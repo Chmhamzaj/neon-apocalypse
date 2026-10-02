@@ -397,7 +397,7 @@ func _create_humanoid(root:Node3D):
         sphere_part(root,Vector3(0.31*side,2.23,0),0.075,skin_shadow,"Ear")
 
     # Nose bridge/tip and real mouth construction.
-    cylinder(root,Vector3(0,2.22,-0.345),0.040,0.14,skin_shadow,"NoseBridge",Vector3(deg_to_rad(90),0,0))
+    cylinder(root,Vector3(0,2.22,-0.345),0.040,0.14,skin_shadow,Vector3(deg_to_rad(90),0,0))
     sphere_part(root,Vector3(0,2.17,-0.405),0.055,skin,"NoseTip")
     player_jaw=sphere_part(root,Vector3(0,-0.018,2.065),0.205,skin,"Jaw")
     player_jaw.scale=Vector3(1.15,0.58,0.55)
@@ -414,7 +414,7 @@ func _create_humanoid(root:Node3D):
         sphere_part(root,Vector3(0.57*side,0.73,0),0.11,skin,"Hand")
         capsule(root,Vector3(0.21*side,0.63,0),0.16,0.82,pants,"Thigh")
         capsule(root,Vector3(0.21*side,0.18,0),0.13,0.58,boot_mat,"Shin")
-        box(root,Vector3(0.21*side,-0.12,-0.12),Vector3(0.20,0.34,0.14),boot_mat,"Boot",0.05)
+        box(root,Vector3(0.21*side,-0.12,-0.12),Vector3(0.20,0.34,0.14),boot_mat,"Boot")
 
     # Cape panels and gold trim give the silhouette from the supplied reference.
     var cape_l:=sphere_part(root,Vector3(-0.31,1.27,0.10),0.65,green,"Cape")
@@ -422,7 +422,7 @@ func _create_humanoid(root:Node3D):
     var cape_r:=sphere_part(root,Vector3(0.31,1.27,0.10),0.65,green,"Cape")
     cape_r.scale=Vector3(0.62,1.20,0.18)
     box(root,Vector3(-0.47,-0.20,1.35),Vector3(0.025,0.018,0.56),green_trim,"CapeTrim")
-    box(root,Vector3(0.47,-0.20,1.35),Vector3(0.025,0.018,0.56),green_trim,"CapeTrim",0.01)
+    box(root,Vector3(0.47,-0.20,1.35),Vector3(0.025,0.018,0.56),green_trim,"CapeTrim")
     box(root,Vector3(0,-0.37,1.08),Vector3(0.42,0.018,0.035),green_trim,"BeltTrim")
 
 func capsule(parent:Node3D,pos:Vector3,radius:float,height:float,mat:Material,node_name:String)->MeshInstance3D:
@@ -451,7 +451,7 @@ func sphere_part(parent:Node3D,pos:Vector3,radius:float,mat:Material,node_name:S
     return n
 
 func _spawn_population():
-    for i in range(44):
+    for i in range(20):
         var n := Node3D.new()
         n.name="Civilian_%02d"%i
         n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
@@ -496,7 +496,7 @@ func _create_npc_visual(root:Node3D,index:int):
         sphere_part(root,Vector3(0.31*side,0.78,0),0.085,skin,"Hand")
         capsule(root,Vector3(0.16*side,0.52,0),0.125,0.64,cloth,"Leg")
         sphere_part(root,Vector3(0.16*side,0.15,-0.08),0.13,cloth,"Foot")
-    cylinder(root,Vector3(0,1.67,-0.275),0.038,0.10,skin,"Nose",Vector3(deg_to_rad(90),0,0))
+    cylinder(root,Vector3(0,1.67,-0.275),0.038,0.10,skin,Vector3(deg_to_rad(90),0,0))
     var mouth:=box(root,Vector3(0,-0.247,1.58),Vector3(0.075,0.013,0.023),lip,"Mouth")
     var jaw:=sphere_part(root,Vector3(0,-0.02,1.59),0.15,skin,"Jaw")
     jaw.scale=Vector3(1.12,0.60,0.55)
@@ -848,7 +848,7 @@ func _animate_npcs(delta):
             if head:
                 head.rotation.y=sin(talk_clock*1.7+float(n.get_meta("phase")))*0.14
                 head.rotation.x=sin(talk_clock*0.9)*0.04
-            var syllable:=abs(sin(talk_clock*8.0+float(n.get_meta("phase"))))
+            var syllable:float=abs(sin(talk_clock*8.0+float(n.get_meta("phase"))))
             if jaw: jaw.rotation.x=syllable*0.11
             if mouth: mouth.scale.y=1.0+syllable*1.8
             if arm_r:
