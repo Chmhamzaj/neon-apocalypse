@@ -37,6 +37,8 @@ var player_legs: Array[Node3D] = []
 var player_head: Node3D
 var player_body: Node3D
 var player_anim_phase := 0.0
+var player_eye_nodes: Array[Node3D] = []
+var player_pupil_nodes: Array[Node3D] = []
 var car_wheel_sets: Array[Array] = []
 var joystick_id := -1
 var look_id := -1
@@ -367,7 +369,9 @@ func _create_humanoid(root:Node3D):
     for side in [-1.0,1.0]:
         sphere_part(root,Vector3(0.305*side,2.18,0),0.075,skin_dark,"Ear")
         var eye:=sphere_part(root,Vector3(0.115*side,2.23,-0.286),0.058,eye_white,"Eye")
-        sphere_part(root,Vector3(0.115*side,2.23,-0.338),0.026,iris,"Pupil")
+        var pupil:=sphere_part(root,Vector3(0.115*side,2.23,-0.338),0.026,iris,"Pupil")
+        player_eye_nodes.append(eye)
+        player_pupil_nodes.append(pupil)
         box(root,Vector3(0.115*side,2.31,-0.293),Vector3(0.13,0.024,0.025),hair,"Brow")
     cylinder(root,Vector3(0,2.17,-0.34),0.05,0.13,skin_dark,"Nose")
     box(root,Vector3(0,2.08,-0.327),Vector3(0.15,0.028,0.025),mouth,"Mouth")
@@ -387,6 +391,7 @@ func capsule(parent:Node3D,pos:Vector3,radius:float,height:float,mat:Material,no
     m.radial_segments=12
     m.rings=4
     n.mesh=m
+    n.name=node_name
     n.position=pos
     n.material_override=mat
     parent.add_child(n)
@@ -708,19 +713,34 @@ func _fire():
 func _animate_player(delta):
     if not is_instance_valid(player_visual):
         return
-    var moving:=Vector2(player.velocity.x,player.velocity.z).length()>0.35
     var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
-    player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 1.8)
+    var moving:=speed_now>0.35
+    player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 1.6)
     var stride:float=sin(player_anim_phase)
     var stride2:float=sin(player_anim_phase+PI)
     var bob:float=abs(sin(player_anim_phase*0.5))*(0.040 if moving else 0.010)
     player_visual.position.y=lerp(player_visual.position.y,bob,1.0-exp(-delta*12.0))
     if player_body:
-        player_body.rotation.z=lerp(player_body.rotation.z,(-0.028*stride if moving else 0.0),1.0-exp(-delta*10.0))
+        player_body.rotation.z=lerp(player_body.rotation.z,-0.028*stride if moving else 0.0,1.0-exp(-delta*10.0))
     if player_head:
-        var idle_look:float=sin(elapsed*0.55)*0.16 if not moving else 0.0
-        player_head.rotation.y=lerp(player_head.rotation.y,idle_look,1.0-exp(-delta*5.0))
-        player_head.rotation.x=lerp(player_head.rotation.x,0.0,1.0-exp(-delta*6.0))
+        var heading:=player_visual.rotation.y
+        var body_to_camera:=wrapf(deg_to_rad(camera_yaw)-heading,-PI,PI)
+        var natural_scan:=sin(elapsed*0.42)*0.13 if not moving else 0.0
+        player_head.rotation.y=lerp(player_head.rotation.y,clamp(body_to_camera*0.34,-0.50,0.50)+natural_scan,1.0-exp(-delta*5.0))
+        player_head.rotation.x=lerp(player_head.rotation.x,clamp(-deg_to_rad(camera_pitch)*0.18,-0.16,0.16),1.0-exp(-delta*5.0))
+    if player_eye_nodes.size()>=2:
+        var blink_cycle:=fmod(elapsed,5.6)
+        var blink:float=1.0
+        if blink_cycle>5.38:
+            blink=0.12
+        elif blink_cycle>5.30:
+            blink=lerp(1.0,0.12,(blink_cycle-5.30)/0.08)
+        for eye in player_eye_nodes:
+            if is_instance_valid(eye):
+                eye.scale.y=blink
+        for pupil in player_pupil_nodes:
+            if is_instance_valid(pupil):
+                pupil.scale.y=blink
     if player_arms.size()>=2:
         player_arms[0].rotation.x=lerp(player_arms[0].rotation.x,stride*0.62 if moving else sin(elapsed*1.4)*0.025,1.0-exp(-delta*14.0))
         player_arms[1].rotation.x=lerp(player_arms[1].rotation.x,stride2*0.62 if moving else -sin(elapsed*1.4)*0.025,1.0-exp(-delta*14.0))
