@@ -223,7 +223,7 @@ func _build_optimized_city():
     ]
     for s in range(4):
         for i in range(30):
-            var bx := district_centers[s] + rng.randf_range(-16,16)
+            var bx: float = float(district_centers[s]) + rng.randf_range(-16.0,16.0)
             var bz := rng.randf_range(-82,82)
             if abs(bx) < 8: bx += 12.0
             var h: float = rng.randf_range(8.0,30.0)
