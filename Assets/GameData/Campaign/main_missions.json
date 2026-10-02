@@ -1,0 +1,1094 @@
+[
+  {
+    "id": "M0101",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0102",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Fallen City",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0103",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Fallen City",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0104",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 4,
+    "title": "The Long Night: Fallen City",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0105",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Fallen City",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0106",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Fallen City",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0107",
+    "region": "01",
+    "chapter": 1,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Fallen City",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0201",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0202",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Ash Meridian",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0203",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Ash Meridian",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0204",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 4,
+    "title": "The Long Night: Ash Meridian",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0205",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Ash Meridian",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0206",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Ash Meridian",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0207",
+    "region": "02",
+    "chapter": 2,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Ash Meridian",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0301",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0302",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Glass Desert",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0303",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Glass Desert",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0304",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 4,
+    "title": "The Long Night: Glass Desert",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0305",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Glass Desert",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0306",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Glass Desert",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0307",
+    "region": "03",
+    "chapter": 3,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Glass Desert",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0401",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0402",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Dead Orbit",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0403",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Dead Orbit",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0404",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 4,
+    "title": "The Long Night: Dead Orbit",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0405",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Dead Orbit",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0406",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Dead Orbit",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0407",
+    "region": "04",
+    "chapter": 4,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Dead Orbit",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0501",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0502",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Abyssal Reach",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0503",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Abyssal Reach",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0504",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 4,
+    "title": "The Long Night: Abyssal Reach",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0505",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Abyssal Reach",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0506",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Abyssal Reach",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0507",
+    "region": "05",
+    "chapter": 5,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Abyssal Reach",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0601",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0602",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Winter Crown",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0603",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Winter Crown",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0604",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 4,
+    "title": "The Long Night: Winter Crown",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0605",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Winter Crown",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0606",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Winter Crown",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0607",
+    "region": "06",
+    "chapter": 6,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Winter Crown",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0701",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0702",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 2,
+    "title": "Glass Teeth: The Hollow",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0703",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: The Hollow",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0704",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 4,
+    "title": "The Long Night: The Hollow",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0705",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: The Hollow",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0706",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: The Hollow",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0707",
+    "region": "07",
+    "chapter": 7,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: The Hollow",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0801",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0802",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Red Garden",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0803",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Red Garden",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0804",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 4,
+    "title": "The Long Night: Red Garden",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0805",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Red Garden",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0806",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Red Garden",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0807",
+    "region": "08",
+    "chapter": 8,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Red Garden",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0901",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0902",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Black Sun",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0903",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Black Sun",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0904",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 4,
+    "title": "The Long Night: Black Sun",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0905",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Black Sun",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M0906",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Black Sun",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M0907",
+    "region": "09",
+    "chapter": 9,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Black Sun",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1001",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1002",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 2,
+    "title": "Glass Teeth: The Choir",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1003",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: The Choir",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1004",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 4,
+    "title": "The Long Night: The Choir",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1005",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: The Choir",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1006",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: The Choir",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1007",
+    "region": "10",
+    "chapter": 10,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: The Choir",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1101",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1102",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Eventide",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1103",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Eventide",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1104",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 4,
+    "title": "The Long Night: Eventide",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1105",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Eventide",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1106",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Eventide",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1107",
+    "region": "11",
+    "chapter": 11,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Eventide",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1201",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 1,
+    "title": "Signal in the Rain",
+    "brief": "Trace the first anomalous transmission through the ruined district.",
+    "rewards": {
+      "xp": 625,
+      "credits": 390,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1202",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 2,
+    "title": "Glass Teeth: Last Dawn",
+    "brief": "Recover a black-box core while a hunter unit closes in.",
+    "rewards": {
+      "xp": 750,
+      "credits": 480,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1203",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 3,
+    "title": "No Gods in Machines: Last Dawn",
+    "brief": "Choose which survivor faction gets the stolen power cell.",
+    "rewards": {
+      "xp": 875,
+      "credits": 570,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1204",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 4,
+    "title": "The Long Night: Last Dawn",
+    "brief": "Defend an evacuation corridor during a city-wide blackout.",
+    "rewards": {
+      "xp": 1000,
+      "credits": 660,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1205",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 5,
+    "title": "Ghost Protocol: Last Dawn",
+    "brief": "Enter a restricted facility and discover records about the protagonist.",
+    "rewards": {
+      "xp": 1125,
+      "credits": 750,
+      "story_fragment": true
+    }
+  },
+  {
+    "id": "M1206",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 6,
+    "title": "A Door Beneath the World: Last Dawn",
+    "brief": "Unlock a sealed transit gate leading into the next region.",
+    "rewards": {
+      "xp": 1250,
+      "credits": 840,
+      "story_fragment": false
+    }
+  },
+  {
+    "id": "M1207",
+    "region": "12",
+    "chapter": 12,
+    "number_in_region": 7,
+    "title": "The Enemy Remembers: Last Dawn",
+    "brief": "Defeat the regional boss and uncover the next fragment of the truth.",
+    "rewards": {
+      "xp": 1375,
+      "credits": 930,
+      "story_fragment": true
+    }
+  }
+]

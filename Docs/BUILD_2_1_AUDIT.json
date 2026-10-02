@@ -1,0 +1,23 @@
+{
+  "build": "2.1 critical merged HD",
+  "total_source_mb": 481.1,
+  "resources_mb": 472.9,
+  "files": 273,
+  "csharp": 74,
+  "json": 12,
+  "png": 146,
+  "obj": 7,
+  "duplicate_type_names": [],
+  "brace_mismatches": [],
+  "near_flat_albedo": [
+    [
+      "T_Rock_Basalt_ALBEDO_2K.png",
+      6.4
+    ],
+    [
+      "T_Asphalt_Wet_ALBEDO_4K.png",
+      4.92
+    ]
+  ],
+  "apk": "not built: Unity Editor/Android toolchain unavailable"
+}

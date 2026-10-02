@@ -1,0 +1,2018 @@
+[
+  {
+    "id": "S0101",
+    "region": "01",
+    "type": "Bounty",
+    "title": "Bounty: Fallen City",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0102",
+    "region": "01",
+    "type": "Rescue",
+    "title": "Rescue: Fallen City",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0103",
+    "region": "01",
+    "type": "Salvage",
+    "title": "Salvage: Fallen City",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0104",
+    "region": "01",
+    "type": "Sabotage",
+    "title": "Sabotage: Fallen City",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0105",
+    "region": "01",
+    "type": "Escort",
+    "title": "Escort: Fallen City",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0106",
+    "region": "01",
+    "type": "Hunt",
+    "title": "Hunt: Fallen City",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0107",
+    "region": "01",
+    "type": "Black Box",
+    "title": "Black Box: Fallen City",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0108",
+    "region": "01",
+    "type": "Arena",
+    "title": "Arena: Fallen City",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0109",
+    "region": "01",
+    "type": "Theft",
+    "title": "Theft: Fallen City",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0110",
+    "region": "01",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Fallen City",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0111",
+    "region": "01",
+    "type": "Anomaly",
+    "title": "Anomaly: Fallen City",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0112",
+    "region": "01",
+    "type": "Relic",
+    "title": "Relic: Fallen City",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0113",
+    "region": "01",
+    "type": "Revenge",
+    "title": "Revenge: Fallen City",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0114",
+    "region": "01",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Fallen City",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0201",
+    "region": "02",
+    "type": "Bounty",
+    "title": "Bounty: Ash Meridian",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0202",
+    "region": "02",
+    "type": "Rescue",
+    "title": "Rescue: Ash Meridian",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0203",
+    "region": "02",
+    "type": "Salvage",
+    "title": "Salvage: Ash Meridian",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0204",
+    "region": "02",
+    "type": "Sabotage",
+    "title": "Sabotage: Ash Meridian",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0205",
+    "region": "02",
+    "type": "Escort",
+    "title": "Escort: Ash Meridian",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0206",
+    "region": "02",
+    "type": "Hunt",
+    "title": "Hunt: Ash Meridian",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0207",
+    "region": "02",
+    "type": "Black Box",
+    "title": "Black Box: Ash Meridian",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0208",
+    "region": "02",
+    "type": "Arena",
+    "title": "Arena: Ash Meridian",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0209",
+    "region": "02",
+    "type": "Theft",
+    "title": "Theft: Ash Meridian",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0210",
+    "region": "02",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Ash Meridian",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0211",
+    "region": "02",
+    "type": "Anomaly",
+    "title": "Anomaly: Ash Meridian",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0212",
+    "region": "02",
+    "type": "Relic",
+    "title": "Relic: Ash Meridian",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0213",
+    "region": "02",
+    "type": "Revenge",
+    "title": "Revenge: Ash Meridian",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0214",
+    "region": "02",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Ash Meridian",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0301",
+    "region": "03",
+    "type": "Bounty",
+    "title": "Bounty: Glass Desert",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0302",
+    "region": "03",
+    "type": "Rescue",
+    "title": "Rescue: Glass Desert",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0303",
+    "region": "03",
+    "type": "Salvage",
+    "title": "Salvage: Glass Desert",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0304",
+    "region": "03",
+    "type": "Sabotage",
+    "title": "Sabotage: Glass Desert",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0305",
+    "region": "03",
+    "type": "Escort",
+    "title": "Escort: Glass Desert",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0306",
+    "region": "03",
+    "type": "Hunt",
+    "title": "Hunt: Glass Desert",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0307",
+    "region": "03",
+    "type": "Black Box",
+    "title": "Black Box: Glass Desert",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0308",
+    "region": "03",
+    "type": "Arena",
+    "title": "Arena: Glass Desert",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0309",
+    "region": "03",
+    "type": "Theft",
+    "title": "Theft: Glass Desert",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0310",
+    "region": "03",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Glass Desert",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0311",
+    "region": "03",
+    "type": "Anomaly",
+    "title": "Anomaly: Glass Desert",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0312",
+    "region": "03",
+    "type": "Relic",
+    "title": "Relic: Glass Desert",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0313",
+    "region": "03",
+    "type": "Revenge",
+    "title": "Revenge: Glass Desert",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0314",
+    "region": "03",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Glass Desert",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0401",
+    "region": "04",
+    "type": "Bounty",
+    "title": "Bounty: Dead Orbit",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0402",
+    "region": "04",
+    "type": "Rescue",
+    "title": "Rescue: Dead Orbit",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0403",
+    "region": "04",
+    "type": "Salvage",
+    "title": "Salvage: Dead Orbit",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0404",
+    "region": "04",
+    "type": "Sabotage",
+    "title": "Sabotage: Dead Orbit",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0405",
+    "region": "04",
+    "type": "Escort",
+    "title": "Escort: Dead Orbit",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0406",
+    "region": "04",
+    "type": "Hunt",
+    "title": "Hunt: Dead Orbit",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0407",
+    "region": "04",
+    "type": "Black Box",
+    "title": "Black Box: Dead Orbit",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0408",
+    "region": "04",
+    "type": "Arena",
+    "title": "Arena: Dead Orbit",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0409",
+    "region": "04",
+    "type": "Theft",
+    "title": "Theft: Dead Orbit",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0410",
+    "region": "04",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Dead Orbit",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0411",
+    "region": "04",
+    "type": "Anomaly",
+    "title": "Anomaly: Dead Orbit",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0412",
+    "region": "04",
+    "type": "Relic",
+    "title": "Relic: Dead Orbit",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0413",
+    "region": "04",
+    "type": "Revenge",
+    "title": "Revenge: Dead Orbit",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0414",
+    "region": "04",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Dead Orbit",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0501",
+    "region": "05",
+    "type": "Bounty",
+    "title": "Bounty: Abyssal Reach",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0502",
+    "region": "05",
+    "type": "Rescue",
+    "title": "Rescue: Abyssal Reach",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0503",
+    "region": "05",
+    "type": "Salvage",
+    "title": "Salvage: Abyssal Reach",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0504",
+    "region": "05",
+    "type": "Sabotage",
+    "title": "Sabotage: Abyssal Reach",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0505",
+    "region": "05",
+    "type": "Escort",
+    "title": "Escort: Abyssal Reach",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0506",
+    "region": "05",
+    "type": "Hunt",
+    "title": "Hunt: Abyssal Reach",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0507",
+    "region": "05",
+    "type": "Black Box",
+    "title": "Black Box: Abyssal Reach",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0508",
+    "region": "05",
+    "type": "Arena",
+    "title": "Arena: Abyssal Reach",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0509",
+    "region": "05",
+    "type": "Theft",
+    "title": "Theft: Abyssal Reach",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0510",
+    "region": "05",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Abyssal Reach",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0511",
+    "region": "05",
+    "type": "Anomaly",
+    "title": "Anomaly: Abyssal Reach",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0512",
+    "region": "05",
+    "type": "Relic",
+    "title": "Relic: Abyssal Reach",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0513",
+    "region": "05",
+    "type": "Revenge",
+    "title": "Revenge: Abyssal Reach",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0514",
+    "region": "05",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Abyssal Reach",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0601",
+    "region": "06",
+    "type": "Bounty",
+    "title": "Bounty: Winter Crown",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0602",
+    "region": "06",
+    "type": "Rescue",
+    "title": "Rescue: Winter Crown",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0603",
+    "region": "06",
+    "type": "Salvage",
+    "title": "Salvage: Winter Crown",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0604",
+    "region": "06",
+    "type": "Sabotage",
+    "title": "Sabotage: Winter Crown",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0605",
+    "region": "06",
+    "type": "Escort",
+    "title": "Escort: Winter Crown",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0606",
+    "region": "06",
+    "type": "Hunt",
+    "title": "Hunt: Winter Crown",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0607",
+    "region": "06",
+    "type": "Black Box",
+    "title": "Black Box: Winter Crown",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0608",
+    "region": "06",
+    "type": "Arena",
+    "title": "Arena: Winter Crown",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0609",
+    "region": "06",
+    "type": "Theft",
+    "title": "Theft: Winter Crown",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0610",
+    "region": "06",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Winter Crown",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0611",
+    "region": "06",
+    "type": "Anomaly",
+    "title": "Anomaly: Winter Crown",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0612",
+    "region": "06",
+    "type": "Relic",
+    "title": "Relic: Winter Crown",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0613",
+    "region": "06",
+    "type": "Revenge",
+    "title": "Revenge: Winter Crown",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0614",
+    "region": "06",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Winter Crown",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0701",
+    "region": "07",
+    "type": "Bounty",
+    "title": "Bounty: The Hollow",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0702",
+    "region": "07",
+    "type": "Rescue",
+    "title": "Rescue: The Hollow",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0703",
+    "region": "07",
+    "type": "Salvage",
+    "title": "Salvage: The Hollow",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0704",
+    "region": "07",
+    "type": "Sabotage",
+    "title": "Sabotage: The Hollow",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0705",
+    "region": "07",
+    "type": "Escort",
+    "title": "Escort: The Hollow",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0706",
+    "region": "07",
+    "type": "Hunt",
+    "title": "Hunt: The Hollow",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0707",
+    "region": "07",
+    "type": "Black Box",
+    "title": "Black Box: The Hollow",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0708",
+    "region": "07",
+    "type": "Arena",
+    "title": "Arena: The Hollow",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0709",
+    "region": "07",
+    "type": "Theft",
+    "title": "Theft: The Hollow",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0710",
+    "region": "07",
+    "type": "Diplomacy",
+    "title": "Diplomacy: The Hollow",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0711",
+    "region": "07",
+    "type": "Anomaly",
+    "title": "Anomaly: The Hollow",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0712",
+    "region": "07",
+    "type": "Relic",
+    "title": "Relic: The Hollow",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0713",
+    "region": "07",
+    "type": "Revenge",
+    "title": "Revenge: The Hollow",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0714",
+    "region": "07",
+    "type": "Hidden Route",
+    "title": "Hidden Route: The Hollow",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0801",
+    "region": "08",
+    "type": "Bounty",
+    "title": "Bounty: Red Garden",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0802",
+    "region": "08",
+    "type": "Rescue",
+    "title": "Rescue: Red Garden",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0803",
+    "region": "08",
+    "type": "Salvage",
+    "title": "Salvage: Red Garden",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0804",
+    "region": "08",
+    "type": "Sabotage",
+    "title": "Sabotage: Red Garden",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0805",
+    "region": "08",
+    "type": "Escort",
+    "title": "Escort: Red Garden",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0806",
+    "region": "08",
+    "type": "Hunt",
+    "title": "Hunt: Red Garden",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0807",
+    "region": "08",
+    "type": "Black Box",
+    "title": "Black Box: Red Garden",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0808",
+    "region": "08",
+    "type": "Arena",
+    "title": "Arena: Red Garden",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0809",
+    "region": "08",
+    "type": "Theft",
+    "title": "Theft: Red Garden",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0810",
+    "region": "08",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Red Garden",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0811",
+    "region": "08",
+    "type": "Anomaly",
+    "title": "Anomaly: Red Garden",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0812",
+    "region": "08",
+    "type": "Relic",
+    "title": "Relic: Red Garden",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0813",
+    "region": "08",
+    "type": "Revenge",
+    "title": "Revenge: Red Garden",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0814",
+    "region": "08",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Red Garden",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S0901",
+    "region": "09",
+    "type": "Bounty",
+    "title": "Bounty: Black Sun",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S0902",
+    "region": "09",
+    "type": "Rescue",
+    "title": "Rescue: Black Sun",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S0903",
+    "region": "09",
+    "type": "Salvage",
+    "title": "Salvage: Black Sun",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S0904",
+    "region": "09",
+    "type": "Sabotage",
+    "title": "Sabotage: Black Sun",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S0905",
+    "region": "09",
+    "type": "Escort",
+    "title": "Escort: Black Sun",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S0906",
+    "region": "09",
+    "type": "Hunt",
+    "title": "Hunt: Black Sun",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S0907",
+    "region": "09",
+    "type": "Black Box",
+    "title": "Black Box: Black Sun",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S0908",
+    "region": "09",
+    "type": "Arena",
+    "title": "Arena: Black Sun",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S0909",
+    "region": "09",
+    "type": "Theft",
+    "title": "Theft: Black Sun",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S0910",
+    "region": "09",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Black Sun",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S0911",
+    "region": "09",
+    "type": "Anomaly",
+    "title": "Anomaly: Black Sun",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S0912",
+    "region": "09",
+    "type": "Relic",
+    "title": "Relic: Black Sun",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S0913",
+    "region": "09",
+    "type": "Revenge",
+    "title": "Revenge: Black Sun",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S0914",
+    "region": "09",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Black Sun",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S1001",
+    "region": "10",
+    "type": "Bounty",
+    "title": "Bounty: The Choir",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S1002",
+    "region": "10",
+    "type": "Rescue",
+    "title": "Rescue: The Choir",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S1003",
+    "region": "10",
+    "type": "Salvage",
+    "title": "Salvage: The Choir",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S1004",
+    "region": "10",
+    "type": "Sabotage",
+    "title": "Sabotage: The Choir",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S1005",
+    "region": "10",
+    "type": "Escort",
+    "title": "Escort: The Choir",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S1006",
+    "region": "10",
+    "type": "Hunt",
+    "title": "Hunt: The Choir",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S1007",
+    "region": "10",
+    "type": "Black Box",
+    "title": "Black Box: The Choir",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S1008",
+    "region": "10",
+    "type": "Arena",
+    "title": "Arena: The Choir",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S1009",
+    "region": "10",
+    "type": "Theft",
+    "title": "Theft: The Choir",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S1010",
+    "region": "10",
+    "type": "Diplomacy",
+    "title": "Diplomacy: The Choir",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S1011",
+    "region": "10",
+    "type": "Anomaly",
+    "title": "Anomaly: The Choir",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S1012",
+    "region": "10",
+    "type": "Relic",
+    "title": "Relic: The Choir",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S1013",
+    "region": "10",
+    "type": "Revenge",
+    "title": "Revenge: The Choir",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S1014",
+    "region": "10",
+    "type": "Hidden Route",
+    "title": "Hidden Route: The Choir",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S1101",
+    "region": "11",
+    "type": "Bounty",
+    "title": "Bounty: Eventide",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S1102",
+    "region": "11",
+    "type": "Rescue",
+    "title": "Rescue: Eventide",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S1103",
+    "region": "11",
+    "type": "Salvage",
+    "title": "Salvage: Eventide",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S1104",
+    "region": "11",
+    "type": "Sabotage",
+    "title": "Sabotage: Eventide",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S1105",
+    "region": "11",
+    "type": "Escort",
+    "title": "Escort: Eventide",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S1106",
+    "region": "11",
+    "type": "Hunt",
+    "title": "Hunt: Eventide",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S1107",
+    "region": "11",
+    "type": "Black Box",
+    "title": "Black Box: Eventide",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S1108",
+    "region": "11",
+    "type": "Arena",
+    "title": "Arena: Eventide",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S1109",
+    "region": "11",
+    "type": "Theft",
+    "title": "Theft: Eventide",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S1110",
+    "region": "11",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Eventide",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S1111",
+    "region": "11",
+    "type": "Anomaly",
+    "title": "Anomaly: Eventide",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S1112",
+    "region": "11",
+    "type": "Relic",
+    "title": "Relic: Eventide",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S1113",
+    "region": "11",
+    "type": "Revenge",
+    "title": "Revenge: Eventide",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S1114",
+    "region": "11",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Eventide",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  },
+  {
+    "id": "S1201",
+    "region": "12",
+    "type": "Bounty",
+    "title": "Bounty: Last Dawn",
+    "brief": "Eliminate a marked elite before it reaches the convoy.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 250,
+      "credits": 185
+    }
+  },
+  {
+    "id": "S1202",
+    "region": "12",
+    "type": "Rescue",
+    "title": "Rescue: Last Dawn",
+    "brief": "Extract trapped civilians before the zone collapses.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 300,
+      "credits": 220
+    }
+  },
+  {
+    "id": "S1203",
+    "region": "12",
+    "type": "Salvage",
+    "title": "Salvage: Last Dawn",
+    "brief": "Recover three lost components from a hostile ruin.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 350,
+      "credits": 255
+    }
+  },
+  {
+    "id": "S1204",
+    "region": "12",
+    "type": "Sabotage",
+    "title": "Sabotage: Last Dawn",
+    "brief": "Disable an automated defense node without triggering the full alarm.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 400,
+      "credits": 290
+    }
+  },
+  {
+    "id": "S1205",
+    "region": "12",
+    "type": "Escort",
+    "title": "Escort: Last Dawn",
+    "brief": "Get a supply carrier across an active combat corridor.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 450,
+      "credits": 325
+    }
+  },
+  {
+    "id": "S1206",
+    "region": "12",
+    "type": "Hunt",
+    "title": "Hunt: Last Dawn",
+    "brief": "Track a rare enemy variant using environmental clues.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 500,
+      "credits": 360
+    }
+  },
+  {
+    "id": "S1207",
+    "region": "12",
+    "type": "Black Box",
+    "title": "Black Box: Last Dawn",
+    "brief": "Decode a damaged memory fragment from the old world.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 550,
+      "credits": 395
+    }
+  },
+  {
+    "id": "S1208",
+    "region": "12",
+    "type": "Arena",
+    "title": "Arena: Last Dawn",
+    "brief": "Survive escalating waves for a high-value reward.",
+    "repeatable": true,
+    "rewards": {
+      "xp": 600,
+      "credits": 430
+    }
+  },
+  {
+    "id": "S1209",
+    "region": "12",
+    "type": "Theft",
+    "title": "Theft: Last Dawn",
+    "brief": "Steal a prototype weapon from a rival faction.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 650,
+      "credits": 465
+    }
+  },
+  {
+    "id": "S1210",
+    "region": "12",
+    "type": "Diplomacy",
+    "title": "Diplomacy: Last Dawn",
+    "brief": "Broker a temporary truce between two hostile groups.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 700,
+      "credits": 500
+    }
+  },
+  {
+    "id": "S1211",
+    "region": "12",
+    "type": "Anomaly",
+    "title": "Anomaly: Last Dawn",
+    "brief": "Investigate a reality-bending event with no known cause.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 750,
+      "credits": 535
+    }
+  },
+  {
+    "id": "S1212",
+    "region": "12",
+    "type": "Relic",
+    "title": "Relic: Last Dawn",
+    "brief": "Find a pre-collapse artifact that changes a character relationship.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 800,
+      "credits": 570
+    }
+  },
+  {
+    "id": "S1213",
+    "region": "12",
+    "type": "Revenge",
+    "title": "Revenge: Last Dawn",
+    "brief": "Help an NPC confront the commander responsible for their loss.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 850,
+      "credits": 605
+    }
+  },
+  {
+    "id": "S1214",
+    "region": "12",
+    "type": "Hidden Route",
+    "title": "Hidden Route: Last Dawn",
+    "brief": "Open a secret traversal route that remains available afterward.",
+    "repeatable": false,
+    "rewards": {
+      "xp": 900,
+      "credits": 640
+    }
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "region": "01",
+  "title": "THE FALLEN CITY",
+  "chapters": [
+    {"id":"01A","title":"BLACKOUT","beats":["Emergency neon returns across the drowned district","Hero wakes beneath a collapsed transit station","First contact with the Choir signal"]},
+    {"id":"01B","title":"GHOSTS IN THE GRID","beats":["Cross the flooded market","Rescue trapped civilians","Discover that the blackout was deliberately triggered"]},
+    {"id":"01C","title":"THE UNDERCITY","beats":["Descend into a sealed reactor line","Fight the first elite hunter","Recover a fragment of the impossible signal"]},
+    {"id":"01D","title":"NEMESIS","beats":["Reach the emergency tower","Survive three combat phases","Witness the first memory breach"]}
+  ],
+  "production_target": {"hero_asset_quality":"high", "environment_density":"high", "cinematic_hooks":12, "combat_encounters":28, "exploration_nodes":36}
+}

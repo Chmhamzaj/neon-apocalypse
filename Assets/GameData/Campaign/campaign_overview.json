@@ -1,0 +1,14 @@
+{
+  "title": "NEON APOCALYPSE",
+  "subtitle": "When the sky went silent, humanity became the backup plan.",
+  "chapters": 12,
+  "regions": 12,
+  "main_missions": 84,
+  "side_missions": 168,
+  "boss_encounters": 24,
+  "factions": 6,
+  "target_playtime_hours": 55,
+  "new_game_plus": true,
+  "tone": ["cinematic", "mysterious", "violent", "emotional", "sci-fi", "rebellious", "hopeful"],
+  "design_rule": "Every major region introduces a gameplay twist, narrative revelation, environmental identity, and at least one memorable set-piece."
+}

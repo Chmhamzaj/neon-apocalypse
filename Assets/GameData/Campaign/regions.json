@@ -1,0 +1,98 @@
+[
+  {
+    "id": "01",
+    "name": "Fallen City",
+    "description": "A drowned megacity lit by emergency neon, where the first blackout war began.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "02",
+    "name": "Ash Meridian",
+    "description": "Volcanic industrial belts and convoy wars beneath a permanent ash sky.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "03",
+    "name": "Glass Desert",
+    "description": "A solar wasteland filled with buried laboratories and mirage storms.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "04",
+    "name": "Dead Orbit",
+    "description": "A launch complex where gravity experiments tore open the upper atmosphere.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "05",
+    "name": "Abyssal Reach",
+    "description": "Flooded arcologies and ocean-floor reactors hiding the original signal.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "06",
+    "name": "Winter Crown",
+    "description": "A frozen capital where a rogue weather engine has become a religion.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "07",
+    "name": "The Hollow",
+    "description": "An underground megastructure whose corridors rearrange themselves.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "08",
+    "name": "Red Garden",
+    "description": "A biomechanical jungle consuming machines and rewriting DNA.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "09",
+    "name": "Black Sun",
+    "description": "A ruined orbital elevator and the first direct war with the machine intelligence.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "10",
+    "name": "The Choir",
+    "description": "A city-sized communications cathedral broadcasting a voice from beyond the moon.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "11",
+    "name": "Eventide",
+    "description": "A fractured time-zone where future ruins overlap with the present.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  },
+  {
+    "id": "12",
+    "name": "Last Dawn",
+    "description": "The shattered sky-core and the final choice that determines what humanity becomes.",
+    "main_mission_count": 7,
+    "side_mission_count": 14,
+    "bosses": 2
+  }
+]

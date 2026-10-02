@@ -1,0 +1,830 @@
+{
+  "version": "2.1",
+  "resource_texture_count": 137,
+  "resource_bytes": 472925798,
+  "resources_root": "Assets/Resources",
+  "textures": [
+    {
+      "file": "HDDecals/Decal_Sign_00.png",
+      "bytes": 40202,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_01.png",
+      "bytes": 41387,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_02.png",
+      "bytes": 38955,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_03.png",
+      "bytes": 33224,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_04.png",
+      "bytes": 37004,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_05.png",
+      "bytes": 40510,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_06.png",
+      "bytes": 40137,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_07.png",
+      "bytes": 34906,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_08.png",
+      "bytes": 38979,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDDecals/Decal_Sign_09.png",
+      "bytes": 36413,
+      "type": "decal",
+      "tier": "other"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Road_ALBEDO_2K.jpg",
+      "bytes": 532313,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Road_ALBEDO_4K.png",
+      "bytes": 1321272,
+      "type": "albedo",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Road_NORMAL_2K.png",
+      "bytes": 1918817,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Road_NORMAL_4K.png",
+      "bytes": 5105516,
+      "type": "normal",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Road_ORM_2K.jpg",
+      "bytes": 505002,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Road_ORM_4K.png",
+      "bytes": 1193456,
+      "type": "orm",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Wet_ALBEDO_2K.jpg",
+      "bytes": 517742,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Wet_ALBEDO_4K.png",
+      "bytes": 20130007,
+      "type": "albedo",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Wet_NORMAL_2K.png",
+      "bytes": 1900044,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Wet_NORMAL_4K.png",
+      "bytes": 48891707,
+      "type": "normal",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Wet_ORM_2K.jpg",
+      "bytes": 503370,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Asphalt_Wet_ORM_4K.png",
+      "bytes": 29200249,
+      "type": "orm",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Blue_Building_Glass_ALBEDO_2K.jpg",
+      "bytes": 1190420,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Blue_Building_Glass_NORMAL_2K.png",
+      "bytes": 4568730,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Blue_Building_Glass_ORM_2K.jpg",
+      "bytes": 4044430,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Brick_Dark_ALBEDO_2K.jpg",
+      "bytes": 827143,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Brick_Dark_NORMAL_2K.png",
+      "bytes": 2772174,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Brick_Dark_ORM_2K.jpg",
+      "bytes": 783408,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Cargo_Container_ALBEDO_2K.jpg",
+      "bytes": 661965,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Cargo_Container_NORMAL_2K.png",
+      "bytes": 2122158,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Cargo_Container_ORM_2K.jpg",
+      "bytes": 583656,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Aged_ALBEDO_2K.jpg",
+      "bytes": 1404619,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Aged_ALBEDO_4K.png",
+      "bytes": 3951810,
+      "type": "albedo",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Aged_NORMAL_2K.png",
+      "bytes": 3656942,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Aged_NORMAL_4K.png",
+      "bytes": 10253747,
+      "type": "normal",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Aged_ORM_2K.jpg",
+      "bytes": 1192812,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Aged_ORM_4K.png",
+      "bytes": 3085185,
+      "type": "orm",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Clean_ALBEDO_2K.jpg",
+      "bytes": 1643195,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Clean_NORMAL_2K.png",
+      "bytes": 4569646,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Concrete_Clean_ORM_2K.jpg",
+      "bytes": 4045716,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Desert_Rock_ALBEDO_2K.jpg",
+      "bytes": 784277,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Desert_Rock_NORMAL_2K.png",
+      "bytes": 4569984,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Desert_Rock_ORM_2K.jpg",
+      "bytes": 3872673,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Dirty_Plaster_ALBEDO_2K.jpg",
+      "bytes": 1414903,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Dirty_Plaster_NORMAL_2K.png",
+      "bytes": 4567972,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Dirty_Plaster_ORM_2K.jpg",
+      "bytes": 4047143,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Forest_Ground_ALBEDO_2K.jpg",
+      "bytes": 701167,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Forest_Ground_NORMAL_2K.png",
+      "bytes": 4567682,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Forest_Ground_ORM_2K.jpg",
+      "bytes": 3750078,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Forest_Rock_ALBEDO_2K.jpg",
+      "bytes": 761798,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Forest_Rock_NORMAL_2K.png",
+      "bytes": 4568589,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Forest_Rock_ORM_2K.jpg",
+      "bytes": 4003588,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Glass_Blue_ALBEDO_2K.jpg",
+      "bytes": 1162822,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Glass_Blue_NORMAL_2K.png",
+      "bytes": 4572000,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Glass_Blue_ORM_2K.jpg",
+      "bytes": 4047948,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Industrial_Paint_ALBEDO_2K.jpg",
+      "bytes": 612833,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Industrial_Paint_NORMAL_2K.png",
+      "bytes": 4569023,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Industrial_Paint_ORM_2K.jpg",
+      "bytes": 4046920,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Painted_ALBEDO_2K.jpg",
+      "bytes": 579614,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Painted_NORMAL_2K.png",
+      "bytes": 4566364,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Painted_ORM_2K.jpg",
+      "bytes": 4042469,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Rusted_ALBEDO_2K.jpg",
+      "bytes": 572159,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Rusted_ALBEDO_4K.png",
+      "bytes": 1414434,
+      "type": "albedo",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Rusted_NORMAL_2K.png",
+      "bytes": 1774067,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Rusted_NORMAL_4K.png",
+      "bytes": 4567471,
+      "type": "normal",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Rusted_ORM_2K.jpg",
+      "bytes": 429730,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Metal_Rusted_ORM_4K.png",
+      "bytes": 1005984,
+      "type": "orm",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Neon_Panel_ALBEDO_2K.jpg",
+      "bytes": 599216,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Neon_Panel_ALBEDO_4K.png",
+      "bytes": 1555134,
+      "type": "albedo",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Neon_Panel_NORMAL_2K.png",
+      "bytes": 1859250,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Neon_Panel_NORMAL_4K.png",
+      "bytes": 5037882,
+      "type": "normal",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Neon_Panel_ORM_2K.jpg",
+      "bytes": 544651,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Neon_Panel_ORM_4K.png",
+      "bytes": 1386149,
+      "type": "orm",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Panel_Future_ALBEDO_2K.jpg",
+      "bytes": 616807,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Panel_Future_ALBEDO_4K.png",
+      "bytes": 1567219,
+      "type": "albedo",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Panel_Future_NORMAL_2K.png",
+      "bytes": 1904094,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Panel_Future_NORMAL_4K.png",
+      "bytes": 5148303,
+      "type": "normal",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Panel_Future_ORM_2K.jpg",
+      "bytes": 550290,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Panel_Future_ORM_4K.png",
+      "bytes": 1383616,
+      "type": "orm",
+      "tier": "4K"
+    },
+    {
+      "file": "HDMaterials/T_Red_Brick_ALBEDO_2K.jpg",
+      "bytes": 822825,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Red_Brick_NORMAL_2K.png",
+      "bytes": 4573072,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Red_Brick_ORM_2K.jpg",
+      "bytes": 4046249,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Road_Marking_ALBEDO_2K.jpg",
+      "bytes": 894718,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Road_Marking_NORMAL_2K.png",
+      "bytes": 4565129,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Road_Marking_ORM_2K.jpg",
+      "bytes": 4045324,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Rock_Basalt_ALBEDO_2K.jpg",
+      "bytes": 697099,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Rock_Basalt_NORMAL_2K.png",
+      "bytes": 4571933,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Rock_Basalt_ORM_2K.jpg",
+      "bytes": 3873906,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Roof_Gravel_ALBEDO_2K.jpg",
+      "bytes": 756021,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Roof_Gravel_NORMAL_2K.png",
+      "bytes": 4562198,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Roof_Gravel_ORM_2K.jpg",
+      "bytes": 3952099,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Rubble_Stone_ALBEDO_2K.jpg",
+      "bytes": 758754,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Rubble_Stone_NORMAL_2K.png",
+      "bytes": 4567596,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Rubble_Stone_ORM_2K.jpg",
+      "bytes": 4005637,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Sand_Badlands_ALBEDO_2K.jpg",
+      "bytes": 1021055,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Sand_Badlands_NORMAL_2K.png",
+      "bytes": 4570748,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Sand_Badlands_ORM_2K.jpg",
+      "bytes": 3752871,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Sidewalk_Stone_ALBEDO_2K.jpg",
+      "bytes": 755713,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Sidewalk_Stone_NORMAL_2K.png",
+      "bytes": 2021056,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Sidewalk_Stone_ORM_2K.jpg",
+      "bytes": 475616,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Wet_Metal_ALBEDO_2K.jpg",
+      "bytes": 594685,
+      "type": "albedo",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Wet_Metal_NORMAL_2K.png",
+      "bytes": 1985363,
+      "type": "normal",
+      "tier": "2K"
+    },
+    {
+      "file": "HDMaterials/T_Wet_Metal_ORM_2K.jpg",
+      "bytes": 517561,
+      "type": "orm",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_01_2K.png",
+      "bytes": 3058493,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_02_2K.png",
+      "bytes": 3049053,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_03_2K.png",
+      "bytes": 3043712,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_04_2K.png",
+      "bytes": 3047735,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_05_2K.png",
+      "bytes": 3067967,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_06_2K.png",
+      "bytes": 3062140,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_07_2K.png",
+      "bytes": 3046165,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_08_2K.png",
+      "bytes": 3066953,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_09_2K.png",
+      "bytes": 3081528,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_10_2K.png",
+      "bytes": 3069857,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_11_2K.png",
+      "bytes": 3076243,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_12_2K.png",
+      "bytes": 3060909,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_13_2K.png",
+      "bytes": 3064949,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_14_2K.png",
+      "bytes": 3056598,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_15_2K.png",
+      "bytes": 3070169,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/Terrain_HeightRegion_16_2K.png",
+      "bytes": 3066943,
+      "type": "terrain_height",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_01_2K.jpg",
+      "bytes": 5570946,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_02_2K.jpg",
+      "bytes": 5578875,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_03_2K.jpg",
+      "bytes": 5568394,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_04_2K.jpg",
+      "bytes": 5560741,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_05_2K.jpg",
+      "bytes": 5570433,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_06_2K.jpg",
+      "bytes": 5590058,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_07_2K.jpg",
+      "bytes": 5589794,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_08_2K.jpg",
+      "bytes": 5572358,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_09_2K.jpg",
+      "bytes": 5572947,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_10_2K.jpg",
+      "bytes": 5586294,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_11_2K.jpg",
+      "bytes": 5587202,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_12_2K.jpg",
+      "bytes": 5571616,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_13_2K.jpg",
+      "bytes": 5567060,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_14_2K.jpg",
+      "bytes": 5588343,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_15_2K.jpg",
+      "bytes": 5561905,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_16_2K.jpg",
+      "bytes": 5569041,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_17_2K.jpg",
+      "bytes": 5573886,
+      "type": "atlas",
+      "tier": "2K"
+    },
+    {
+      "file": "HDWorldAtlases/World_Art_Atlas_18_2K.jpg",
+      "bytes": 5583992,
+      "type": "atlas",
+      "tier": "2K"
+    }
+  ]
+}

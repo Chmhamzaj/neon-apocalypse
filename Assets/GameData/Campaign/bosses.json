@@ -1,0 +1,194 @@
+[
+  {
+    "id": "B011",
+    "region": "01",
+    "name": "Nemesis",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "drone swarms"
+  },
+  {
+    "id": "B012",
+    "region": "01",
+    "name": "Warden Zero // Fallen City",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "weather inversion"
+  },
+  {
+    "id": "B021",
+    "region": "02",
+    "name": "Nemesis // Ash Meridian",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "weather inversion"
+  },
+  {
+    "id": "B022",
+    "region": "02",
+    "name": "Warden Zero // Ash Meridian",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "gravity pulse"
+  },
+  {
+    "id": "B031",
+    "region": "03",
+    "name": "Nemesis // Glass Desert",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "gravity pulse"
+  },
+  {
+    "id": "B032",
+    "region": "03",
+    "name": "Warden Zero // Glass Desert",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "arena collapse"
+  },
+  {
+    "id": "B041",
+    "region": "04",
+    "name": "Nemesis // Dead Orbit",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "arena collapse"
+  },
+  {
+    "id": "B042",
+    "region": "04",
+    "name": "Warden Zero // Dead Orbit",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "drone swarms"
+  },
+  {
+    "id": "B051",
+    "region": "05",
+    "name": "Nemesis // Abyssal Reach",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "drone swarms"
+  },
+  {
+    "id": "B052",
+    "region": "05",
+    "name": "Warden Zero // Abyssal Reach",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "weather inversion"
+  },
+  {
+    "id": "B061",
+    "region": "06",
+    "name": "Nemesis // Winter Crown",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "weather inversion"
+  },
+  {
+    "id": "B062",
+    "region": "06",
+    "name": "Warden Zero // Winter Crown",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "gravity pulse"
+  },
+  {
+    "id": "B071",
+    "region": "07",
+    "name": "Nemesis // The Hollow",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "gravity pulse"
+  },
+  {
+    "id": "B072",
+    "region": "07",
+    "name": "Warden Zero // The Hollow",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "arena collapse"
+  },
+  {
+    "id": "B081",
+    "region": "08",
+    "name": "Nemesis // Red Garden",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "arena collapse"
+  },
+  {
+    "id": "B082",
+    "region": "08",
+    "name": "Warden Zero // Red Garden",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "drone swarms"
+  },
+  {
+    "id": "B091",
+    "region": "09",
+    "name": "Nemesis // Black Sun",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "drone swarms"
+  },
+  {
+    "id": "B092",
+    "region": "09",
+    "name": "Warden Zero // Black Sun",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "weather inversion"
+  },
+  {
+    "id": "B101",
+    "region": "10",
+    "name": "Nemesis // The Choir",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "weather inversion"
+  },
+  {
+    "id": "B102",
+    "region": "10",
+    "name": "Warden Zero // The Choir",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "gravity pulse"
+  },
+  {
+    "id": "B111",
+    "region": "11",
+    "name": "Nemesis // Eventide",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "gravity pulse"
+  },
+  {
+    "id": "B112",
+    "region": "11",
+    "name": "Warden Zero // Eventide",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "arena collapse"
+  },
+  {
+    "id": "B121",
+    "region": "12",
+    "name": "Nemesis // Last Dawn",
+    "description": "The purple reactor titan that learns the player\u2019s attack rhythm.",
+    "phases": 3,
+    "signature_mechanic": "arena collapse"
+  },
+  {
+    "id": "B122",
+    "region": "12",
+    "name": "Warden Zero // Last Dawn",
+    "description": "A siege machine built around a stolen human neural map.",
+    "phases": 4,
+    "signature_mechanic": "drone swarms"
+  }
+]
