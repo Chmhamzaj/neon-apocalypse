@@ -42,8 +42,6 @@ var player_jaw: Node3D
 var player_mouth: Node3D
 var player_eye_nodes: Array[Node3D] = []
 var player_pupil_nodes: Array[Node3D] = []
-var player_eye_nodes: Array[Node3D] = []
-var player_pupil_nodes: Array[Node3D] = []
 var car_wheel_sets: Array[Array] = []
 var joystick_id := -1
 var look_id := -1
