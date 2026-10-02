@@ -377,7 +377,7 @@ func _animate_cars(delta):
         if c.position.z>98:c.position.z=-98
         if c.position.z<-98:c.position.z=98
         c.rotation.y=0 if dir>0 else PI
-    _tone(engine_audio,48.0+(driving*35.0),0.02)
+    _tone(engine_audio,48.0+(float(driving)*35.0),0.02)
 
 func _update_time(delta):
     var hour=fmod(18.0+elapsed*0.18,24.0)
