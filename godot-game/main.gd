@@ -381,8 +381,9 @@ func _create_humanoid(root:Node3D):
 
     # Hair mass with layered front locks.
     sphere_part(root,Vector3(0,2.49,0.015),0.35,hair,"HairMass")
-    for x,z,lean in [[-0.26,2.49,-0.08],[-0.13,2.58,-0.04],[0.0,2.62,0.0],[0.14,2.58,0.04],[0.27,2.50,0.08]]:
-        var lock:=sphere_part(root,Vector3(x,-0.25,z),0.12,hair_hi,"HairLock")
+    var hair_specs:Array=[[-0.26,2.49],[-0.13,2.58],[0.0,2.62],[0.14,2.58],[0.27,2.50]]
+    for spec in hair_specs:
+        var lock:=sphere_part(root,Vector3(float(spec[0]),-0.25,float(spec[1])),0.12,hair_hi,"HairLock")
         lock.scale=Vector3(1.05,1.55,0.55)
 
     # Expressive eyes and independently controllable pupils.
