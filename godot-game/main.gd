@@ -710,49 +710,81 @@ func _animate_player(delta):
         return
     var moving:=Vector2(player.velocity.x,player.velocity.z).length()>0.35
     var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
-    player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 2.2)
-    var stride: float = sin(player_anim_phase)
-    var stride2: float = sin(player_anim_phase+PI)
-    var bob: float = abs(sin(player_anim_phase*0.5))*(0.045 if moving else 0.018)
+    player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 1.8)
+    var stride:float=sin(player_anim_phase)
+    var stride2:float=sin(player_anim_phase+PI)
+    var bob:float=abs(sin(player_anim_phase*0.5))*(0.040 if moving else 0.010)
     player_visual.position.y=lerp(player_visual.position.y,bob,1.0-exp(-delta*12.0))
     if player_body:
-        player_body.rotation.z=lerp(player_body.rotation.z,(-0.035*stride if moving else 0.0),1.0-exp(-delta*10.0))
-        player_body.scale.y=1.0+sin(player_anim_phase)*0.018
+        player_body.rotation.z=lerp(player_body.rotation.z,(-0.028*stride if moving else 0.0),1.0-exp(-delta*10.0))
     if player_head:
-        player_head.rotation.z=sin(player_anim_phase*0.5)*0.035
-        player_head.rotation.x=sin(player_anim_phase*0.7)*0.025
+        var idle_look:float=sin(elapsed*0.55)*0.16 if not moving else 0.0
+        player_head.rotation.y=lerp(player_head.rotation.y,idle_look,1.0-exp(-delta*5.0))
+        player_head.rotation.x=lerp(player_head.rotation.x,0.0,1.0-exp(-delta*6.0))
     if player_arms.size()>=2:
-        player_arms[0].rotation.x=lerp(player_arms[0].rotation.x,stride*0.65 if moving else sin(elapsed*1.8)*0.04,1.0-exp(-delta*14.0))
-        player_arms[1].rotation.x=lerp(player_arms[1].rotation.x,stride2*0.65 if moving else -sin(elapsed*1.8)*0.04,1.0-exp(-delta*14.0))
+        player_arms[0].rotation.x=lerp(player_arms[0].rotation.x,stride*0.62 if moving else sin(elapsed*1.4)*0.025,1.0-exp(-delta*14.0))
+        player_arms[1].rotation.x=lerp(player_arms[1].rotation.x,stride2*0.62 if moving else -sin(elapsed*1.4)*0.025,1.0-exp(-delta*14.0))
     if player_legs.size()>=2:
-        player_legs[0].rotation.x=lerp(player_legs[0].rotation.x,stride2*0.72 if moving else 0.0,1.0-exp(-delta*16.0))
-        player_legs[1].rotation.x=lerp(player_legs[1].rotation.x,stride*0.72 if moving else 0.0,1.0-exp(-delta*16.0))
-    if shooting:
-        player_body.rotation.x=lerp(player_body.rotation.x,-0.10,1.0-exp(-delta*22.0))
-    else:
+        player_legs[0].rotation.x=lerp(player_legs[0].rotation.x,stride2*0.68 if moving else 0.0,1.0-exp(-delta*16.0))
+        player_legs[1].rotation.x=lerp(player_legs[1].rotation.x,stride*0.68 if moving else 0.0,1.0-exp(-delta*16.0))
+    if shooting and player_body:
+        player_body.rotation.x=lerp(player_body.rotation.x,-0.08,1.0-exp(-delta*18.0))
+    elif player_body:
         player_body.rotation.x=lerp(player_body.rotation.x,0.0,1.0-exp(-delta*10.0))
 
 func _animate_npcs(delta):
     for n in npcs:
         var target:Vector3=n.get_meta("target",n.global_position)
-        var to_target:=target-n.global_position; to_target.y=0.0
-        if to_target.length()<1.5:
-            target=Vector3(rng.randf_range(-86.0,86.0),0.0,rng.randf_range(-86.0,86.0))
-            n.set_meta("target",target); to_target=target-n.global_position; to_target.y=0.0
-        var speed:=float(n.get_meta("speed"))
-        if to_target.length()>0.2:
+        var to_target:=target-n.global_position
+        to_target.y=0.0
+        if to_target.length()<1.6:
+            target=Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0))
+            n.set_meta("target",target)
+            to_target=target-n.global_position
+            to_target.y=0.0
+        var speed:float=float(n.get_meta("speed"))
+        var moving:=to_target.length()>0.25
+        var life:float=float(n.get_meta("life_clock"))+delta
+        n.set_meta("life_clock",life)
+        var phase:float=life*speed*4.0+float(n.get_meta("phase"))
+        var head:Node3D=n.get_meta("head_node") as Node3D
+        var arm_l:Node3D=n.get_node_or_null("Arm") as Node3D
+        var arm_r:Node3D=n.get_node_or_null("Arm2") as Node3D
+        var leg_l:Node3D=n.get_node_or_null("Leg") as Node3D
+        var leg_r:Node3D=n.get_node_or_null("Leg2") as Node3D
+        if moving:
             var dir:=to_target.normalized()
             n.position+=dir*speed*delta
-            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*5.0)
-        var phase:=elapsed*speed*3.0+float(n.get_meta("phase"))
-        var walk:=sin(phase)
-        var arm_l:=n.get_node_or_null("Arm"); var leg_l:=n.get_node_or_null("Leg")
-        var arm_r:=n.get_node_or_null("Arm2"); var leg_r:=n.get_node_or_null("Leg2")
-        if arm_l: arm_l.rotation.x=walk*0.55
-        if leg_l: leg_l.rotation.x=-walk*0.65
-        if arm_r: arm_r.rotation.x=-walk*0.55
-        if leg_r: leg_r.rotation.x=walk*0.65
-        n.position.y=abs(sin(phase))*0.035
+            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*6.0)
+            var walk:=sin(phase)
+            if arm_l: arm_l.rotation.x=walk*0.52
+            if arm_r: arm_r.rotation.x=-walk*0.52
+            if leg_l: leg_l.rotation.x=-walk*0.62
+            if leg_r: leg_r.rotation.x=walk*0.62
+            if head: head.rotation.y=sin(phase*0.31)*0.10
+        else:
+            var glance:=sin(life*0.72+float(n.get_meta("phase")))
+            if head:
+                head.rotation.y=lerp(head.rotation.y,glance*0.48,delta*3.5)
+                head.rotation.x=sin(life*0.45)*0.04
+            if arm_l: arm_l.rotation.x=0.02*sin(life)
+            if arm_r: arm_r.rotation.x=-0.02*sin(life)
+            var check_clock:float=float(n.get_meta("check_clock"))+delta
+            if check_clock>8.0:
+                check_clock=0.0
+                n.set_meta("checking_time",true)
+            n.set_meta("check_clock",check_clock)
+            if bool(n.get_meta("checking_time")):
+                if arm_r:
+                    arm_r.rotation.z=lerp(arm_r.rotation.z,-1.10,delta*4.0)
+                    arm_r.rotation.x=lerp(arm_r.rotation.x,-0.50,delta*4.0)
+                if head:
+                    head.rotation.y=lerp(head.rotation.y,0.30,delta*4.0)
+                if check_clock>1.9:
+                    n.set_meta("checking_time",false)
+            elif arm_r:
+                arm_r.rotation.z=lerp(arm_r.rotation.z,0.0,delta*3.0)
+        n.position.y=0.0
 
 func _animate_cars(delta):
     for c in cars:
