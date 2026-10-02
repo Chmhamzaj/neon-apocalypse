@@ -106,6 +106,7 @@ func _boot_world():
     await get_tree().process_frame
     boot_label.text = "LOADING • WORLD LIGHTING"
     _setup_world()
+    _prepare_external_assets()
     await get_tree().process_frame
     boot_label.text = "LOADING • CITY 10%"
     await _build_city_async()
@@ -698,104 +699,179 @@ func _make_tone_stream(freq:float,amp:float,seconds:float)->AudioStreamWAV:
     wav.loop_mode=AudioStreamWAV.LOOP_FORWARD; wav.loop_begin=0; wav.loop_end=count; return wav
 
 func _setup_ui():
-    var layer:=CanvasLayer.new()
-    add_child(layer)
+    ui_layer=CanvasLayer.new()
+    ui_layer.name="PremiumHUD"
+    add_child(ui_layer)
 
-    hud=Label.new()
-    hud.position=Vector2(22,18)
-    hud.add_theme_font_size_override("font_size",18)
-    hud.add_theme_color_override("font_color",Color.WHITE)
-    layer.add_child(hud)
+    var profile:=_ui_panel(Vector2(16,14),Vector2(286,92),Color(0.035,0.055,0.075,0.90),Color(0.20,0.72,0.86,0.38),14)
+    _ui_label(profile,"STREET SOVEREIGN",Vector2(16,9),Vector2(200,24),18,Color("#f2fbff"))
+    district_value=_ui_label(profile,"NIGHT CITY",Vector2(16,34),Vector2(180,18),12,Color("#83d9ee"))
+    cash_value=_ui_label(profile,"$ 12,500",Vector2(190,11),Vector2(82,22),15,Color("#f6d26b"),HORIZONTAL_ALIGNMENT_RIGHT)
+    wanted_value=_ui_label(profile,"W 0/5",Vector2(200,38),Vector2(72,18),12,Color("#ff8a72"),HORIZONTAL_ALIGNMENT_RIGHT)
 
-    objective=Label.new()
-    objective.position=Vector2(22,70)
-    objective.add_theme_font_size_override("font_size",15)
-    objective.add_theme_color_override("font_color",Color("#ffd75a"))
-    layer.add_child(objective)
+    health_bar=ProgressBar.new()
+    health_bar.position=Vector2(16,58)
+    health_bar.size=Vector2(160,10)
+    health_bar.show_percentage=false
+    health_bar.value=100.0
+    var hb_bg:=StyleBoxFlat.new(); hb_bg.bg_color=Color(0.06,0.09,0.12,1); hb_bg.corner_radius_top_left=5; hb_bg.corner_radius_top_right=5; hb_bg.corner_radius_bottom_left=5; hb_bg.corner_radius_bottom_right=5
+    var hb_fill:=StyleBoxFlat.new(); hb_fill.bg_color=Color("#49d6a7"); hb_fill.corner_radius_top_left=5; hb_fill.corner_radius_top_right=5; hb_fill.corner_radius_bottom_left=5; hb_fill.corner_radius_bottom_right=5
+    health_bar.add_theme_stylebox_override("background",hb_bg); health_bar.add_theme_stylebox_override("fill",hb_fill); profile.add_child(health_bar)
 
-    status=Label.new()
-    status.position=Vector2(22,112)
-    status.add_theme_font_size_override("font_size",13)
-    status.add_theme_color_override("font_color",Color("#a9c6e8"))
-    layer.add_child(status)
+    stamina_bar=ProgressBar.new()
+    stamina_bar.position=Vector2(16,73)
+    stamina_bar.size=Vector2(160,7)
+    stamina_bar.show_percentage=false
+    stamina_bar.value=85.0
+    var sb_bg:=StyleBoxFlat.new(); sb_bg.bg_color=Color(0.06,0.09,0.12,1); sb_bg.corner_radius_top_left=4; sb_bg.corner_radius_top_right=4; sb_bg.corner_radius_bottom_left=4; sb_bg.corner_radius_bottom_right=4
+    var sb_fill:=StyleBoxFlat.new(); sb_fill.bg_color=Color("#4b9dff"); sb_fill.corner_radius_top_left=4; sb_fill.corner_radius_top_right=4; sb_fill.corner_radius_bottom_left=4; sb_fill.corner_radius_bottom_right=4
+    stamina_bar.add_theme_stylebox_override("background",sb_bg); stamina_bar.add_theme_stylebox_override("fill",sb_fill); profile.add_child(stamina_bar)
 
-    crosshair=Label.new()
-    crosshair.text="+"
-    crosshair.position=Vector2(0,0)
-    crosshair.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-    crosshair.add_theme_font_size_override("font_size",28)
-    crosshair.add_theme_color_override("font_color",Color("#ffffffcc"))
-    layer.add_child(crosshair)
+    var mission_panel:=_ui_panel(Vector2(16,114),Vector2(286,78),Color(0.025,0.040,0.055,0.86),Color(0.95,0.72,0.26,0.32),12)
+    _ui_label(mission_panel,"CURRENT OBJECTIVE",Vector2(14,9),Vector2(240,16),10,Color("#8da6b7"))
+    mission_value=_ui_label(mission_panel,"SUNSET RUN",Vector2(14,27),Vector2(248,22),15,Color("#ffe18a"))
+    objective=_ui_label(mission_panel,"Reach the gold marker",Vector2(14,50),Vector2(250,18),11,Color("#d9e5ed"))
+
+    var compass:=_ui_panel(Vector2(0,12),Vector2(260,38),Color(0.02,0.03,0.04,0.68),Color(0.40,0.82,0.96,0.22),18)
+    compass.set_anchors_preset(Control.PRESET_TOP_WIDE,Control.PRESET_MODE_MINSIZE,0)
+    compass.position.x=0
+    _ui_label(compass,"W       NW       N       NE       E",Vector2(18,6),Vector2(224,26),11,Color("#d9eef8"),HORIZONTAL_ALIGNMENT_CENTER)
+
+    map_panel=_ui_panel(Vector2(-132,14),Vector2(112,112),Color(0.02,0.035,0.045,0.82),Color(0.48,0.86,0.95,0.36),56)
+    map_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,14)
+    map_panel.position.x=-132
+    _ui_label(map_panel,"N",Vector2(46,8),Vector2(20,18),11,Color("#f2fbff"),HORIZONTAL_ALIGNMENT_CENTER)
+    _ui_label(map_panel,"+",Vector2(46,46),Vector2(20,20),15,Color("#8ee8ff"),HORIZONTAL_ALIGNMENT_CENTER)
+    _ui_label(map_panel,"MISSION",Vector2(23,82),Vector2(66,16),9,Color("#ffe18a"),HORIZONTAL_ALIGNMENT_CENTER)
+
+    graphics_button=_ui_button(ui_layer,"SET",Vector2(-204,14),Vector2(60,48),12)
+    graphics_button.set_anchors_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,14)
+    graphics_button.position.x=-204
+    graphics_button.pressed.connect(_toggle_settings)
+
+    var fire:=_ui_button(ui_layer,"FIRE",Vector2(-126,-146),Vector2(108,108),17)
+    fire.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    fire.position.x=-126; fire.position.y=-146
+    fire.button_down.connect(func(): shooting=true)
+    fire.button_up.connect(func(): shooting=false)
+
+    var jump:=_ui_button(ui_layer,"JUMP",Vector2(-220,-92),Vector2(76,76),13)
+    jump.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    jump.position.x=-220; jump.position.y=-92
+    jump.pressed.connect(func(): jump_requested=true)
+
+    var drive:=_ui_button(ui_layer,"CAR",Vector2(-224,-174),Vector2(82,58),12)
+    drive.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    drive.position.x=-224; drive.position.y=-174
+    drive.pressed.connect(_toggle_drive)
+
+    joystick_ring=_ui_panel(Vector2(24,-198),Vector2(176,176),Color(0.02,0.035,0.045,0.30),Color(0.58,0.82,0.90,0.30),88)
+    joystick_ring.set_anchors_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
+    joystick_ring.position.x=24; joystick_ring.position.y=-198
+    joystick_knob=_ui_panel(Vector2(58,58),Vector2(60,60),Color(0.68,0.86,0.93,0.18),Color(0.82,0.95,1,0.45),30)
+    joystick_ring.add_child(joystick_knob)
+    _ui_label(ui_layer,"MOVE",Vector2(24,-220),Vector2(176,18),9,Color("#b7cad5"),HORIZONTAL_ALIGNMENT_CENTER)
+    var touch_hint:=_ui_label(ui_layer,"DRAG RIGHT = LOOK",Vector2(-210,-30),Vector2(190,18),9,Color(0.72,0.84,0.90,0.60),HORIZONTAL_ALIGNMENT_RIGHT)
+    touch_hint.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    touch_hint.position.x=-210; touch_hint.position.y=-30
 
     boot_label=Label.new()
     boot_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     boot_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
     boot_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-    boot_label.add_theme_font_size_override("font_size",22)
-    boot_label.add_theme_color_override("font_color",Color("#63e6ff"))
-    boot_label.text="BOOT 0/5  •  STARTING 3D WORLD"
-    layer.add_child(boot_label)
+    boot_label.add_theme_font_size_override("font_size",18)
+    boot_label.add_theme_color_override("font_color",Color("#8ee8ff"))
+    boot_label.text="STARTING 3D WORLD"
+    ui_layer.add_child(boot_label)
 
-    var fire:=_button(layer,"FIRE",Vector2(-170,-150),Vector2(150,90),24)
-    fire.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
-    fire.button_down.connect(func():shooting=true)
-    fire.button_up.connect(func():shooting=false)
+    settings_panel=_ui_panel(Vector2(0,0),Vector2(330,350),Color(0.025,0.045,0.065,0.97),Color(0.46,0.82,0.94,0.48),20)
+    settings_panel.set_anchors_preset(Control.PRESET_CENTER,Control.PRESET_MODE_MINSIZE,0)
+    settings_panel.position=Vector2(-165,-175)
+    _ui_label(settings_panel,"GRAPHICS & CONTROLS",Vector2(22,20),Vector2(285,28),18,Color("#f3fbff"))
+    _ui_label(settings_panel,"Performance presets for mobile",Vector2(22,50),Vector2(285,18),10,Color("#8da6b7"))
 
-    var drive:=_button(layer,"ENTER CAR",Vector2(-335,-150),Vector2(145,70),16)
-    drive.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
-    drive.position.y-=100
-    drive.pressed.connect(_toggle_drive)
+    var low:=_ui_button(settings_panel,"LOW",Vector2(22,88),Vector2(86,48),12); low.pressed.connect(func(): graphics=0; _apply_quality())
+    var med:=_ui_button(settings_panel,"MED",Vector2(122,88),Vector2(86,48),12); med.pressed.connect(func(): graphics=1; _apply_quality())
+    var high:=_ui_button(settings_panel,"HIGH",Vector2(222,88),Vector2(86,48),12); high.pressed.connect(func(): graphics=2; _apply_quality())
 
-    graphics_button=_button(layer,"GRAPHICS: MED",Vector2(0,0),Vector2(145,48),13)
-    graphics_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,18)
-    graphics_button.pressed.connect(_cycle_graphics)
-
-    gyro_button=_button(layer,"GYRO: ON",Vector2(0,0),Vector2(125,48),13)
-    gyro_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,18)
-    gyro_button.position.x-=160
+    gyro_button=_ui_button(settings_panel,"GYRO: ON",Vector2(22,150),Vector2(130,48),11)
     gyro_button.pressed.connect(func():
         gyro_enabled=!gyro_enabled
         gyro_button.text="GYRO: ON" if gyro_enabled else "GYRO: OFF")
+    var close:=_ui_button(settings_panel,"CLOSE",Vector2(178,150),Vector2(130,48),11)
+    close.pressed.connect(_toggle_settings)
+    _ui_label(settings_panel,"CAMERA SENSITIVITY",Vector2(22,224),Vector2(200,18),10,Color("#8da6b7"))
+    _ui_label(settings_panel,"0.12",Vector2(245,224),Vector2(63,18),10,Color("#dff7ff"),HORIZONTAL_ALIGNMENT_RIGHT)
+    _ui_label(settings_panel,"Real-time external GLB assets + PBR roads",Vector2(22,274),Vector2(286,36),10,Color("#72b9cb"))
 
-    # Virtual joystick: left bottom.
-    var up:=_button(layer,"▲",Vector2(112,-180),Vector2(74,66),24)
-    up.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
-    up.button_down.connect(func():move_input.y=-1)
-    up.button_up.connect(func():move_input.y=0)
-    var left:=_button(layer,"◀",Vector2(28,-112),Vector2(74,66),24)
-    left.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
-    left.button_down.connect(func():move_input.x=-1)
-    left.button_up.connect(func():move_input.x=0)
-    var right:=_button(layer,"▶",Vector2(196,-112),Vector2(74,66),24)
-    right.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
-    right.button_down.connect(func():move_input.x=1)
-    right.button_up.connect(func():move_input.x=0)
-    var down:=_button(layer,"▼",Vector2(112,-42),Vector2(74,50),20)
-    down.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
-    down.button_down.connect(func():move_input.y=1)
-    down.button_up.connect(func():move_input.y=0)
-    var jump:=_button(layer,"JUMP",Vector2(-165,-55),Vector2(120,58),16)
-    jump.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
-    jump.pressed.connect(func(): jump_requested=true)
-    fps_label=Label.new(); fps_label.position=Vector2(22,150); fps_label.add_theme_font_size_override("font_size",12); layer.add_child(fps_label)
+    hud=Label.new()
+    hud.visible=false
+    ui_layer.add_child(hud)
+    status=Label.new()
+    status.visible=false
+    ui_layer.add_child(status)
+    crosshair=Label.new()
+    crosshair.text="+"
+    crosshair.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+    crosshair.add_theme_font_size_override("font_size",20)
+    crosshair.add_theme_color_override("font_color",Color(1,1,1,0.55))
+    ui_layer.add_child(crosshair)
+    fps_label=Label.new()
+    fps_label.position=Vector2(16,198)
+    fps_label.add_theme_font_size_override("font_size",10)
+    fps_label.add_theme_color_override("font_color",Color("#89a2b0"))
+    ui_layer.add_child(fps_label)
+    settings_panel.visible=false
 
-    var hint:=Label.new()
-    hint.text="DRAG RIGHT SIDE = CAMERA • GYRO = CAMERA"
-    hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-    hint.position.y=-28
-    hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-    hint.add_theme_font_size_override("font_size",12)
-    hint.add_theme_color_override("font_color",Color("#d7e5ff99"))
-    layer.add_child(hint)
+func _ui_style(bg:Color,border:Color,radius:int)->StyleBoxFlat:
+    var sb:=StyleBoxFlat.new()
+    sb.bg_color=bg
+    sb.border_color=border
+    sb.set_border_width_all(1)
+    sb.corner_radius_top_left=radius
+    sb.corner_radius_top_right=radius
+    sb.corner_radius_bottom_left=radius
+    sb.corner_radius_bottom_right=radius
+    return sb
 
-func _button(layer:CanvasLayer,text_value:String,pos:Vector2,size:Vector2,font_size:int)->Button:
+func _ui_panel(pos:Vector2,size:Vector2,bg:Color,border:Color,radius:int)->Panel:
+    var p:=Panel.new()
+    p.position=pos
+    p.size=size
+    p.add_theme_stylebox_override("panel",_ui_style(bg,border,radius))
+    ui_layer.add_child(p)
+    return p
+
+func _ui_label(parent:Node,text_value:String,pos:Vector2,size:Vector2,font_size:int,font_color:Color,align:int=HORIZONTAL_ALIGNMENT_LEFT)->Label:
+    var l:=Label.new()
+    l.text=text_value
+    l.position=pos
+    l.size=size
+    l.horizontal_alignment=align
+    l.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+    l.add_theme_font_size_override("font_size",font_size)
+    l.add_theme_color_override("font_color",font_color)
+    parent.add_child(l)
+    return l
+
+func _ui_button(parent:Node,text_value:String,pos:Vector2,size:Vector2,font_size:int)->Button:
     var b:=Button.new()
     b.text=text_value
     b.position=pos
     b.size=size
     b.add_theme_font_size_override("font_size",font_size)
-    layer.add_child(b)
+    b.add_theme_color_override("font_color",Color("#edf9ff"))
+    b.add_theme_color_override("font_hover_color",Color("#ffffff"))
+    b.add_theme_color_override("font_pressed_color",Color("#ffffff"))
+    b.add_theme_stylebox_override("normal",_ui_style(Color(0.05,0.09,0.12,0.86),Color(0.39,0.70,0.82,0.36),18))
+    b.add_theme_stylebox_override("pressed",_ui_style(Color(0.10,0.22,0.28,0.95),Color(0.55,0.90,1.0,0.72),18))
+    b.add_theme_stylebox_override("hover",_ui_style(Color(0.08,0.15,0.19,0.92),Color(0.50,0.82,0.92,0.52),18))
+    parent.add_child(b)
     return b
+
+func _toggle_settings():
+    if is_instance_valid(settings_panel):
+        settings_panel.visible=not settings_panel.visible
 
 func _new_mission():
     if is_instance_valid(mission_marker): mission_marker.queue_free()
@@ -1029,8 +1105,22 @@ func _apply_quality():
     world_env.environment.glow_enabled=false
 
 func _update_hud():
-    if not is_instance_valid(hud): return
-    hud.text="STREET SOVEREIGN 3D\\n$%d   HP %d   WANTED %d/5   •   %s" % [money,int(health),wanted,districts[mission%3]]
-    objective.text="MISSION %d/6  —  %s\\nReach the gold marker" % [mission+1,missions[mission][0]]
-    status.text="20 HUMAN NPCs • 10 VARIED CARS • FACIAL AI • TOUCH + GYRO"
-    if is_instance_valid(fps_label): fps_label.text="FPS %d  •  GFX %s" % [Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
+    if is_instance_valid(health_bar):
+        health_bar.value=health
+    if is_instance_valid(stamina_bar):
+        stamina_bar.value=clamp(70.0+sin(elapsed*1.4)*12.0,0.0,100.0)
+    if is_instance_valid(cash_value):
+        cash_value.text="$ %d"%money
+    if is_instance_valid(wanted_value):
+        wanted_value.text="W %d/5"%wanted
+    if is_instance_valid(district_value):
+        district_value.text=districts[mission%3]
+    if is_instance_valid(mission_value):
+        mission_value.text=missions[mission][0]
+    if is_instance_valid(objective):
+        objective.text="Reach the gold marker"
+    if is_instance_valid(fps_label):
+        fps_label.text="FPS %d  |  GFX %s"%[Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
+    if is_instance_valid(joystick_knob):
+        var knob_center:=Vector2(58,58)
+        joystick_knob.position=knob_center+move_input*48.0
