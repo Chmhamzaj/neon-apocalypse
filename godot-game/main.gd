@@ -645,9 +645,9 @@ func _move_player(delta):
     player.position.z=clamp(player.position.z,-93.0,93.0)
     if dir.length()>0.1:
         player_visual.rotation.y=lerp_angle(player_visual.rotation.y,atan2(dir.x,dir.z),delta*10.0)
-    var yaw:=deg_to_rad(camera_yaw)
-    var pitch:=deg_to_rad(camera_pitch)
-    var rot:=Basis(Vector3.UP,yaw)*Basis(Vector3.RIGHT,pitch)
+    var cam_yaw_rad:=deg_to_rad(camera_yaw)
+    var cam_pitch_rad:=deg_to_rad(camera_pitch)
+    var rot:=Basis(Vector3.UP,cam_yaw_rad)*Basis(Vector3.RIGHT,cam_pitch_rad)
     var desired_cam:=player.global_position+Vector3(0,camera_height,0)+rot*Vector3(0,0,camera_distance)
     camera.global_position=camera.global_position.lerp(desired_cam,1.0-exp(-delta*14.0))
     camera.look_at(player.global_position+Vector3(0,1.15,0),Vector3.UP)
