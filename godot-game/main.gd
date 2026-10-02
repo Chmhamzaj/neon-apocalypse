@@ -348,6 +348,7 @@ func _create_car(root:Node3D,index:int):
     box(root,Vector3(0,0.45,-0.15),Vector3(1.45,0.48,1.85),glass,"Cabin")
     box(root,Vector3(0,0.47,-1.05),Vector3(1.48,0.32,0.08),paint,"Hood")
     box(root,Vector3(0,0.46,1.15),Vector3(1.48,0.25,0.08),paint,"Trunk")
+    var wheels:Array[Node3D]=[]
     for x in [-0.92,0.92]:
         for z in [-1.25,1.25]:
             var wheel:=MeshInstance3D.new()
