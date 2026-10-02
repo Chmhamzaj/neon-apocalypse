@@ -97,8 +97,8 @@ func _build_city_async():
     var done:=0
     for ds in range(4):
         for i in range(30):
-            var bx := district_centers[ds] + rng.randf_range(-16,16)
-            var bz := rng.randf_range(-82,82)
+            var bx: float = float(district_centers[ds]) + rng.randf_range(-16.0,16.0)
+            var bz: float = rng.randf_range(-82.0,82.0)
             if abs(bx) < 8: bx += 12.0
             _create_building(bx,bz,rng.randf_range(6,11),rng.randf_range(8,30),rng.randf_range(6,12),palettes[ds],i)
             done+=1
@@ -226,9 +226,9 @@ func _build_optimized_city():
             var bx := district_centers[s] + rng.randf_range(-16,16)
             var bz := rng.randf_range(-82,82)
             if abs(bx) < 8: bx += 12.0
-            var h := rng.randf_range(8,30)
-            var w := rng.randf_range(6,11)
-            var d := rng.randf_range(6,12)
+            var h: float = rng.randf_range(8.0,30.0)
+            var w: float = rng.randf_range(6.0,11.0)
+            var d: float = rng.randf_range(6.0,12.0)
             _create_building(bx,bz,w,h,d,palettes[s],i)
     _build_roads()
     _build_landmarks()
@@ -245,7 +245,7 @@ func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:in
     var root := Node3D.new()
     root.position = Vector3(x,0,z)
     city.add_child(root)
-    var facade := palette[i%2]
+    var facade: Color = palette[i%2]
     box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),material(facade,0.65),"Building")
     # Vertical side tower / architectural crown.
     if i%3==0:
@@ -276,7 +276,7 @@ func _build_roads():
 func _build_landmarks():
     var neon := [Color("#ff477e"),Color("#38d8ef"),Color("#ffc857"),Color("#8cf38c")]
     for i in range(4):
-        var x := [-62.0,-20.0,24.0,67.0][i]
+        var x: float = [-62.0,-20.0,24.0,67.0][i]
         var root := Node3D.new()
         root.position = Vector3(x,0,-78)
         city.add_child(root)
@@ -621,9 +621,9 @@ func _animate_player(delta):
     var moving:=Vector2(player.velocity.x,player.velocity.z).length()>0.35
     var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
     player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 2.2)
-    var stride:=sin(player_anim_phase)
-    var stride2:=sin(player_anim_phase+PI)
-    var bob:=abs(sin(player_anim_phase*0.5))*(0.045 if moving else 0.018)
+    var stride: float = sin(player_anim_phase)
+    var stride2: float = sin(player_anim_phase+PI)
+    var bob: float = abs(sin(player_anim_phase*0.5))*(0.045 if moving else 0.018)
     player_visual.position.y=lerp(player_visual.position.y,bob,1.0-exp(-delta*12.0))
     if player_body:
         player_body.rotation.z=lerp(player_body.rotation.z,(-0.035*stride if moving else 0.0),1.0-exp(-delta*10.0))
