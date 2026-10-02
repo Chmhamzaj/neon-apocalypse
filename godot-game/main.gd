@@ -31,6 +31,13 @@ var camera_yaw := 0.0
 var camera_pitch := -12.0
 var fire_cooldown := 0.0
 var quality_changed := false
+var boot_label: Label
+var player_arms: Array[Node3D] = []
+var player_legs: Array[Node3D] = []
+var player_head: Node3D
+var player_body: Node3D
+var player_anim_phase := 0.0
+var car_wheel_sets: Array[Array] = []
 
 var hud: Label
 var objective: Label
@@ -52,13 +59,26 @@ var districts := ["VICE RAY", "SAN VALORA", "LIBERTY BAY"]
 
 func _ready():
     rng.seed = 90210
-    _setup_world()
-    _build_optimized_city()
-    _spawn_player()
-    _spawn_population()
+    RenderingServer.set_default_clear_color(Color("#050a18"))
     _setup_ui()
+    _spawn_player()
+    boot_label.text = "BOOT 1/5  •  CAMERA ONLINE"
+    await get_tree().process_frame
+    _setup_world()
+    boot_label.text = "BOOT 2/5  •  WORLD LIGHTING ONLINE"
+    await get_tree().process_frame
+    _build_optimized_city()
+    boot_label.text = "BOOT 3/5  •  CITY ONLINE"
+    await get_tree().process_frame
+    _spawn_population()
+    boot_label.text = "BOOT 4/5  •  TRAFFIC & CITIZENS ONLINE"
+    await get_tree().process_frame
     _new_mission()
     _apply_quality()
+    boot_label.text = "STREET SOVEREIGN  •  READY"
+    await get_tree().create_timer(0.8).timeout
+    if is_instance_valid(boot_label):
+        boot_label.queue_free()
     set_process(true)
 
 func material(color: Color, roughness := 0.72, metallic := 0.0, emission := Color.TRANSPARENT) -> StandardMaterial3D:
@@ -100,18 +120,11 @@ func cylinder(parent: Node3D, pos: Vector3, radius: float, height: float, mat: M
 func _setup_world():
     world_env = WorldEnvironment.new()
     var env := Environment.new()
-    env.background_mode = Environment.BG_SKY
-    var sky := Sky.new()
-    var sky_mat := ProceduralSkyMaterial.new()
-    sky_mat.sky_top_color = Color("#061126")
-    sky_mat.sky_horizon_color = Color("#e06c59")
-    sky_mat.ground_bottom_color = Color("#02040a")
-    sky_mat.ground_horizon_color = Color("#20283a")
-    sky_mat.sun_angle_max = 18.0
-    sky.sky_material = sky_mat
-    env.sky = sky
-    env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-    env.ambient_light_energy = 0.8
+    env.background_mode = Environment.BG_COLOR
+    env.background_color = Color("#081226")
+    env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+    env.ambient_light_color = Color("#8fa8c8")
+    env.ambient_light_energy = 0.9
     env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
     env.glow_enabled = false
     world_env.environment = env
@@ -121,7 +134,7 @@ func _setup_world():
     sun.rotation_degrees = Vector3(-52,-28,0)
     sun.light_energy = 1.2
     sun.light_color = Color("#fff1dc")
-    sun.shadow_enabled = true
+    sun.shadow_enabled = false
     sun.directional_shadow_max_distance = 75.0
     add_child(sun)
 
@@ -273,19 +286,22 @@ func _create_humanoid(root:Node3D):
     var pants := material(Color("#18202e"),0.78)
     var shoes := material(Color("#0a0c10"),0.55,0.15)
     # Torso, head, neck.
-    box(root,Vector3(0,1.25,0),Vector3(0.72,0.92,0.42),jacket,"Torso")
+    player_body=box(root,Vector3(0,1.25,0),Vector3(0.72,0.92,0.42),jacket,"Torso")
     cylinder(root,Vector3(0,1.83,0),0.23,0.18,skin,"Neck")
     var head := MeshInstance3D.new()
     var sphere := SphereMesh.new()
     sphere.radius=0.31;sphere.height=0.62
     head.mesh=sphere;head.position=Vector3(0,2.2,0);head.material_override=skin;root.add_child(head)
+    player_head=head
     # Hair/hat silhouette.
     cylinder(root,Vector3(0,2.49,0),0.34,0.13,material(Color("#111522"),0.7),"Hair")
     # Arms and hands.
     for side in [-1.0,1.0]:
-        box(root,Vector3(0.48*side,1.30,0),Vector3(0.18,0.72,0.22),jacket,"Arm")
+        var arm:=box(root,Vector3(0.48*side,1.30,0),Vector3(0.18,0.72,0.22),jacket,"Arm")
+        player_arms.append(arm)
         cylinder(root,Vector3(0.48*side,0.88,0),0.12,0.20,skin,"Hand")
-        box(root,Vector3(0.19*side,0.62,0),Vector3(0.30,0.85,0.30),pants,"Leg")
+        var leg:=box(root,Vector3(0.19*side,0.62,0),Vector3(0.30,0.85,0.30),pants,"Leg")
+        player_legs.append(leg)
         box(root,Vector3(0.19*side,0.15,0.08),Vector3(0.34,0.18,0.56),shoes,"Shoe")
     box(root,Vector3(0,1.42,-0.225),Vector3(0.36,0.45,0.05),shirt,"Shirt")
 
@@ -337,6 +353,8 @@ func _create_car(root:Node3D,index:int):
             var wheel:=MeshInstance3D.new()
             var wm:=CylinderMesh.new();wm.top_radius=0.38;wm.bottom_radius=0.38;wm.height=0.18;wm.radial_segments=12
             wheel.mesh=wm;wheel.rotation_degrees=Vector3(90,0,0);wheel.position=Vector3(x, -0.05,z);wheel.material_override=tire;root.add_child(wheel)
+            wheels.append(wheel)
+        car_wheel_sets.append(wheels)
     box(root,Vector3(-0.58,0.20, -2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
     box(root,Vector3(0.58,0.20,-2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
 
@@ -369,6 +387,15 @@ func _setup_ui():
     crosshair.add_theme_font_size_override("font_size",28)
     crosshair.add_theme_color_override("font_color",Color("#ffffffcc"))
     layer.add_child(crosshair)
+
+    boot_label=Label.new()
+    boot_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    boot_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    boot_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+    boot_label.add_theme_font_size_override("font_size",22)
+    boot_label.add_theme_color_override("font_color",Color("#63e6ff"))
+    boot_label.text="BOOT 0/5  •  STARTING 3D WORLD"
+    layer.add_child(boot_label)
 
     var fire:=_button(layer,"FIRE",Vector2(-170,-150),Vector2(150,90),24)
     fire.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
@@ -454,6 +481,7 @@ func _process(delta):
     elapsed+=delta
     fire_cooldown=max(0.0,fire_cooldown-delta)
     _move_player(delta)
+    _animate_player(delta)
     _animate_npcs(delta)
     _animate_cars(delta)
     _update_day_night()
@@ -527,6 +555,33 @@ func _fire():
         if n.global_position.distance_to(player.global_position)<7.0:
             n.set_meta("speed",min(2.0,float(n.get_meta("speed"))+0.8))
 
+func _animate_player(delta):
+    if not is_instance_valid(player_visual):
+        return
+    var moving:=Vector2(player.velocity.x,player.velocity.z).length()>0.35
+    var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
+    player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 2.2)
+    var stride:=sin(player_anim_phase)
+    var stride2:=sin(player_anim_phase+PI)
+    var bob:=abs(sin(player_anim_phase*0.5))*(0.045 if moving else 0.018)
+    player_visual.position.y=lerp(player_visual.position.y,bob,1.0-exp(-delta*12.0))
+    if player_body:
+        player_body.rotation.z=lerp(player_body.rotation.z,(-0.035*stride if moving else 0.0),1.0-exp(-delta*10.0))
+        player_body.scale.y=1.0+sin(player_anim_phase)*0.018
+    if player_head:
+        player_head.rotation.z=sin(player_anim_phase*0.5)*0.035
+        player_head.rotation.x=sin(player_anim_phase*0.7)*0.025
+    if player_arms.size()>=2:
+        player_arms[0].rotation.x=lerp(player_arms[0].rotation.x,stride*0.65 if moving else sin(elapsed*1.8)*0.04,1.0-exp(-delta*14.0))
+        player_arms[1].rotation.x=lerp(player_arms[1].rotation.x,stride2*0.65 if moving else -sin(elapsed*1.8)*0.04,1.0-exp(-delta*14.0))
+    if player_legs.size()>=2:
+        player_legs[0].rotation.x=lerp(player_legs[0].rotation.x,stride2*0.72 if moving else 0.0,1.0-exp(-delta*16.0))
+        player_legs[1].rotation.x=lerp(player_legs[1].rotation.x,stride*0.72 if moving else 0.0,1.0-exp(-delta*16.0))
+    if shooting:
+        player_body.rotation.x=lerp(player_body.rotation.x,-0.10,1.0-exp(-delta*22.0))
+    else:
+        player_body.rotation.x=lerp(player_body.rotation.x,0.0,1.0-exp(-delta*10.0))
+
 func _animate_npcs(delta):
     for n in npcs:
         var phase:=float(n.get_meta("phase"))+elapsed*float(n.get_meta("speed"))
@@ -534,7 +589,17 @@ func _animate_npcs(delta):
         n.position.z+=cos(phase*0.53)*delta*0.22
         n.position.x=clamp(n.position.x,-90.0,90.0)
         n.position.z=clamp(n.position.z,-90.0,90.0)
-        n.rotation.y=sin(phase)*0.8
+        n.rotation.y=sin(phase)*0.35
+        var walk:=sin(phase*1.8)
+        var arm_l:=n.get_node_or_null("Arm")
+        var leg_l:=n.get_node_or_null("Leg")
+        if arm_l: arm_l.rotation.x=walk*0.45
+        if leg_l: leg_l.rotation.x=-walk*0.55
+        var arm_r:=n.get_node_or_null("Arm2")
+        var leg_r:=n.get_node_or_null("Leg2")
+        if arm_r: arm_r.rotation.x=-walk*0.45
+        if leg_r: leg_r.rotation.x=walk*0.55
+        n.position.y=abs(sin(phase*0.9))*0.035
 
 func _animate_cars(delta):
     for c in cars:
@@ -544,6 +609,7 @@ func _animate_cars(delta):
         if c.position.z>96:c.position.z=-96
         if c.position.z<-96:c.position.z=96
         c.rotation.y=0 if dir>0 else PI
+        c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.035
 
 func _update_day_night():
     var hour:=fmod(18.0+elapsed*0.12,24.0)
@@ -558,7 +624,7 @@ func _apply_quality():
     if not is_instance_valid(sun): return
     var names=["LOW","MED","HIGH"]
     graphics_button.text="GRAPHICS: "+names[graphics] if is_instance_valid(graphics_button) else ""
-    sun.shadow_enabled=graphics>0
+    sun.shadow_enabled=graphics>1
     sun.directional_shadow_max_distance=[45.0,75.0,105.0][graphics]
     world_env.environment.ambient_light_energy=[0.68,0.82,0.95][graphics]
     world_env.environment.glow_enabled=false
