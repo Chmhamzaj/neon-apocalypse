@@ -11,10 +11,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Godot 4.5
         run: |
-          wget -q https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_linux.x86_64.zip
+          wget -q https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
           unzip -q Godot_v4.5-stable_linux.x86_64.zip
           sudo mv Godot_v4.5-stable_linux.x86_64 /usr/local/bin/godot
-          wget -q https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_export_templates.tpz
+          wget -q https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_export_templates.tpz
           mkdir -p ~/.local/share/godot/export_templates/4.5.stable
           unzip -q Godot_v4.5-stable_export_templates.tpz -d /tmp/godot-templates
           cp -r /tmp/godot-templates/templates/* ~/.local/share/godot/export_templates/4.5.stable/
