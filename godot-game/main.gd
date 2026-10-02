@@ -346,43 +346,62 @@ func _spawn_player():
     camera.look_at(player.global_position + Vector3(0,1.2,0), Vector3.UP)
 
 func _create_humanoid(root:Node3D):
-    var skin := material(Color("#b97859"),0.72)
-    var jacket := material(Color("#263a5b"),0.68,0.1)
-    var shirt := material(Color("#e8edf2"),0.62)
-    var pants := material(Color("#18202e"),0.78)
-    var shoes := material(Color("#0a0c10"),0.55,0.15)
-    # Torso, head, neck.
-    player_body=box(root,Vector3(0,1.25,0),Vector3(0.72,0.92,0.42),jacket,"Torso")
-    cylinder(root,Vector3(0,1.83,0),0.23,0.18,skin,"Neck")
-    var head := MeshInstance3D.new()
-    var sphere := SphereMesh.new()
-    sphere.radius=0.31;sphere.height=0.62
-    head.mesh=sphere;head.position=Vector3(0,2.2,0);head.material_override=skin;root.add_child(head)
+    var skin:=material(Color("#c78468"),0.60)
+    var skin_dark:=material(Color("#915943"),0.66)
+    var hair:=material(Color("#151114"),0.48)
+    var jacket:=material(Color("#304a73"),0.54,0.08)
+    var shirt:=material(Color("#e8edf2"),0.50)
+    var pants:=material(Color("#202735"),0.70)
+    var shoes:=material(Color("#0a0d13"),0.45,0.18)
+    var eye_white:=material(Color("#f6f7fb"),0.18)
+    var iris:=material(Color("#3e6f9c"),0.15,0.10)
+    var mouth:=material(Color("#762b3a"),0.48)
+    capsule(root,Vector3(0,1.28,0),0.34,0.92,jacket,"Torso").scale=Vector3(1.03,1.0,0.70)
+    box(root,Vector3(0,1.43,-0.25),Vector3(0.34,0.44,0.035),shirt,"ShirtFront")
+    cylinder(root,Vector3(0,1.82,0),0.15,0.18,skin,"Neck")
+    var head:=sphere_part(root,Vector3(0,2.19,0),0.32,skin,"Head")
+    head.scale=Vector3(0.98,1.05,0.92)
     player_head=head
-    # Hair and facial features.
-    cylinder(root,Vector3(0,2.49,0),0.34,0.13,material(Color("#111522"),0.7),"Hair")
-    var face_white:=material(Color("#f4f6f8"),0.2)
-    var face_iris:=material(Color("#3e6f9c"),0.18,0.1)
-    var face_dark:=material(Color("#4f3025"),0.65)
+    cylinder(root,Vector3(0,2.49,0),0.33,0.14,hair,"Hair")
+    box(root,Vector3(0,2.42,-0.265),Vector3(0.42,0.14,0.10),hair,"HairFront")
     for side in [-1.0,1.0]:
-        var eye:=MeshInstance3D.new(); var em:=SphereMesh.new(); em.radius=0.06; em.height=0.10
-        eye.mesh=em; eye.position=Vector3(0.115*side,2.23,-0.286); eye.material_override=face_white; root.add_child(eye)
-        var pupil:=MeshInstance3D.new(); var pm:=SphereMesh.new(); pm.radius=0.027; pm.height=0.05
-        pupil.mesh=pm; pupil.position=Vector3(0.115*side,2.23,-0.34); pupil.material_override=face_iris; root.add_child(pupil)
-        box(root,Vector3(0.115*side,2.31,-0.292),Vector3(0.13,0.025,0.025),face_dark,"Brow")
-        var ear:=MeshInstance3D.new(); var es:=SphereMesh.new(); es.radius=0.075; es.height=0.15
-        ear.mesh=es; ear.position=Vector3(0.305*side,2.18,0); ear.material_override=skin; root.add_child(ear)
-    cylinder(root,Vector3(0,2.17,-0.34),0.055,0.13,skin,"Nose")
-    box(root,Vector3(0,2.08,-0.326),Vector3(0.15,0.025,0.025),material(Color("#702735"),0.55),"Mouth")
-    # Arms and hands.
+        sphere_part(root,Vector3(0.305*side,2.18,0),0.075,skin_dark,"Ear")
+        var eye:=sphere_part(root,Vector3(0.115*side,2.23,-0.286),0.058,eye_white,"Eye")
+        sphere_part(root,Vector3(0.115*side,2.23,-0.338),0.026,iris,"Pupil")
+        box(root,Vector3(0.115*side,2.31,-0.293),Vector3(0.13,0.024,0.025),hair,"Brow")
+    cylinder(root,Vector3(0,2.17,-0.34),0.05,0.13,skin_dark,"Nose")
+    box(root,Vector3(0,2.08,-0.327),Vector3(0.15,0.028,0.025),mouth,"Mouth")
     for side in [-1.0,1.0]:
-        var arm:=box(root,Vector3(0.48*side,1.30,0),Vector3(0.18,0.72,0.22),jacket,"Arm")
+        var arm:=capsule(root,Vector3(0.49*side,1.31,0),0.105,0.68,jacket,"Arm")
         player_arms.append(arm)
-        cylinder(root,Vector3(0.48*side,0.88,0),0.12,0.20,skin,"Hand")
-        var leg:=box(root,Vector3(0.19*side,0.62,0),Vector3(0.30,0.85,0.30),pants,"Leg")
+        sphere_part(root,Vector3(0.49*side,0.89,0),0.11,skin,"Hand")
+        var leg:=capsule(root,Vector3(0.19*side,0.64,0),0.16,0.84,pants,"Leg")
         player_legs.append(leg)
-        box(root,Vector3(0.19*side,0.15,0.08),Vector3(0.34,0.18,0.56),shoes,"Shoe")
-    box(root,Vector3(0,1.42,-0.225),Vector3(0.36,0.45,0.05),shirt,"Shirt")
+        box(root,Vector3(0.19*side,0.15,-0.02),Vector3(0.34,0.18,0.56),shoes,"Shoe")
+
+func capsule(parent:Node3D,pos:Vector3,radius:float,height:float,mat:Material,node_name:String)->MeshInstance3D:
+    var n:=MeshInstance3D.new()
+    var m:=CapsuleMesh.new()
+    m.radius=radius
+    m.height=height
+    m.radial_segments=12
+    m.rings=4
+    n.mesh=m
+    n.position=pos
+    n.material_override=mat
+    parent.add_child(n)
+    return n
+
+func sphere_part(parent:Node3D,pos:Vector3,radius:float,mat:Material,node_name:String)->MeshInstance3D:
+    var n:=MeshInstance3D.new()
+    var m:=SphereMesh.new()
+    m.radius=radius
+    m.height=radius*2.0
+    n.mesh=m
+    n.position=pos
+    n.material_override=mat
+    parent.add_child(n)
+    return n
 
 func _spawn_population():
     for i in range(44):
