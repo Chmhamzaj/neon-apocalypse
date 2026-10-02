@@ -30,7 +30,8 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
           godot --headless --path godot-game --editor --quit
-          godot --headless --path godot-game --export-debug "Android" dist/StreetSovereign-3D-Hamza.apk
+          godot --headless --path godot-game --export-debug "Android" dist/StreetSovereign-3D-Hamza-unsigned.apk
+          ${ANDROID_HOME}/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out dist/StreetSovereign-3D-Hamza.apk dist/StreetSovereign-3D-Hamza-unsigned.apk
       - name: Upload 3D APK
         uses: actions/upload-artifact@v4
         with:
