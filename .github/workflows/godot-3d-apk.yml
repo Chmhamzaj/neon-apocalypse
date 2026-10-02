@@ -18,6 +18,31 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.5.stable
           unzip -q Godot_v4.5-stable_export_templates.tpz -d /tmp/godot-templates
           cp -r /tmp/godot-templates/templates/* ~/.local/share/godot/export_templates/4.5.stable/
+      - name: Download real-world asset pack
+        run: |
+          set -e
+          mkdir -p godot-game/assets/external
+          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human.glb" -o godot-game/assets/external/human.glb
+          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb" -o godot-game/assets/external/CarConcept.glb
+
+          mkdir -p godot-game/assets/external/polyhaven
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_diff_2k.jpg" -o godot-game/assets/external/polyhaven/asphalt_07_diff_2k.jpg
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/asphalt_07_nor_gl_2k.jpg
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_rough_2k.jpg" -o godot-game/assets/external/polyhaven/asphalt_07_rough_2k.jpg
+
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete/concrete_diff_2k.jpg" -o godot-game/assets/external/polyhaven/concrete_diff_2k.jpg
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete/concrete_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/concrete_nor_gl_2k.jpg
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete/concrete_rough_2k.jpg" -o godot-game/assets/external/polyhaven/concrete_rough_2k.jpg
+
+          mkdir -p godot-game/assets/external/polyhaven/street_lamp_01/textures
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/street_lamp_01/street_lamp_01_2k.gltf" -o godot-game/assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/street_lamp_01/street_lamp_01.bin" -o godot-game/assets/external/polyhaven/street_lamp_01/street_lamp_01.bin
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_diff_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_diff_2k.jpg
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_arm_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_arm_2k.jpg
+          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_nor_gl_2k.jpg
+
+          ls -lh godot-game/assets/external
+          file godot-game/assets/external/human.glb godot-game/assets/external/CarConcept.glb
       - name: Configure Android SDK
         uses: android-actions/setup-android@v3
         with:
