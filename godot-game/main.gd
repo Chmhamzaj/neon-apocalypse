@@ -54,6 +54,26 @@ var fps_label: Label
 var sensitivity := 0.12
 var camera_distance := 7.0
 var camera_height := 2.8
+var external_human_scene: PackedScene
+var external_car_scene: PackedScene
+var external_lamp_scene: PackedScene
+var asphalt_pbr: StandardMaterial3D
+var concrete_pbr: StandardMaterial3D
+var player_model_animation: AnimationPlayer
+var player_idle_anim := ""
+var player_walk_anim := ""
+var player_run_anim := ""
+var ui_layer: CanvasLayer
+var settings_panel: Panel
+var health_bar: ProgressBar
+var stamina_bar: ProgressBar
+var mission_value: Label
+var district_value: Label
+var cash_value: Label
+var wanted_value: Label
+var map_panel: Panel
+var joystick_ring: Panel
+var joystick_knob: Panel
 
 var hud: Label
 var objective: Label
@@ -89,6 +109,10 @@ func _boot_world():
     await get_tree().process_frame
     boot_label.text = "LOADING • CITY 10%"
     await _build_city_async()
+    boot_label.text = "LOADING • EXTERNAL 3D ASSETS"
+    _prepare_external_assets()
+    await get_tree().process_frame
+    _replace_player_with_external_asset()
     boot_label.text = "LOADING • PEOPLE & TRAFFIC"
     await _spawn_population_async()
     _new_mission()
@@ -97,6 +121,80 @@ func _boot_world():
     await get_tree().create_timer(0.7).timeout
     if is_instance_valid(boot_label):
         boot_label.queue_free()
+
+func _prepare_external_assets():
+    if ResourceLoader.exists("res://assets/external/human.glb"):
+        external_human_scene=load("res://assets/external/human.glb") as PackedScene
+    if ResourceLoader.exists("res://assets/external/CarConcept.glb"):
+        external_car_scene=load("res://assets/external/CarConcept.glb") as PackedScene
+    if ResourceLoader.exists("res://assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf"):
+        external_lamp_scene=load("res://assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf") as PackedScene
+    asphalt_pbr=_make_pbr_material(
+        "res://assets/external/polyhaven/asphalt_07_diff_2k.jpg",
+        "res://assets/external/polyhaven/asphalt_07_nor_gl_2k.jpg",
+        "res://assets/external/polyhaven/asphalt_07_rough_2k.jpg",
+        Vector3(3.0,3.0,3.0)
+    )
+    concrete_pbr=_make_pbr_material(
+        "res://assets/external/polyhaven/concrete_diff_2k.jpg",
+        "res://assets/external/polyhaven/concrete_nor_gl_2k.jpg",
+        "res://assets/external/polyhaven/concrete_rough_2k.jpg",
+        Vector3(1.25,1.25,1.25)
+    )
+
+func _make_pbr_material(albedo_path:String,normal_path:String,rough_path:String,tiling:Vector3)->StandardMaterial3D:
+    var m:=StandardMaterial3D.new()
+    if ResourceLoader.exists(albedo_path):
+        m.albedo_texture=load(albedo_path) as Texture2D
+    if ResourceLoader.exists(normal_path):
+        m.normal_enabled=true
+        m.normal_texture=load(normal_path) as Texture2D
+    if ResourceLoader.exists(rough_path):
+        m.roughness_texture=load(rough_path) as Texture2D
+        m.roughness_texture_channel=BaseMaterial3D.TEXTURE_CHANNEL_RED
+    m.roughness=0.78
+    m.uv1_scale=tiling
+    return m
+
+func _replace_player_with_external_asset():
+    if external_human_scene==null or not is_instance_valid(player):
+        return
+    if is_instance_valid(player_visual):
+        player_visual.queue_free()
+    player_arms.clear()
+    player_legs.clear()
+    player_eye_nodes.clear()
+    player_pupil_nodes.clear()
+    player_visual=Node3D.new()
+    player_visual.name="HeroRealHuman"
+    player.add_child(player_visual)
+    var model:=external_human_scene.instantiate()
+    player_visual.add_child(model)
+    model.scale=Vector3.ONE
+    model.position.y=0.02
+    player_model_animation=_find_animation_player(model)
+    if player_model_animation:
+        player_idle_anim=_find_animation(player_model_animation,["idle","stand"])
+        player_walk_anim=_find_animation(player_model_animation,["walk"])
+        player_run_anim=_find_animation(player_model_animation,["run"])
+        if player_idle_anim!="":
+            player_model_animation.play(player_idle_anim)
+
+func _find_animation_player(root:Node)->AnimationPlayer:
+    var players:=root.find_children("*","AnimationPlayer",true,false)
+    if players.size()>0:
+        return players[0] as AnimationPlayer
+    return null
+
+func _find_animation(ap:AnimationPlayer,wanted:Array[String])->String:
+    if ap==null:
+        return ""
+    for anim_name in ap.get_animation_list():
+        var lower:=anim_name.to_lower()
+        for token in wanted:
+            if lower.contains(token):
+                return anim_name
+    return ""
 
 func _build_city_async():
     city = Node3D.new()
@@ -134,29 +232,62 @@ func _build_city_async():
 
 func _spawn_population_async():
     for i in range(20):
-        var n := Node3D.new()
+        var n:=Node3D.new()
         n.name="Civilian_%02d"%i
         n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
-        _create_npc_visual(n,i)
+        if external_human_scene:
+            _create_external_human(n,i)
+        else:
+            _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
         n.set_meta("speed",rng.randf_range(0.65,1.35))
         n.set_meta("target",Vector3(rng.randf_range(-86.0,86.0),0.0,rng.randf_range(-86.0,86.0)))
         npcs.append(n)
-        if i%4==0:
+        if i%3==0:
             await get_tree().process_frame
     for i in range(10):
-        var c := Node3D.new()
+        var c:=Node3D.new()
         c.name="Traffic_%02d"%i
-        c.position=Vector3([-82,-40,42,82][i%4],0.45,rng.randf_range(-90,90))
-        _create_car(c,i)
+        c.position=Vector3([-82,-40,42,82][i%4],0.0,rng.randf_range(-90,90))
+        if external_car_scene:
+            _create_external_car(c,i)
+        else:
+            _create_car(c,i)
         c.set_meta("speed",rng.randf_range(4.0,8.0))
         c.set_meta("dir",1.0 if i%2==0 else -1.0)
         c.set_meta("lane",c.position.x)
         cars.append(c)
         add_child(c)
-        if i%4==0:
+        if i%3==0:
             await get_tree().process_frame
+
+func _create_external_human(root:Node3D,index:int):
+    var model:=external_human_scene.instantiate()
+    root.add_child(model)
+    model.scale=Vector3.ONE
+    model.position.y=0.01
+    var ap:=_find_animation_player(model)
+    root.set_meta("model",model)
+    root.set_meta("anim_player",ap)
+    root.set_meta("idle_anim",_find_animation(ap,["idle","stand"]))
+    root.set_meta("walk_anim",_find_animation(ap,["walk"]))
+    root.set_meta("run_anim",_find_animation(ap,["run"]))
+    if ap:
+        var idle_name:String=String(root.get_meta("idle_anim"))
+        if idle_name!="": ap.play(idle_name)
+    root.set_meta("head_node",null)
+    root.set_meta("jaw_node",null)
+    root.set_meta("mouth_node",null)
+
+func _create_external_car(root:Node3D,index:int):
+    var model:=external_car_scene.instantiate()
+    root.add_child(model)
+    model.scale=Vector3.ONE
+    model.position.y=0.45
+    root.rotation.y=PI if index%2 else 0.0
+    root.set_meta("model",model)
+    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
 
 func material(color: Color, roughness := 0.72, metallic := 0.0, emission := Color.TRANSPARENT) -> StandardMaterial3D:
     var m := StandardMaterial3D.new()
@@ -264,24 +395,31 @@ func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:in
     root.position=Vector3(x,0,z)
     city.add_child(root)
     var facade:Color=palette[i%2]
-    box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),material(facade,0.58),"Building")
-    var accent:=material(palette[2],0.22,0.30,palette[2])
-    box(root,Vector3(-w*0.30,h*0.52,d*0.515),Vector3(w*0.06,h*0.72,0.06),accent,"FacadeAccent")
-    box(root,Vector3(w*0.30,h*0.34,d*0.515),Vector3(w*0.06,h*0.40,0.06),accent,"FacadeAccent2")
+    var facade_mat:=concrete_pbr.duplicate() if concrete_pbr else material(facade,0.65)
+    facade_mat.albedo_color=facade
+    box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),facade_mat,"Building")
+    var glass:=material(Color("#152432"),0.20,0.35)
+    for side in [-1.0,1.0]:
+        box(root,Vector3(side*w*0.26,h*0.46,d*0.515),Vector3(w*0.14,h*0.60,0.05),glass,"WindowBand")
     if i%3==0:
-        box(root,Vector3(0,h+0.55,0),Vector3(w*0.50,0.65,d*0.50),material(palette[1],0.45,0.18),"Crown")
+        box(root,Vector3(0,h+0.55,0),Vector3(w*0.48,0.65,d*0.48),material(palette[1],0.48,0.18),"Crown")
     elif i%3==1:
-        cylinder(root,Vector3(0,h+0.90,0),0.45,1.8,material(Color("#222932"),0.45,0.28),"RoofUnit")
+        cylinder(root,Vector3(0,h+0.88,0),0.42,1.75,material(Color("#282d33"),0.45,0.28),"RoofUnit")
 
 func _build_roads():
-    var road_mat := material(Color("#10141b"),0.96)
-    var lane_mat := material(Color("#f3d26b"),0.5,0.05)
+    var road_mat:Material=asphalt_pbr if asphalt_pbr else material(Color("#14171c"),0.92)
+    var lane_mat:=material(Color("#d7b24f"),0.48,0.05)
+    var sidewalk_mat:Material=concrete_pbr if concrete_pbr else material(Color("#555a62"),0.88)
     for z in range(-84,85,21):
         box(city,Vector3(0,-0.02,z),Vector3(WORLD,0.18,6.5),road_mat,"Road")
+        box(city,Vector3(0,0.08,z+4.15),Vector3(WORLD,0.16,1.2),sidewalk_mat,"Sidewalk")
+        box(city,Vector3(0,0.08,z-4.15),Vector3(WORLD,0.16,1.2),sidewalk_mat,"Sidewalk")
         for x in range(-88,89,12):
             box(city,Vector3(x,0.10,z),Vector3(4.2,0.035,0.13),lane_mat,"Lane")
     for x in [-82.0,-40.0,42.0,82.0]:
         box(city,Vector3(x,0.0,0),Vector3(6.5,0.18,WORLD),road_mat,"Road")
+        box(city,Vector3(x+4.15,0.08,0),Vector3(1.2,0.16,WORLD),sidewalk_mat,"Sidewalk")
+        box(city,Vector3(x-4.15,0.08,0),Vector3(1.2,0.16,WORLD),sidewalk_mat,"Sidewalk")
         for z in range(-88,89,12):
             box(city,Vector3(x,0.10,z),Vector3(0.13,0.035,4.2),lane_mat,"Lane")
 
@@ -303,22 +441,20 @@ func _create_bridge(z:float):
         cylinder(city,Vector3(x,2.4,z-3.5),0.10,3.0,material(Color("#d5b15a"),0.5,0.25),"BridgeLamp")
 
 func _build_instanced_props():
-    # Deliberately sparse decorative props around roads; avoids thousands of active nodes.
-    for i in range(36):
-        var x := rng.randf_range(-88,88)
-        var z := rng.randf_range(-88,88)
-        if abs(x) < 10: continue
-        var root := Node3D.new()
-        root.position = Vector3(x,0,z)
-        city.add_child(root)
-        if i%3==0:
-            cylinder(root,Vector3(0,2.1,0),0.09,4.2,material(Color("#20252e"),0.55,0.25),"Lamp")
-            box(root,Vector3(0,4.15,0),Vector3(0.65,0.12,0.65),material(Color("#ffd37a"),0.25,0.1,Color("#ffd37a")),"LampGlow")
+    for i in range(30):
+        var x:float=rng.randf_range(-88,88)
+        var z:float=rng.randf_range(-88,88)
+        if abs(x)<10: continue
+        if i%3==0 and external_lamp_scene:
+            var lamp:=external_lamp_scene.instantiate()
+            lamp.position=Vector3(x,0,z)
+            lamp.scale=Vector3(0.70,0.70,0.70)
+            city.add_child(lamp)
         elif i%3==1:
-            cylinder(root,Vector3(0,1.0,0),0.75,2.0,material(Color("#1f6944"),0.85),"Tree")
-            cylinder(root,Vector3(0,0.65,0),0.22,1.3,material(Color("#63442d"),0.9),"Trunk")
+            cylinder(city,Vector3(x,1.0,z),0.78,2.0,material(Color("#2b744f"),0.86),"TreeCanopy")
+            cylinder(city,Vector3(x,0.65,z),0.22,1.3,material(Color("#63442d"),0.90),"TreeTrunk")
         else:
-            box(root,Vector3(0,0.5,0),Vector3(1.2,1.0,0.8),material(Color("#6c4c36"),0.85),"Crate")
+            box(city,Vector3(x,0.5,z),Vector3(1.2,1.0,0.8),material(Color("#6c4c36"),0.85),"StreetCrate")
 
 func _spawn_player():
     player = CharacterBody3D.new()
@@ -770,46 +906,35 @@ func _fire():
             n.set_meta("speed",min(2.0,float(n.get_meta("speed"))+0.8))
 
 func _animate_player(delta):
+    if player_model_animation:
+        var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
+        var clip:=player_idle_anim
+        if speed_now>7.5 and player_run_anim!="":
+            clip=player_run_anim
+        elif speed_now>0.35 and player_walk_anim!="":
+            clip=player_walk_anim
+        if clip!="" and player_model_animation.current_animation!=clip:
+            player_model_animation.play(clip)
+        return
     if not is_instance_valid(player_visual):
         return
-    var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
-    var moving:=speed_now>0.35
-    player_anim_phase+=delta*(7.0+speed_now*1.5 if moving else 1.6)
+    var speed_fallback:=Vector2(player.velocity.x,player.velocity.z).length()
+    var moving_fallback:=speed_fallback>0.35
+    player_anim_phase+=delta*(7.0+speed_fallback*1.5 if moving_fallback else 1.6)
     var stride:float=sin(player_anim_phase)
     var stride2:float=sin(player_anim_phase+PI)
-    var bob:float=abs(sin(player_anim_phase*0.5))*(0.040 if moving else 0.010)
-    player_visual.position.y=lerp(player_visual.position.y,bob,1.0-exp(-delta*12.0))
-    if player_body:
-        player_body.rotation.z=lerp(player_body.rotation.z,-0.028*stride if moving else 0.0,1.0-exp(-delta*10.0))
+    player_visual.position.y=abs(sin(player_anim_phase*0.5))*(0.040 if moving_fallback else 0.010)
     if player_head:
         var heading:=player_visual.rotation.y
         var body_to_camera:=wrapf(deg_to_rad(camera_yaw)-heading,-PI,PI)
-        var natural_scan:=sin(elapsed*0.42)*0.13 if not moving else 0.0
-        player_head.rotation.y=lerp(player_head.rotation.y,clamp(body_to_camera*0.34,-0.50,0.50)+natural_scan,1.0-exp(-delta*5.0))
-        player_head.rotation.x=lerp(player_head.rotation.x,clamp(-deg_to_rad(camera_pitch)*0.18,-0.16,0.16),1.0-exp(-delta*5.0))
-    if player_eye_nodes.size()>=2:
-        var blink_cycle:=fmod(elapsed,5.6)
-        var blink:float=1.0
-        if blink_cycle>5.38:
-            blink=0.12
-        elif blink_cycle>5.30:
-            blink=lerp(1.0,0.12,(blink_cycle-5.30)/0.08)
-        for eye in player_eye_nodes:
-            if is_instance_valid(eye):
-                eye.scale.y=blink
-        for pupil in player_pupil_nodes:
-            if is_instance_valid(pupil):
-                pupil.scale.y=blink
+        player_head.rotation.y=clamp(body_to_camera*0.34,-0.50,0.50)+sin(elapsed*0.42)*0.13
+        player_head.rotation.x=clamp(-deg_to_rad(camera_pitch)*0.18,-0.16,0.16)
     if player_arms.size()>=2:
-        player_arms[0].rotation.x=lerp(player_arms[0].rotation.x,stride*0.62 if moving else sin(elapsed*1.4)*0.025,1.0-exp(-delta*14.0))
-        player_arms[1].rotation.x=lerp(player_arms[1].rotation.x,stride2*0.62 if moving else -sin(elapsed*1.4)*0.025,1.0-exp(-delta*14.0))
+        player_arms[0].rotation.x=stride*0.62 if moving_fallback else 0.0
+        player_arms[1].rotation.x=stride2*0.62 if moving_fallback else 0.0
     if player_legs.size()>=2:
-        player_legs[0].rotation.x=lerp(player_legs[0].rotation.x,stride2*0.68 if moving else 0.0,1.0-exp(-delta*16.0))
-        player_legs[1].rotation.x=lerp(player_legs[1].rotation.x,stride*0.68 if moving else 0.0,1.0-exp(-delta*16.0))
-    if shooting and player_body:
-        player_body.rotation.x=lerp(player_body.rotation.x,-0.08,1.0-exp(-delta*18.0))
-    elif player_body:
-        player_body.rotation.x=lerp(player_body.rotation.x,0.0,1.0-exp(-delta*10.0))
+        player_legs[0].rotation.x=stride2*0.68 if moving_fallback else 0.0
+        player_legs[1].rotation.x=stride*0.68 if moving_fallback else 0.0
 
 func _animate_npcs(delta):
     for n in npcs:
@@ -817,86 +942,45 @@ func _animate_npcs(delta):
         var to_target:=target-n.global_position
         to_target.y=0.0
         var speed:float=float(n.get_meta("speed"))
-        var life:float=float(n.get_meta("life_clock"))+delta
+        var life:float=float(n.get_meta("life_clock",0.0))+delta
         n.set_meta("life_clock",life)
-
-        # Occasionally pair nearby NPCs and have them converse naturally.
         var partner:Node3D=n.get_meta("partner",null) as Node3D
-        if not is_instance_valid(partner) and not bool(n.get_meta("conversation_cooldown",false)) and fmod(life+float(n.get_meta("phase")),11.0)<0.035:
-            var nearest:=_nearest_npc(n)
-            if nearest and n.global_position.distance_to(nearest.global_position)<5.0:
-                n.set_meta("partner",nearest)
-                nearest.set_meta("partner",n)
-                n.set_meta("talk_clock",0.0)
-                nearest.set_meta("talk_clock",0.0)
 
-        partner=n.get_meta("partner",null) as Node3D
-        var talking:=is_instance_valid(partner) and n.global_position.distance_to(partner.global_position)<5.5
-        var head:=n.get_meta("head_node") as Node3D
-        var jaw:=n.get_meta("jaw_node") as Node3D
-        var mouth:=n.get_meta("mouth_node") as Node3D
-        var arm_l:=n.get_node_or_null("Arm") as Node3D
-        var arm_r:=n.get_node_or_null("Arm2") as Node3D
-        var leg_l:=n.get_node_or_null("Leg") as Node3D
-        var leg_r:=n.get_node_or_null("Leg2") as Node3D
-
-        if talking:
-            var talk_clock:float=float(n.get_meta("talk_clock",0.0))+delta
-            n.set_meta("talk_clock",talk_clock)
-            var face_dir:=partner.global_position-n.global_position
-            face_dir.y=0.0
-            if face_dir.length()>0.1:
-                n.rotation.y=lerp_angle(n.rotation.y,atan2(face_dir.x,face_dir.z),delta*4.0)
-            if head:
-                head.rotation.y=sin(talk_clock*1.7+float(n.get_meta("phase")))*0.14
-                head.rotation.x=sin(talk_clock*0.9)*0.04
-            var syllable:float=abs(sin(talk_clock*8.0+float(n.get_meta("phase"))))
-            if jaw: jaw.rotation.x=syllable*0.11
-            if mouth: mouth.scale.y=1.0+syllable*1.8
-            if arm_r:
-                arm_r.rotation.x=sin(talk_clock*1.35)*0.10
-                arm_r.rotation.z=-0.18+sin(talk_clock*0.9)*0.08
-            if fmod(talk_clock,5.5)>4.8:
-                n.set_meta("partner",null)
-                partner.set_meta("partner",null)
-                n.set_meta("conversation_cooldown",true)
-                partner.set_meta("conversation_cooldown",true)
-        else:
-            if to_target.length()<1.6:
-                target=Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0))
-                n.set_meta("target",target)
-                to_target=target-n.global_position
-                to_target.y=0.0
-            var moving:=to_target.length()>0.25
-            var phase:float=life*speed*4.0+float(n.get_meta("phase"))
+        if external_human_scene and n.has_meta("anim_player"):
+            var moving:=to_target.length()>1.6 and not is_instance_valid(partner)
+            var ap:AnimationPlayer=n.get_meta("anim_player") as AnimationPlayer
+            var idle_name:String=String(n.get_meta("idle_anim",""))
+            var walk_name:String=String(n.get_meta("walk_anim",""))
+            var chosen:=walk_name if moving else idle_name
+            if ap and chosen!="" and ap.current_animation!=chosen:
+                ap.play(chosen)
             if moving:
                 var dir:=to_target.normalized()
                 n.position+=dir*speed*delta
-                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*5.5)
-                var walk:=sin(phase)
-                if arm_l: arm_l.rotation.x=walk*0.50
-                if arm_r: arm_r.rotation.x=-walk*0.50
-                if leg_l: leg_l.rotation.x=-walk*0.60
-                if leg_r: leg_r.rotation.x=walk*0.60
-                if head: head.rotation.y=sin(phase*0.31)*0.08
+                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*5.0)
             else:
-                var glance:=sin(life*0.65+float(n.get_meta("phase")))
-                if head:
-                    head.rotation.y=glance*0.42
-                    head.rotation.x=sin(life*0.4)*0.035
-                if arm_l: arm_l.rotation.z=sin(life*0.7)*0.04
-                if arm_r: arm_r.rotation.z=-sin(life*0.7)*0.04
+                n.rotation.y+=sin(life*0.55+float(n.get_meta("phase")))*delta*0.25
                 var check_clock:float=float(n.get_meta("check_clock",0.0))+delta
-                if check_clock>8.0:
-                    check_clock=0.0
+                if check_clock>7.5:
+                    n.set_meta("check_clock",0.0)
                     n.set_meta("checking_time",true)
                 n.set_meta("check_clock",check_clock)
-                if bool(n.get_meta("checking_time",false)):
-                    if arm_r:
-                        arm_r.rotation.z=lerp(arm_r.rotation.z,-1.05,delta*4.0)
-                        arm_r.rotation.x=lerp(arm_r.rotation.x,-0.45,delta*4.0)
-                    if head: head.rotation.y=lerp(head.rotation.y,0.24,delta*3.5)
-                    if check_clock>2.0: n.set_meta("checking_time",false)
+                if bool(n.get_meta("checking_time",false)) and check_clock>1.6:
+                    n.set_meta("checking_time",false)
+            if to_target.length()<1.6:
+                n.set_meta("target",Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0)))
+            continue
+
+        # Fallback procedural NPC logic.
+        var moving_fallback:=to_target.length()>0.25
+        if moving_fallback:
+            var dir_fallback:=to_target.normalized()
+            n.position+=dir_fallback*speed*delta
+            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir_fallback.x,dir_fallback.z),delta*5.5)
+        else:
+            n.rotation.y+=sin(life*0.65+float(n.get_meta("phase")))*delta*0.25
+        if to_target.length()<1.6:
+            n.set_meta("target",Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0)))
         n.position.y=0.0
 
 func _nearest_npc(source:Node3D)->Node3D:
