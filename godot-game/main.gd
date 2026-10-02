@@ -472,8 +472,8 @@ func _setup_audio():
 func _make_tone_stream(freq:float,amp:float,seconds:float)->AudioStreamWAV:
     var rate:=22050; var count:=int(rate*seconds); var bytes:=PackedByteArray(); bytes.resize(count*2)
     for i in range(count):
-        var t:=float(i)/rate; var env:=min(1.0,t*20.0)*min(1.0,(seconds-t)*12.0)
-        bytes.encode_s16(i*2,int(sin(TAU*freq*t)*amp*env*32767.0))
+        var t:float=float(i)/rate; var fade:float=min(1.0,t*20.0)*min(1.0,(seconds-t)*12.0)
+        bytes.encode_s16(i*2,int(sin(TAU*freq*t)*amp*fade*32767.0))
     var wav:=AudioStreamWAV.new(); wav.format=AudioStreamWAV.FORMAT_16_BITS; wav.mix_rate=rate; wav.stereo=false; wav.data=bytes
     wav.loop_mode=AudioStreamWAV.LOOP_FORWARD; wav.loop_begin=0; wav.loop_end=count; return wav
 
