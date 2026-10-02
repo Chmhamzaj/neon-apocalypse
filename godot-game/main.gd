@@ -1,399 +1,564 @@
 extends Node3D
+## STREET SOVEREIGN 3D — mobile-first visual rebuild.
+## Original procedural assets; optimized for Android using reusable meshes and batched scenery.
 
-# STREET SOVEREIGN 3D — original open-world Android game.
-# Procedural content is used to create a large 3D city without copying GTA assets.
+const WORLD := 190.0
+const PLAYER_START := Vector3(-58, 0.1, 54)
 
 var player: CharacterBody3D
+var player_visual: Node3D
 var camera: Camera3D
+var camera_pivot: Node3D
 var sun: DirectionalLight3D
 var world_env: WorldEnvironment
+var city: Node3D
+var cars: Array[Node3D] = []
+var npcs: Array[Node3D] = []
 var health := 100.0
 var money := 12500
 var wanted := 0
 var mission := 0
-var district := 0
-var driving := false
-var shooting := false
-var graphics := 2
+var graphics := 1
 var elapsed := 0.0
 var rng := RandomNumberGenerator.new()
-var cars: Array[Node3D] = []
-var npcs: Array[Node3D] = []
-var mission_marker: MeshInstance3D
+var move_input := Vector2.ZERO
+var shooting := false
+var driving := false
+var gyro_enabled := true
+var look_touching := false
+var last_touch := Vector2.ZERO
+var camera_yaw := 0.0
+var camera_pitch := -12.0
+var fire_cooldown := 0.0
+var quality_changed := false
+
 var hud: Label
 var objective: Label
 var status: Label
-var fire_audio: AudioStreamPlayer
-var engine_audio: AudioStreamPlayer
-var touch_dir := Vector2.ZERO
-var camera_yaw := 0.0
-var camera_pitch := -0.25
+var crosshair: Label
+var graphics_button: Button
+var gyro_button: Button
+var mission_marker: MeshInstance3D
 
-var mission_names = [
-    "SUNSET RUN",
-    "NEON PACKAGE",
-    "RIVER DISTRICT",
-    "HIGHWAY HEAT",
-    "NIGHT WOLVES",
-    "CITY TAKEOVER"
+var missions := [
+    ["SUNSET RUN", Vector3(-58,0.5,54)],
+    ["NEON PACKAGE", Vector3(52,0.5,40)],
+    ["RIVER DISTRICT", Vector3(57,0.5,-42)],
+    ["HIGHWAY HEAT", Vector3(-52,0.5,-55)],
+    ["NIGHT WOLVES", Vector3(68,0.5,68)],
+    ["CITY TAKEOVER", Vector3(0,0.5,-76)]
 ]
-var districts = ["VICE RAY", "SAN VALORA", "LIBERTY BAY"]
+var districts := ["VICE RAY", "SAN VALORA", "LIBERTY BAY"]
 
 func _ready():
-    rng.seed = 24017
+    rng.seed = 90210
     _setup_world()
-    _build_city()
+    _build_optimized_city()
     _spawn_player()
     _spawn_population()
     _setup_ui()
-    _setup_audio()
     _new_mission()
-    _update_quality()
+    _apply_quality()
+    Input.set_accelerometer_fallback(Vector3.ZERO)
     set_process(true)
 
-func mat(color: Color, rough := 0.7, metallic := 0.0) -> StandardMaterial3D:
-    var m = StandardMaterial3D.new()
+func material(color: Color, roughness := 0.72, metallic := 0.0, emission := Color.TRANSPARENT) -> StandardMaterial3D:
+    var m := StandardMaterial3D.new()
     m.albedo_color = color
-    m.roughness = rough
+    m.roughness = roughness
     m.metallic = metallic
+    if emission != Color.TRANSPARENT:
+        m.emission_enabled = true
+        m.emission = emission
+        m.emission_energy_multiplier = 2.0
     return m
 
-func mesh_box(parent: Node3D, pos: Vector3, size: Vector3, material: Material, name := "prop") -> MeshInstance3D:
-    var n = MeshInstance3D.new()
-    n.name = name
-    var b = BoxMesh.new()
-    b.size = size
-    n.mesh = b
+func box(parent: Node3D, pos: Vector3, size: Vector3, mat: Material, node_name := "Box") -> MeshInstance3D:
+    var n := MeshInstance3D.new()
+    n.name = node_name
+    var mesh := BoxMesh.new()
+    mesh.size = size
+    n.mesh = mesh
     n.position = pos
-    n.material_override = material
+    n.material_override = mat
     parent.add_child(n)
     return n
 
-func mesh_cyl(parent: Node3D, pos: Vector3, radius: float, height: float, material: Material, name := "cylinder") -> MeshInstance3D:
-    var n = MeshInstance3D.new()
-    n.name = name
-    var c = CylinderMesh.new()
-    c.top_radius = radius
-    c.bottom_radius = radius
-    c.height = height
-    n.mesh = c
+func cylinder(parent: Node3D, pos: Vector3, radius: float, height: float, mat: Material, node_name := "Cylinder") -> MeshInstance3D:
+    var n := MeshInstance3D.new()
+    n.name = node_name
+    var mesh := CylinderMesh.new()
+    mesh.top_radius = radius
+    mesh.bottom_radius = radius
+    mesh.height = height
+    mesh.radial_segments = 10
+    n.mesh = mesh
     n.position = pos
-    n.material_override = material
+    n.material_override = mat
     parent.add_child(n)
     return n
 
 func _setup_world():
     world_env = WorldEnvironment.new()
-    var env = Environment.new()
+    var env := Environment.new()
     env.background_mode = Environment.BG_SKY
-    var sky = Sky.new()
-    var sky_mat = ProceduralSkyMaterial.new()
-    sky_mat.sky_top_color = Color("#091329")
-    sky_mat.sky_horizon_color = Color("#f16b55")
-    sky_mat.ground_bottom_color = Color("#05070c")
-    sky_mat.ground_horizon_color = Color("#2b3344")
+    var sky := Sky.new()
+    var sky_mat := ProceduralSkyMaterial.new()
+    sky_mat.sky_top_color = Color("#061126")
+    sky_mat.sky_horizon_color = Color("#e06c59")
+    sky_mat.ground_bottom_color = Color("#02040a")
+    sky_mat.ground_horizon_color = Color("#20283a")
+    sky_mat.sun_angle_max = 18.0
     sky.sky_material = sky_mat
     env.sky = sky
     env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-    env.ambient_light_energy = 0.75
+    env.ambient_light_energy = 0.8
     env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+    env.glow_enabled = true
+    env.glow_intensity = 0.8
     world_env.environment = env
     add_child(world_env)
 
     sun = DirectionalLight3D.new()
-    sun.rotation_degrees = Vector3(-48, -32, 0)
-    sun.light_energy = 1.15
+    sun.rotation_degrees = Vector3(-52,-28,0)
+    sun.light_energy = 1.2
+    sun.light_color = Color("#fff1dc")
     sun.shadow_enabled = true
-    sun.directional_shadow_max_distance = 90.0
+    sun.directional_shadow_max_distance = 75.0
     add_child(sun)
 
-    var moon = OmniLight3D.new()
-    moon.position = Vector3(0, 35, 0)
-    moon.omni_range = 150
-    moon.light_energy = 0.25
-    moon.light_color = Color("#7899ff")
-    add_child(moon)
+    var ground := StaticBody3D.new()
+    ground.name = "Ground"
+    add_child(ground)
+    box(ground, Vector3(0,-1.1,0), Vector3(WORLD,2,WORLD), material(Color("#26332d")), "GroundMesh")
+    var shape := CollisionShape3D.new()
+    var bs := BoxShape3D.new()
+    bs.size = Vector3(WORLD,2,WORLD)
+    shape.shape = bs
+    shape.position.y = -1.1
+    ground.add_child(shape)
 
-    var floor = StaticBody3D.new()
-    floor.name = "CityGround"
-    add_child(floor)
-    mesh_box(floor, Vector3(0, -1.2, 0), Vector3(210, 2, 210), mat(Color("#243329")), "ground")
-    var shape = CollisionShape3D.new()
-    var box = BoxShape3D.new()
-    box.size = Vector3(210, 2, 210)
-    shape.shape = box
-    shape.position.y = -1.2
-    floor.add_child(shape)
-
-func _build_city():
-    var city = Node3D.new()
-    city.name = "ThreeDistrictMegaCity"
+func _build_optimized_city():
+    city = Node3D.new()
+    city.name = "OptimizedMegaCity"
     add_child(city)
 
-    # Three original districts with distinct visual identities.
-    for sector in range(3):
-        var x0 = -70.0 + sector * 70.0
-        var district_mat = [mat(Color("#5a596b")), mat(Color("#465b62")), mat(Color("#5b4e58"))][sector]
-        for i in range(185):
-            var bx = x0 + rng.randf_range(-31, 31)
-            var bz = rng.randf_range(-82, 82)
-            var h = rng.randf_range(7, 34) * (1.0 if sector != 1 else 1.25)
-            var w = rng.randf_range(5, 12)
-            var d = rng.randf_range(5, 12)
-            var building = mesh_box(city, Vector3(bx, h/2.0, bz), Vector3(w,h,d), district_mat, "Building_%03d" % i)
-            # Rooftop equipment makes the skyline denser.
-            if i % 3 == 0:
-                mesh_cyl(city, Vector3(bx, h + 2.0, bz), 0.7, 4.0, mat(Color("#30343d"),0.5,0.3), "Rooftop")
-            if i % 7 == 0:
-                mesh_box(city, Vector3(bx, h + 4.0, bz), Vector3(4,0.25,0.7), mat(Color("#ff4058"),0.3,0.1), "NeonSign")
-        _build_roads(city, x0)
-        _build_landmarks(city, x0, sector)
+    # Four strong visual districts, fewer expensive nodes, richer individual buildings.
+    var district_centers := [-62.0, -20.0, 24.0, 67.0]
+    var palettes := [
+        [Color("#242b46"),Color("#47517a"),Color("#f04f79")],
+        [Color("#263c42"),Color("#426e78"),Color("#3ed6e8")],
+        [Color("#352c42"),Color("#65506f"),Color("#ffbf4b")],
+        [Color("#263d35"),Color("#4e765f"),Color("#8ef08d")]
+    ]
+    for s in range(4):
+        for i in range(30):
+            var bx := district_centers[s] + rng.randf_range(-16,16)
+            var bz := rng.randf_range(-82,82)
+            if abs(bx) < 8: bx += 12.0
+            var h := rng.randf_range(8,30)
+            var w := rng.randf_range(6,11)
+            var d := rng.randf_range(6,12)
+            _create_building(bx,bz,w,h,d,palettes[s],i)
+    _build_roads()
+    _build_landmarks()
+    _build_instanced_props()
 
-    # River and bridges separating the districts.
-    mesh_box(city, Vector3(0, -0.25, 0), Vector3(14, 0.4, 205), mat(Color("#123c64"),0.2,0.4), "GrandRiver")
-    for z in [-62.0, 0.0, 62.0]:
-        mesh_box(city, Vector3(0, 0.7, z), Vector3(22, 1.5, 12), mat(Color("#5e626a"),0.5,0.15), "Bridge")
-        for k in range(-5,6):
-            mesh_cyl(city, Vector3(k*2.0, 2.2, z-4.0), 0.12, 3.0, mat(Color("#d6b45c"),0.5,0.3), "BridgeLamp")
+    # River with emissive banks.
+    box(city,Vector3(0,-0.15,0),Vector3(10,0.25,WORLD),material(Color("#0b3454"),0.15,0.55),"River")
+    box(city,Vector3(-5.8,0.08,0),Vector3(0.35,0.18,WORLD),material(Color("#21a8d8"),0.2,0.3,Color("#21a8d8")),"RiverGlow")
+    box(city,Vector3(5.8,0.08,0),Vector3(0.35,0.18,WORLD),material(Color("#21a8d8"),0.2,0.3,Color("#21a8d8")),"RiverGlow")
+    for z in [-62.0,0.0,62.0]:
+        _create_bridge(z)
 
-    # Thousands of small visual assets: lamps, signs, barriers, trees and crates.
-    for i in range(1300):
-        var px = rng.randf_range(-98,98)
-        var pz = rng.randf_range(-98,98)
-        if abs(px) < 9: continue
-        var kind = i % 5
-        if kind == 0:
-            mesh_cyl(city, Vector3(px, 2.0, pz), 0.08, 4.0, mat(Color("#30333a"),0.6,0.2), "StreetLamp")
-        elif kind == 1:
-            mesh_box(city, Vector3(px, 0.45, pz), Vector3(0.7,0.9,0.7), mat(Color("#7b4e35")), "Crate")
-        elif kind == 2:
-            mesh_cyl(city, Vector3(px, 1.4, pz), 0.9, 2.8, mat(Color("#1d5b3b")), "Tree")
-        elif kind == 3:
-            mesh_box(city, Vector3(px, 0.9, pz), Vector3(1.6,1.8,0.35), mat(Color("#4e5665")), "Barrier")
+func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:int):
+    var root := Node3D.new()
+    root.position = Vector3(x,0,z)
+    city.add_child(root)
+    var facade := palette[i%2]
+    box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),material(facade,0.65),"Building")
+    # Vertical side tower / architectural crown.
+    if i%3==0:
+        box(root,Vector3(w*0.28,h+1.5,0),Vector3(w*0.22,3.0,d*0.45),material(palette[1],0.55,0.15),"Crown")
+    # Windows in two bands, recognizable as a building rather than a plain cube.
+    var window_mat := material(Color("#101b2b"),0.22,0.45,palette[2])
+    for band in range(min(5,int(h/4.5))):
+        var yy := 2.0 + band*4.0
+        box(root,Vector3(-w*0.18,yy,d*0.515),Vector3(w*0.23,1.0,0.08),window_mat,"Window")
+        box(root,Vector3(w*0.18,yy,d*0.515),Vector3(w*0.23,1.0,0.08),window_mat,"Window")
+    if i%4==0:
+        box(root,Vector3(0,h*0.72,d*0.515),Vector3(w*0.78,0.22,0.08),material(palette[2],0.2,0.2,palette[2]),"NeonSign")
+    if i%5==0:
+        cylinder(root,Vector3(0,h+2,0),0.65,4.0,material(Color("#1c202a"),0.45,0.3),"RoofTank")
+
+func _build_roads():
+    var road_mat := material(Color("#10141b"),0.96)
+    var lane_mat := material(Color("#f3d26b"),0.5,0.05)
+    for z in range(-84,85,21):
+        box(city,Vector3(0,-0.02,z),Vector3(WORLD,0.18,6.5),road_mat,"Road")
+        for x in range(-88,89,12):
+            box(city,Vector3(x,0.10,z),Vector3(4.2,0.035,0.13),lane_mat,"Lane")
+    for x in [-82.0,-40.0,42.0,82.0]:
+        box(city,Vector3(x,0.0,0),Vector3(6.5,0.18,WORLD),road_mat,"Road")
+        for z in range(-88,89,12):
+            box(city,Vector3(x,0.10,z),Vector3(0.13,0.035,4.2),lane_mat,"Lane")
+
+func _build_landmarks():
+    var neon := [Color("#ff477e"),Color("#38d8ef"),Color("#ffc857"),Color("#8cf38c")]
+    for i in range(4):
+        var x := [-62.0,-20.0,24.0,67.0][i]
+        var root := Node3D.new()
+        root.position = Vector3(x,0,-78)
+        city.add_child(root)
+        box(root,Vector3(0,4,0),Vector3(20,8,3.5),material(Color("#171b27"),0.4,0.25),"Landmark")
+        box(root,Vector3(0,7.7,1.85),Vector3(16,1.0,0.16),material(neon[i],0.2,0.25,neon[i]),"Sign")
+        for k in range(5):
+            cylinder(root,Vector3(-7+k*3.5,2.2,2.1),0.13,4.4,material(Color("#262b36"),0.5,0.2),"Light")
+
+func _create_bridge(z:float):
+    box(city,Vector3(0,0.8,z),Vector3(22,1.4,9),material(Color("#59616d"),0.5,0.18),"Bridge")
+    for x in range(-9,10,3):
+        cylinder(city,Vector3(x,2.4,z-3.5),0.10,3.0,material(Color("#d5b15a"),0.5,0.25),"BridgeLamp")
+
+func _build_instanced_props():
+    # Deliberately sparse decorative props around roads; avoids thousands of active nodes.
+    for i in range(90):
+        var x := rng.randf_range(-88,88)
+        var z := rng.randf_range(-88,88)
+        if abs(x) < 10: continue
+        var root := Node3D.new()
+        root.position = Vector3(x,0,z)
+        city.add_child(root)
+        if i%3==0:
+            cylinder(root,Vector3(0,2.1,0),0.09,4.2,material(Color("#20252e"),0.55,0.25),"Lamp")
+            box(root,Vector3(0,4.15,0),Vector3(0.65,0.12,0.65),material(Color("#ffd37a"),0.25,0.1,Color("#ffd37a")),"LampGlow")
+        elif i%3==1:
+            cylinder(root,Vector3(0,1.0,0),0.75,2.0,material(Color("#1f6944"),0.85),"Tree")
+            cylinder(root,Vector3(0,0.65,0),0.22,1.3,material(Color("#63442d"),0.9),"Trunk")
         else:
-            mesh_box(city, Vector3(px, 2.0, pz), Vector3(0.25,4,0.25), mat(Color("#20232a"),0.5,0.2), "Pole")
-
-func _build_roads(city: Node3D, center_x: float):
-    for z in range(-90, 91, 18):
-        mesh_box(city, Vector3(center_x, 0, z), Vector3(62,0.25,7), mat(Color("#15181e"),0.95), "Road")
-        for lane in range(-7,8,2):
-            mesh_box(city, Vector3(center_x+lane*2.0, 0.16, z), Vector3(1.2,0.04,0.25), mat(Color("#d9b94e"),0.6), "RoadMark")
-    for x in range(int(center_x)-30,int(center_x)+31,15):
-        mesh_box(city, Vector3(x,0,-82), Vector3(6,0.25,180), mat(Color("#15181e"),0.95), "CrossRoad")
-
-func _build_landmarks(city: Node3D, x0: float, sector: int):
-    var colors=[Color("#ef4f6b"),Color("#41b9e8"),Color("#f2b84b")]
-    mesh_box(city,Vector3(x0,3,-72),Vector3(20,6,5),mat(Color("#252a35"),0.5,0.2),"Landmark")
-    mesh_box(city,Vector3(x0,6.2,-72),Vector3(14,1,0.5),mat(colors[sector],0.2,0.4),"LandmarkNeon")
-    for a in range(8):
-        mesh_cyl(city,Vector3(x0-8+a*2.3,1.8,-74.8),0.12,3.6,mat(Color("#242832"),0.4,0.3),"LandmarkLamp")
+            box(root,Vector3(0,0.5,0),Vector3(1.2,1.0,0.8),material(Color("#6c4c36"),0.85),"Crate")
 
 func _spawn_player():
     player = CharacterBody3D.new()
-    player.name = "HamzaPlayer"
+    player.name = "Player"
+    player.position = PLAYER_START
     add_child(player)
-    player.position = Vector3(-62, 2, 58)
-    var collision = CollisionShape3D.new()
-    var capsule = CapsuleShape3D.new()
-    capsule.radius = 0.55
-    capsule.height = 1.9
-    collision.shape = capsule
-    player.add_child(collision)
-    var body = MeshInstance3D.new()
-    var capsule_mesh = CapsuleMesh.new()
-    capsule_mesh.radius = 0.55
-    capsule_mesh.height = 1.9
-    body.mesh = capsule_mesh
-    body.material_override = mat(Color("#e8e8ee"),0.65,0.05)
-    player.add_child(body)
+    var cs := CollisionShape3D.new()
+    var capsule := CapsuleShape3D.new()
+    capsule.radius = 0.42
+    capsule.height = 1.65
+    cs.shape = capsule
+    cs.position.y = 0.95
+    player.add_child(cs)
 
+    player_visual = Node3D.new()
+    player_visual.name = "HeroVisual"
+    player.add_child(player_visual)
+    _create_humanoid(player_visual)
+
+    camera_pivot = Node3D.new()
+    camera_pivot.position = Vector3(0,1.25,0)
+    player.add_child(camera_pivot)
     camera = Camera3D.new()
-    camera.position = Vector3(0, 3.8, 6.8)
-    camera.rotation_degrees.x = -14
-    player.add_child(camera)
+    camera.position = Vector3(0,1.7,5.4)
+    camera.fov = 67
+    camera_pivot.add_child(camera)
     camera.current = true
 
+func _create_humanoid(root:Node3D):
+    var skin := material(Color("#b97859"),0.72)
+    var jacket := material(Color("#263a5b"),0.68,0.1)
+    var shirt := material(Color("#e8edf2"),0.62)
+    var pants := material(Color("#18202e"),0.78)
+    var shoes := material(Color("#0a0c10"),0.55,0.15)
+    # Torso, head, neck.
+    box(root,Vector3(0,1.25,0),Vector3(0.72,0.92,0.42),jacket,"Torso")
+    cylinder(root,Vector3(0,1.83,0),0.23,0.18,skin,"Neck")
+    var head := MeshInstance3D.new()
+    var sphere := SphereMesh.new()
+    sphere.radius=0.31;sphere.height=0.62
+    head.mesh=sphere;head.position=Vector3(0,2.2,0);head.material_override=skin;root.add_child(head)
+    # Hair/hat silhouette.
+    cylinder(root,Vector3(0,2.49,0),0.34,0.13,material(Color("#111522"),0.7),"Hair")
+    # Arms and hands.
+    for side in [-1.0,1.0]:
+        box(root,Vector3(0.48*side,1.30,0),Vector3(0.18,0.72,0.22),jacket,"Arm")
+        cylinder(root,Vector3(0.48*side,0.88,0),0.12,0.20,skin,"Hand")
+        box(root,Vector3(0.19*side,0.62,0),Vector3(0.30,0.85,0.30),pants,"Leg")
+        box(root,Vector3(0.19*side,0.15,0.08),Vector3(0.34,0.18,0.56),shoes,"Shoe")
+    box(root,Vector3(0,1.42,-0.225),Vector3(0.36,0.45,0.05),shirt,"Shirt")
+
 func _spawn_population():
-    for i in range(110):
-        var n = CharacterBody3D.new()
-        n.name = "NPC_%03d" % i
-        n.position = Vector3(rng.randf_range(-92,92),1.1,rng.randf_range(-92,92))
-        var cs=CollisionShape3D.new()
-        var sh=CapsuleShape3D.new()
-        sh.radius=0.3;sh.height=1.5;cs.shape=sh;n.add_child(cs)
-        var mesh=MeshInstance3D.new()
-        var cm=CapsuleMesh.new()
-        cm.radius=0.3;cm.height=1.5;mesh.mesh=cm
-        mesh.material_override=mat([Color("#d99a78"),Color("#79a4d8"),Color("#c96a7a"),Color("#8bcf9b")][i%4])
-        n.add_child(mesh)
-        n.set_meta("phase",rng.randf_range(0,6.28))
-        n.set_meta("speed",rng.randf_range(0.3,1.0))
-        n.set_meta("cop",i%17==0)
-        npcs.append(n);add_child(n)
+    for i in range(44):
+        var n := Node3D.new()
+        n.name="Civilian_%02d"%i
+        n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
+        _create_npc_visual(n,i)
+        add_child(n)
+        n.set_meta("phase",rng.randf_range(0,TAU))
+        n.set_meta("speed",rng.randf_range(0.35,0.85))
+        npcs.append(n)
 
-    for i in range(65):
-        var c=Node3D.new()
-        c.name="Vehicle_%03d"%i
-        c.position=Vector3(rng.randf_range(-92,92),0.9,rng.randf_range(-92,92))
-        c.set_meta("speed",rng.randf_range(2.5,7.0))
-        c.set_meta("dir",1 if i%2==0 else -1)
-        var body=mesh_box(c,Vector3.ZERO,Vector3(2.1,0.65,4.3),mat([Color("#d94655"),Color("#3974d7"),Color("#d8a63e"),Color("#42aa77"),Color("#9a62ce"),Color("#e1e1e1")][i%6],0.35,0.35),"CarBody")
-        mesh_box(c,Vector3(0,0.45,0),Vector3(1.4,0.35,2.0),mat(Color("#141820"),0.1,0.6),"CarGlass")
-        cars.append(c);add_child(c)
+    for i in range(20):
+        var c := Node3D.new()
+        c.name="Traffic_%02d"%i
+        c.position=Vector3([-82,-40,42,82][i%4],0.45,rng.randf_range(-90,90))
+        _create_car(c,i)
+        c.set_meta("speed",rng.randf_range(4.0,8.0))
+        c.set_meta("dir",1.0 if i%2==0 else -1.0)
+        cars.append(c)
+        add_child(c)
 
-func _setup_audio():
-    fire_audio=AudioStreamPlayer.new()
-    var fire=AudioStreamGenerator.new()
-    fire.mix_rate=22050;fire.buffer_length=0.12
-    fire_audio.stream=fire;add_child(fire_audio);fire_audio.play()
-    engine_audio=AudioStreamPlayer.new()
-    var engine=AudioStreamGenerator.new()
-    engine.mix_rate=22050;engine.buffer_length=0.3
-    engine_audio.stream=engine;add_child(engine_audio);engine_audio.play()
+func _create_npc_visual(root:Node3D,index:int):
+    var skin_colors=[Color("#9b604a"),Color("#d08a67"),Color("#704738"),Color("#c99a76")]
+    var clothes=[Color("#d44c5d"),Color("#3f73bd"),Color("#4aa878"),Color("#b46ad2")]
+    var skin:=material(skin_colors[index%4],0.8)
+    var cloth:=material(clothes[index%4],0.72)
+    box(root,Vector3(0,1.05,0),Vector3(0.5,0.72,0.30),cloth,"Body")
+    var head:=MeshInstance3D.new()
+    var sm:=SphereMesh.new();sm.radius=0.22;sm.height=0.44
+    head.mesh=sm;head.position=Vector3(0,1.62,0);head.material_override=skin;root.add_child(head)
+    for side in [-1.0,1.0]:
+        box(root,Vector3(0.16*side,0.50,0),Vector3(0.18,0.65,0.20),cloth,"Leg")
+        box(root,Vector3(0.34*side,1.08,0),Vector3(0.14,0.62,0.18),cloth,"Arm")
 
-func _tone(player_audio: AudioStreamPlayer, frequency: float, duration: float):
-    var playback=player_audio.get_stream_playback()
-    if playback==null:return
-    var frames=int(22050*duration)
-    var data=PackedVector2Array()
-    data.resize(frames)
-    for i in range(frames):
-        var v=sin(TAU*frequency*float(i)/22050.0)*0.16
-        data[i]=Vector2(v,v)
-    playback.push_buffer(data)
+func _create_car(root:Node3D,index:int):
+    var colors=[Color("#d83d55"),Color("#3274d8"),Color("#d6a33d"),Color("#40ad7b"),Color("#9b5ed0"),Color("#e1e5e8")]
+    var paint:=material(colors[index%colors.size()],0.32,0.45)
+    var glass:=material(Color("#0b1623"),0.12,0.75)
+    var tire:=material(Color("#090a0d"),0.92)
+    box(root,Vector3(0,0,0),Vector3(2.0,0.62,4.1),paint,"CarBody")
+    box(root,Vector3(0,0.45,-0.15),Vector3(1.45,0.48,1.85),glass,"Cabin")
+    box(root,Vector3(0,0.47,-1.05),Vector3(1.48,0.32,0.08),paint,"Hood")
+    box(root,Vector3(0,0.46,1.15),Vector3(1.48,0.25,0.08),paint,"Trunk")
+    for x in [-0.92,0.92]:
+        for z in [-1.25,1.25]:
+            var wheel:=MeshInstance3D.new()
+            var wm:=CylinderMesh.new();wm.top_radius=0.38;wm.bottom_radius=0.38;wm.height=0.18;wm.radial_segments=12
+            wheel.mesh=wm;wheel.rotation_degrees=Vector3(90,0,0);wheel.position=Vector3(x, -0.05,z);wheel.material_override=tire;root.add_child(wheel)
+    box(root,Vector3(-0.58,0.20, -2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
+    box(root,Vector3(0.58,0.20,-2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
 
 func _setup_ui():
-    var layer=CanvasLayer.new()
+    var layer:=CanvasLayer.new()
     add_child(layer)
+
     hud=Label.new()
-    hud.position=Vector2(26,22);hud.add_theme_font_size_override("font_size",25);hud.add_theme_color_override("font_color",Color.WHITE)
+    hud.position=Vector2(22,18)
+    hud.add_theme_font_size_override("font_size",18)
+    hud.add_theme_color_override("font_color",Color.WHITE)
     layer.add_child(hud)
+
     objective=Label.new()
-    objective.position=Vector2(26,72);objective.add_theme_font_size_override("font_size",18);objective.add_theme_color_override("font_color",Color("#ffd85c"))
+    objective.position=Vector2(22,70)
+    objective.add_theme_font_size_override("font_size",15)
+    objective.add_theme_color_override("font_color",Color("#ffd75a"))
     layer.add_child(objective)
+
     status=Label.new()
-    status.position=Vector2(26,108);status.add_theme_font_size_override("font_size",17)
+    status.position=Vector2(22,112)
+    status.add_theme_font_size_override("font_size",13)
+    status.add_theme_color_override("font_color",Color("#a9c6e8"))
     layer.add_child(status)
 
-    var fire=Button.new();fire.text="FIRE";fire.position=Vector2(1090,560);fire.size=Vector2(145,100);fire.add_theme_font_size_override("font_size",24);layer.add_child(fire)
+    crosshair=Label.new()
+    crosshair.text="+"
+    crosshair.position=Vector2(0,0)
+    crosshair.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+    crosshair.add_theme_font_size_override("font_size",28)
+    crosshair.add_theme_color_override("font_color",Color("#ffffffcc"))
+    layer.add_child(crosshair)
+
+    var fire:=_button(layer,"FIRE",Vector2(-170,-150),Vector2(150,90),24)
+    fire.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
     fire.button_down.connect(func():shooting=true)
     fire.button_up.connect(func():shooting=false)
 
-    var drive=Button.new();drive.text="ENTER / EXIT";drive.position=Vector2(920,560);drive.size=Vector2(155,100);drive.add_theme_font_size_override("font_size",17);layer.add_child(drive)
-    drive.pressed.connect(func():driving=!driving)
+    var drive:=_button(layer,"ENTER CAR",Vector2(-335,-150),Vector2(145,70),16)
+    drive.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    drive.position.y-=100
+    drive.pressed.connect(_toggle_drive)
 
-    var graphics_btn=Button.new();graphics_btn.text="GRAPHICS";graphics_btn.position=Vector2(1030,25);graphics_btn.size=Vector2(180,58);graphics_btn.add_theme_font_size_override("font_size",16);layer.add_child(graphics_btn)
-    graphics_btn.pressed.connect(func():graphics=(graphics+1)%3;_update_quality())
+    graphics_button=_button(layer,"GRAPHICS: MED",Vector2(0,0),Vector2(145,48),13)
+    graphics_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    graphics_button.pressed.connect(_cycle_graphics)
 
-    var map=Button.new();map.text="MAP";map.position=Vector2(840,25);map.size=Vector2(165,58);map.add_theme_font_size_override("font_size",16);layer.add_child(map)
-    map.pressed.connect(func():_show_map())
+    gyro_button=_button(layer,"GYRO: ON",Vector2(0,0),Vector2(125,48),13)
+    gyro_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    gyro_button.position.x-=160
+    gyro_button.pressed.connect(func():
+        gyro_enabled=!gyro_enabled
+        gyro_button.text="GYRO: ON" if gyro_enabled else "GYRO: OFF")
 
-    var left=Button.new();left.text="◀";left.position=Vector2(30,575);left.size=Vector2(85,90);left.add_theme_font_size_override("font_size",30);layer.add_child(left)
-    left.button_down.connect(func():touch_dir.x=-1);left.button_up.connect(func():touch_dir.x=0)
-    var right=Button.new();right.text="▶";right.position=Vector2(220,575);right.size=Vector2(85,90);right.add_theme_font_size_override("font_size",30);layer.add_child(right)
-    right.button_down.connect(func():touch_dir.x=1);right.button_up.connect(func():touch_dir.x=0)
-    var up=Button.new();up.text="▲";up.position=Vector2(125,500);up.size=Vector2(85,90);up.add_theme_font_size_override("font_size",30);layer.add_child(up)
-    up.button_down.connect(func():touch_dir.y=-1);up.button_up.connect(func():touch_dir.y=0)
-    var down=Button.new();down.text="▼";down.position=Vector2(125,665);down.size=Vector2(85,55);down.add_theme_font_size_override("font_size",24);layer.add_child(down)
-    down.button_down.connect(func():touch_dir.y=1);down.button_up.connect(func():touch_dir.y=0)
+    # Virtual joystick: left bottom.
+    var up:=_button(layer,"▲",Vector2(112,-180),Vector2(74,66),24)
+    up.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
+    up.button_down.connect(func():move_input.y=-1)
+    up.button_up.connect(func():move_input.y=0)
+    var left:=_button(layer,"◀",Vector2(28,-112),Vector2(74,66),24)
+    left.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
+    left.button_down.connect(func():move_input.x=-1)
+    left.button_up.connect(func():move_input.x=0)
+    var right:=_button(layer,"▶",Vector2(196,-112),Vector2(74,66),24)
+    right.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
+    right.button_down.connect(func():move_input.x=1)
+    right.button_up.connect(func():move_input.x=0)
+    var down:=_button(layer,"▼",Vector2(112,-42),Vector2(74,50),20)
+    down.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
+    down.button_down.connect(func():move_input.y=1)
+    down.button_up.connect(func():move_input.y=0)
+
+    var hint:=Label.new()
+    hint.text="DRAG RIGHT SIDE = CAMERA • GYRO = CAMERA"
+    hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+    hint.position.y=-28
+    hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    hint.add_theme_font_size_override("font_size",12)
+    hint.add_theme_color_override("font_color",Color("#d7e5ff99"))
+    layer.add_child(hint)
+
+func _button(layer:CanvasLayer,text_value:String,pos:Vector2,size:Vector2,font_size:int)->Button:
+    var b:=Button.new()
+    b.text=text_value
+    b.position=pos
+    b.size=size
+    b.add_theme_font_size_override("font_size",font_size)
+    layer.add_child(b)
+    return b
 
 func _new_mission():
-    if mission_marker: mission_marker.queue_free()
+    if is_instance_valid(mission_marker): mission_marker.queue_free()
     mission_marker=MeshInstance3D.new()
-    var ring=TorusMesh.new()
-    ring.inner_radius=1.8;ring.outer_radius=2.2;ring.rings=24;ring.ring_segments=32
+    var ring:=TorusMesh.new()
+    ring.inner_radius=1.6;ring.outer_radius=2.05;ring.rings=16;ring.ring_segments=24
     mission_marker.mesh=ring
-    mission_marker.material_override=mat(Color("#ffd83d"),0.2,0.6)
-    mission_marker.position=[Vector3(-62,0.5,58),Vector3(52,0.5,44),Vector3(58,0.5,-42),Vector3(-52,0.5,-55),Vector3(70,0.5,70),Vector3(0,0.5,-75)][mission]
+    mission_marker.material_override=material(Color("#ffd83d"),0.18,0.55,Color("#ffd83d"))
+    mission_marker.position=missions[mission][1]
     add_child(mission_marker)
+
+func _input(event):
+    if event is InputEventScreenTouch:
+        if event.pressed:
+            last_touch=event.position
+            look_touching=event.position.x>get_viewport().size.x*0.42
+        else:
+            look_touching=false
+    elif event is InputEventScreenDrag and look_touching:
+        var delta:Vector2=event.position-last_touch
+        camera_yaw-=delta.x*0.18
+        camera_pitch=clamp(camera_pitch-delta.y*0.12,-35.0,18.0)
+        last_touch=event.position
 
 func _process(delta):
     elapsed+=delta
+    fire_cooldown=max(0.0,fire_cooldown-delta)
     _move_player(delta)
-    _animate_population(delta)
+    _animate_npcs(delta)
     _animate_cars(delta)
-    _update_time(delta)
+    _update_day_night()
     _update_hud()
-    if mission_marker and player and player.global_position.distance_to(mission_marker.global_position)<5.0:
-        money += 1000 + mission*450
-        wanted=max(0,wanted-1)
-        mission=(mission+1)%mission_names.size()
-        district=mission%3
-        _new_mission()
+    if is_instance_valid(mission_marker):
+        mission_marker.rotation.y+=delta*1.6
+        mission_marker.position.y=0.55+sin(elapsed*2.5)*0.15
+        if player.global_position.distance_to(mission_marker.global_position)<5.0:
+            money+=1000+mission*450
+            wanted=max(0,wanted-1)
+            mission=(mission+1)%missions.size()
+            _new_mission()
 
 func _move_player(delta):
-    var input_vec=Vector2.ZERO
-    if Input.is_key_pressed(KEY_A): input_vec.x-=1
-    if Input.is_key_pressed(KEY_D): input_vec.x+=1
-    if Input.is_key_pressed(KEY_W): input_vec.y-=1
-    if Input.is_key_pressed(KEY_S): input_vec.y+=1
-    if touch_dir.length()>0.1: input_vec=touch_dir
-    var speed=12.0 if driving else 7.0
-    if input_vec.length()>1:input_vec=input_vec.normalized()
-    var dir=Vector3(input_vec.x,0,input_vec.y)
-    player.velocity.x=dir.x*speed
-    player.velocity.z=dir.z*speed
+    var input_vec:=move_input
+    var keyboard:=Input.get_vector("ui_left","ui_right","ui_up","ui_down")
+    if keyboard.length()>0.1: input_vec=keyboard
+    var speed:=11.0 if driving else 5.8
+    var yaw:=deg_to_rad(camera_yaw)
+    var forward:=Vector3(-sin(yaw),0,-cos(yaw))
+    var right:=Vector3(cos(yaw),0,-sin(yaw))
+    var dir:Vector3=(right*input_vec.x+forward*(-input_vec.y))
+    if dir.length()>1: dir=dir.normalized()
+    player.velocity.x=move_toward(player.velocity.x,dir.x*speed,delta*22.0)
+    player.velocity.z=move_toward(player.velocity.z,dir.z*speed,delta*22.0)
     player.velocity.y=0
     player.move_and_slide()
-    player.global_position.x=clamp(player.global_position.x,-98.0,98.0)
-    player.global_position.z=clamp(player.global_position.z,-98.0,98.0)
-    camera.position=Vector3(0,3.5,7.0 if not driving else 9.0)
-    camera.look_at(player.global_position+Vector3(0,1.1,0),Vector3.UP)
-    if shooting and not driving:
+    player.position.x=clamp(player.position.x,-93.0,93.0)
+    player.position.z=clamp(player.position.z,-93.0,93.0)
+    if dir.length()>0.1:
+        player_visual.rotation.y=lerp_angle(player_visual.rotation.y,atan2(dir.x,dir.z),delta*10.0)
+    # Smooth camera follows pivot; no per-frame look_at snapping.
+    camera_pivot.rotation_degrees.y=camera_yaw
+    camera_pivot.rotation_degrees.x=camera_pitch
+    if gyro_enabled and not look_touching:
+        var acc:=Input.get_accelerometer()
+        if acc.length()>0.3:
+            camera_yaw-=clamp(acc.x,-4.0,4.0)*delta*1.8
+            camera_pitch=clamp(camera_pitch+clamp(acc.y,-3.0,3.0)*delta*0.9,-35.0,18.0)
+    if shooting and not driving and fire_cooldown<=0:
         _fire()
 
+func _toggle_drive():
+    var nearest:=_nearest_car()
+    if nearest and player.global_position.distance_to(nearest.global_position)<4.5:
+        driving=!driving
+        if driving:
+            player.position=nearest.position+Vector3(0,0.05,0)
+            player_visual.visible=false
+        else:
+            player_visual.visible=true
+
+func _nearest_car()->Node3D:
+    var best:Node3D=null
+    var dist:=999.0
+    for c in cars:
+        var d:=player.global_position.distance_to(c.global_position)
+        if d<dist: dist=d;best=c
+    return best
+
 func _fire():
-    if not is_instance_valid(player):return
+    fire_cooldown=0.22
     shooting=false
     wanted=min(5,wanted+1)
-    health=max(0,health-0.2)
-    _tone(fire_audio,95.0,0.08)
-    var flash=OmniLight3D.new()
-    flash.light_color=Color("#ffbb55");flash.light_energy=7;flash.omni_range=6
-    flash.position=player.global_position+Vector3(0,1,0)
-    add_child(flash)
-    get_tree().create_timer(0.06).timeout.connect(func():if is_instance_valid(flash):flash.queue_free())
     for n in npcs:
-        if n.global_position.distance_to(player.global_position)<7 and rng.randf()<0.35:
-            n.set_meta("speed",rng.randf_range(1.5,3.5))
+        if n.global_position.distance_to(player.global_position)<7.0:
+            n.set_meta("speed",min(2.0,float(n.get_meta("speed"))+0.8))
 
-func _animate_population(delta):
+func _animate_npcs(delta):
     for n in npcs:
-        if not is_instance_valid(n):continue
-        var phase=float(n.get_meta("phase"))+elapsed*float(n.get_meta("speed"))
-        var dir=Vector3(sin(phase*0.31),0,cos(phase*0.27))
-        n.position += dir*delta*0.55
-        n.position.x=clamp(n.position.x,-96.0,96.0)
-        n.position.z=clamp(n.position.z,-96.0,96.0)
-        n.rotation.y=atan2(dir.x,dir.z)
-        var bob=1.0+sin(phase*3.0)*0.04
-        n.scale=Vector3(1,bob,1)
+        var phase:=float(n.get_meta("phase"))+elapsed*float(n.get_meta("speed"))
+        n.position.x+=sin(phase*0.7)*delta*0.22
+        n.position.z+=cos(phase*0.53)*delta*0.22
+        n.position.x=clamp(n.position.x,-90.0,90.0)
+        n.position.z=clamp(n.position.z,-90.0,90.0)
+        n.rotation.y=sin(phase)*0.8
 
 func _animate_cars(delta):
     for c in cars:
-        if not is_instance_valid(c):continue
-        var sp=float(c.get_meta("speed"));var dir=float(c.get_meta("dir"))
-        c.position.z += sp*dir*delta
-        if c.position.z>98:c.position.z=-98
-        if c.position.z<-98:c.position.z=98
+        var speed:=float(c.get_meta("speed"))
+        var dir:=float(c.get_meta("dir"))
+        c.position.z+=speed*dir*delta
+        if c.position.z>96:c.position.z=-96
+        if c.position.z<-96:c.position.z=96
         c.rotation.y=0 if dir>0 else PI
-    _tone(engine_audio,48.0+(float(driving)*35.0),0.02)
 
-func _update_time(delta):
-    var hour=fmod(18.0+elapsed*0.18,24.0)
-    sun.rotation_degrees=Vector3(-35.0-(hour-12.0)*2.0, -25,0)
-    sun.light_energy=0.35 if hour>20 or hour<6 else 1.15
+func _update_day_night():
+    var hour:=fmod(18.0+elapsed*0.12,24.0)
+    sun.rotation_degrees=Vector3(-38.0-(hour-12.0)*2.0,-28,0)
+    sun.light_energy=0.42 if hour>20.0 or hour<6.0 else 1.2
+
+func _cycle_graphics():
+    graphics=(graphics+1)%3
+    _apply_quality()
+
+func _apply_quality():
+    if not is_instance_valid(sun): return
+    var names=["LOW","MED","HIGH"]
+    graphics_button.text="GRAPHICS: "+names[graphics] if is_instance_valid(graphics_button) else ""
+    sun.shadow_enabled=graphics>0
+    sun.directional_shadow_max_distance=[45.0,75.0,105.0][graphics]
+    world_env.environment.ambient_light_energy=[0.68,0.82,0.95][graphics]
+    world_env.environment.glow_enabled=graphics>0
 
 func _update_hud():
-    hud.text="STREET SOVEREIGN 3D  |  HAMZA\n$%d   HP %d   WANTED %d/5   %s" % [money,int(health),wanted,districts[district]]
-    objective.text="MISSION %d/6  —  %s\nReach the gold marker: %s" % [mission+1,mission_names[mission],districts[district]]
-    status.text="3D WORLD • %d BUILDINGS • 1300+ PROPS • 110 NPCs • 65 VEHICLES   |   %s" % [555,["LOW","MEDIUM","ULTRA"][graphics]]
-
-func _update_quality():
-    if not sun:return
-    sun.shadow_enabled=graphics>0
-    sun.directional_shadow_max_distance=70 if graphics==0 else (100 if graphics==1 else 140)
-    world_env.environment.ambient_light_energy=0.55 if graphics==0 else (0.75 if graphics==1 else 1.0)
-
-func _show_map():
-    status.text="MAP: VICE RAY  |  SAN VALORA  |  LIBERTY BAY  —  GOLD MARKER = CURRENT MISSION"
+    if not is_instance_valid(hud): return
+    hud.text="STREET SOVEREIGN 3D\\n$%d   HP %d   WANTED %d/5   •   %s" % [money,int(health),wanted,districts[mission%3]]
+    objective.text="MISSION %d/6  —  %s\\nReach the gold marker" % [mission+1,missions[mission][0]]
+    status.text="44 CIVILIANS • 20 TRAFFIC CARS • TOUCH CAMERA • GYRO "+("ON" if gyro_enabled else "OFF");
