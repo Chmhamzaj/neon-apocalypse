@@ -59,7 +59,6 @@ func _ready():
     _setup_ui()
     _new_mission()
     _apply_quality()
-    Input.set_accelerometer_fallback(Vector3.ZERO)
     set_process(true)
 
 func material(color: Color, roughness := 0.72, metallic := 0.0, emission := Color.TRANSPARENT) -> StandardMaterial3D:
@@ -114,8 +113,7 @@ func _setup_world():
     env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
     env.ambient_light_energy = 0.8
     env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-    env.glow_enabled = true
-    env.glow_intensity = 0.8
+    env.glow_enabled = false
     world_env.environment = env
     add_child(world_env)
 
@@ -260,10 +258,13 @@ func _spawn_player():
     camera_pivot.position = Vector3(0,1.25,0)
     player.add_child(camera_pivot)
     camera = Camera3D.new()
-    camera.position = Vector3(0,1.7,5.4)
     camera.fov = 67
-    camera_pivot.add_child(camera)
+    camera.near = 0.08
+    camera.far = 180.0
+    add_child(camera)
     camera.current = true
+    camera.global_position = player.global_position + Vector3(0,3.0,6.5)
+    camera.look_at(player.global_position + Vector3(0,1.2,0), Vector3.UP)
 
 func _create_humanoid(root:Node3D):
     var skin := material(Color("#b97859"),0.72)
@@ -487,6 +488,11 @@ func _move_player(delta):
     # Smooth camera follows pivot; no per-frame look_at snapping.
     camera_pivot.rotation_degrees.y=camera_yaw
     camera_pivot.rotation_degrees.x=camera_pitch
+    var cam_rot := Basis(Vector3.UP,deg_to_rad(camera_yaw))
+    var cam_offset := cam_rot * Vector3(0,2.7,6.3)
+    var desired_cam := player.global_position + cam_offset
+    camera.global_position = camera.global_position.lerp(desired_cam,1.0-exp(-delta*12.0))
+    camera.look_at(player.global_position + Vector3(0,1.25,0),Vector3.UP)
     if gyro_enabled and not look_touching:
         var acc:=Input.get_accelerometer()
         if acc.length()>0.3:
@@ -555,7 +561,7 @@ func _apply_quality():
     sun.shadow_enabled=graphics>0
     sun.directional_shadow_max_distance=[45.0,75.0,105.0][graphics]
     world_env.environment.ambient_light_energy=[0.68,0.82,0.95][graphics]
-    world_env.environment.glow_enabled=graphics>0
+    world_env.environment.glow_enabled=false
 
 func _update_hud():
     if not is_instance_valid(hud): return
