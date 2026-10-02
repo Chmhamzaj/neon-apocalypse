@@ -768,7 +768,10 @@ func _setup_ui():
     joystick_ring=_ui_panel(Vector2(24,-198),Vector2(176,176),Color(0.02,0.035,0.045,0.30),Color(0.58,0.82,0.90,0.30),88)
     joystick_ring.set_anchors_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE)
     joystick_ring.position.x=24; joystick_ring.position.y=-198
-    joystick_knob=_ui_panel(Vector2(58,58),Vector2(60,60),Color(0.68,0.86,0.93,0.18),Color(0.82,0.95,1,0.45),30)
+    joystick_knob=Panel.new()
+    joystick_knob.position=Vector2(58,58)
+    joystick_knob.size=Vector2(60,60)
+    joystick_knob.add_theme_stylebox_override("panel",_ui_style(Color(0.68,0.86,0.93,0.18),Color(0.82,0.95,1,0.45),30))
     joystick_ring.add_child(joystick_knob)
     _ui_label(ui_layer,"MOVE",Vector2(24,-220),Vector2(176,18),9,Color("#b7cad5"),HORIZONTAL_ALIGNMENT_CENTER)
     var touch_hint:=_ui_label(ui_layer,"DRAG RIGHT = LOOK",Vector2(-210,-30),Vector2(190,18),9,Color(0.72,0.84,0.90,0.60),HORIZONTAL_ALIGNMENT_RIGHT)
