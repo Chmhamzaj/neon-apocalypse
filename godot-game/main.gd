@@ -38,6 +38,17 @@ var player_head: Node3D
 var player_body: Node3D
 var player_anim_phase := 0.0
 var car_wheel_sets: Array[Array] = []
+var joystick_id := -1
+var look_id := -1
+var joystick_center := Vector2.ZERO
+var joystick_radius := 82.0
+var jump_requested := false
+var engine_audio: AudioStreamPlayer
+var ambience_audio: AudioStreamPlayer
+var fps_label: Label
+var sensitivity := 0.12
+var camera_distance := 7.0
+var camera_height := 2.8
 
 var hud: Label
 var objective: Label
@@ -70,6 +81,7 @@ func _boot_world():
     await get_tree().process_frame
     boot_label.text = "LOADING • WORLD LIGHTING"
     _setup_world()
+    _setup_audio()
     await get_tree().process_frame
     boot_label.text = "LOADING • CITY 10%"
     await _build_city_async()
@@ -124,7 +136,8 @@ func _spawn_population_async():
         _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
-        n.set_meta("speed",rng.randf_range(0.35,0.85))
+        n.set_meta("speed",rng.randf_range(0.65,1.35))
+        n.set_meta("target",Vector3(rng.randf_range(-86.0,86.0),0.0,rng.randf_range(-86.0,86.0)))
         npcs.append(n)
         if i%4==0:
             await get_tree().process_frame
@@ -135,6 +148,7 @@ func _spawn_population_async():
         _create_car(c,i)
         c.set_meta("speed",rng.randf_range(4.0,8.0))
         c.set_meta("dir",1.0 if i%2==0 else -1.0)
+        c.set_meta("lane",c.position.x)
         cars.append(c)
         add_child(c)
         if i%4==0:
@@ -352,8 +366,21 @@ func _create_humanoid(root:Node3D):
     sphere.radius=0.31;sphere.height=0.62
     head.mesh=sphere;head.position=Vector3(0,2.2,0);head.material_override=skin;root.add_child(head)
     player_head=head
-    # Hair/hat silhouette.
+    # Hair and facial features.
     cylinder(root,Vector3(0,2.49,0),0.34,0.13,material(Color("#111522"),0.7),"Hair")
+    var face_white:=material(Color("#f4f6f8"),0.2)
+    var face_iris:=material(Color("#3e6f9c"),0.18,0.1)
+    var face_dark:=material(Color("#4f3025"),0.65)
+    for side in [-1.0,1.0]:
+        var eye:=MeshInstance3D.new(); var em:=SphereMesh.new(); em.radius=0.06; em.height=0.10
+        eye.mesh=em; eye.position=Vector3(0.115*side,2.23,-0.286); eye.material_override=face_white; root.add_child(eye)
+        var pupil:=MeshInstance3D.new(); var pm:=SphereMesh.new(); pm.radius=0.027; pm.height=0.05
+        pupil.mesh=pm; pupil.position=Vector3(0.115*side,2.23,-0.34); pupil.material_override=face_iris; root.add_child(pupil)
+        box(root,Vector3(0.115*side,2.31,-0.292),Vector3(0.13,0.025,0.025),face_dark,"Brow")
+        var ear:=MeshInstance3D.new(); var es:=SphereMesh.new(); es.radius=0.075; es.height=0.15
+        ear.mesh=es; ear.position=Vector3(0.305*side,2.18,0); ear.material_override=skin; root.add_child(ear)
+    cylinder(root,Vector3(0,2.17,-0.34),0.055,0.13,skin,"Nose")
+    box(root,Vector3(0,2.08,-0.326),Vector3(0.15,0.025,0.025),material(Color("#702735"),0.55),"Mouth")
     # Arms and hands.
     for side in [-1.0,1.0]:
         var arm:=box(root,Vector3(0.48*side,1.30,0),Vector3(0.18,0.72,0.22),jacket,"Arm")
@@ -404,7 +431,14 @@ func _create_car(root:Node3D,index:int):
     var glass:=material(Color("#0b1623"),0.12,0.75)
     var tire:=material(Color("#090a0d"),0.92)
     box(root,Vector3(0,0,0),Vector3(2.0,0.62,4.1),paint,"CarBody")
-    box(root,Vector3(0,0.45,-0.15),Vector3(1.45,0.48,1.85),glass,"Cabin")
+    var style:=index%4
+    var body_w:=2.0 if style!=1 else 2.15
+    var body_h:=0.62 if style!=3 else 0.82
+    box(root,Vector3(0,0,0),Vector3(body_w,body_h,4.1+float(style)*0.25),paint,"CarBody")
+    box(root,Vector3(0,0.45,-0.15),Vector3(1.45,0.48,1.85 if style<3 else 1.55),glass,"Cabin")
+    if style==1: box(root,Vector3(0,0.78,0.65),Vector3(1.9,0.18,1.45),paint,"SUVRoof")
+    if style==2: box(root,Vector3(0,0.68,1.0),Vector3(1.8,0.14,1.30),paint,"SportDeck")
+    if style==3: box(root,Vector3(0,0.90,1.20),Vector3(2.0,0.22,1.45),paint,"TruckBed")
     box(root,Vector3(0,0.47,-1.05),Vector3(1.48,0.32,0.08),paint,"Hood")
     box(root,Vector3(0,0.46,1.15),Vector3(1.48,0.25,0.08),paint,"Trunk")
     var wheels:Array[Node3D]=[]
@@ -417,6 +451,31 @@ func _create_car(root:Node3D,index:int):
     car_wheel_sets.append(wheels)
     box(root,Vector3(-0.58,0.20, -2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
     box(root,Vector3(0.58,0.20,-2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
+    cylinder(root,Vector3(-0.42,0.18,2.15),0.055,0.18,material(Color("#11151b"),0.4,0.5),"Exhaust")
+    cylinder(root,Vector3(0.42,0.18,2.15),0.055,0.18,material(Color("#11151b"),0.4,0.5),"Exhaust")
+    _add_exhaust_smoke(root,Vector3(-0.42,0.18,2.28))
+    _add_exhaust_smoke(root,Vector3(0.42,0.18,2.28))
+
+func _add_exhaust_smoke(root:Node3D,pos:Vector3):
+    var smoke:=CPUParticles3D.new()
+    smoke.name="ExhaustSmoke"; smoke.position=pos; smoke.emitting=true
+    smoke.amount=16; smoke.lifetime=1.25; smoke.speed_scale=1.0
+    smoke.direction=Vector3(0,0,1); smoke.spread=20.0
+    smoke.initial_velocity_min=0.4; smoke.initial_velocity_max=1.0
+    smoke.scale_amount_min=0.08; smoke.scale_amount_max=0.20
+    smoke.color=Color(0.55,0.58,0.62,0.28); root.add_child(smoke)
+
+func _setup_audio():
+    engine_audio=AudioStreamPlayer.new(); engine_audio.stream=_make_tone_stream(96.0,0.35,1.6); engine_audio.volume_db=-26.0; engine_audio.autoplay=true; add_child(engine_audio)
+    ambience_audio=AudioStreamPlayer.new(); ambience_audio.stream=_make_tone_stream(180.0,0.10,3.0); ambience_audio.volume_db=-32.0; ambience_audio.autoplay=true; add_child(ambience_audio)
+
+func _make_tone_stream(freq:float,amp:float,seconds:float)->AudioStreamWAV:
+    var rate:=22050; var count:=int(rate*seconds); var bytes:=PackedByteArray(); bytes.resize(count*2)
+    for i in range(count):
+        var t:=float(i)/rate; var env:=min(1.0,t*20.0)*min(1.0,(seconds-t)*12.0)
+        bytes.encode_s16(i*2,int(sin(TAU*freq*t)*amp*env*32767.0))
+    var wav:=AudioStreamWAV.new(); wav.format=AudioStreamWAV.FORMAT_16_BITS; wav.mix_rate=rate; wav.stereo=false; wav.data=bytes
+    wav.loop_mode=AudioStreamWAV.LOOP_FORWARD; wav.loop_begin=0; wav.loop_end=count; return wav
 
 func _setup_ui():
     var layer:=CanvasLayer.new()
@@ -495,6 +554,10 @@ func _setup_ui():
     down.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
     down.button_down.connect(func():move_input.y=1)
     down.button_up.connect(func():move_input.y=0)
+    var jump:=_button(layer,"JUMP",Vector2(-165,-55),Vector2(120,58),16)
+    jump.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    jump.pressed.connect(func(): jump_requested=true)
+    fps_label=Label.new(); fps_label.position=Vector2(22,150); fps_label.add_theme_font_size_override("font_size",12); layer.add_child(fps_label)
 
     var hint:=Label.new()
     hint.text="DRAG RIGHT SIDE = CAMERA • GYRO = CAMERA"
@@ -527,15 +590,21 @@ func _new_mission():
 func _input(event):
     if event is InputEventScreenTouch:
         if event.pressed:
-            last_touch=event.position
-            look_touching=event.position.x>get_viewport().size.x*0.42
+            if event.position.x < get_viewport().size.x*0.42 and joystick_id==-1:
+                joystick_id=event.index; joystick_center=event.position; move_input=Vector2.ZERO
+            elif event.position.x >= get_viewport().size.x*0.42 and look_id==-1:
+                look_id=event.index
         else:
-            look_touching=false
-    elif event is InputEventScreenDrag and look_touching:
-        var delta:Vector2=event.position-last_touch
-        camera_yaw-=delta.x*0.18
-        camera_pitch=clamp(camera_pitch-delta.y*0.12,-35.0,18.0)
-        last_touch=event.position
+            if event.index==joystick_id: joystick_id=-1; move_input=Vector2.ZERO
+            if event.index==look_id: look_id=-1
+    elif event is InputEventScreenDrag:
+        if event.index==joystick_id:
+            var offset:=event.position-joystick_center
+            if offset.length()>joystick_radius: offset=offset.normalized()*joystick_radius
+            move_input=offset/joystick_radius
+        elif event.index==look_id:
+            camera_yaw-=event.relative.x*sensitivity
+            camera_pitch=clamp(camera_pitch-event.relative.y*sensitivity,-55.0,35.0)
 
 func _process(delta):
     elapsed+=delta
@@ -569,18 +638,19 @@ func _move_player(delta):
     player.velocity.z=move_toward(player.velocity.z,dir.z*speed,delta*22.0)
     player.velocity.y=0
     player.move_and_slide()
+    if jump_requested and player.is_on_floor() and not driving:
+        player.velocity.y=7.0
+        jump_requested=false
     player.position.x=clamp(player.position.x,-93.0,93.0)
     player.position.z=clamp(player.position.z,-93.0,93.0)
     if dir.length()>0.1:
         player_visual.rotation.y=lerp_angle(player_visual.rotation.y,atan2(dir.x,dir.z),delta*10.0)
-    # Smooth camera follows pivot; no per-frame look_at snapping.
-    camera_pivot.rotation_degrees.y=camera_yaw
-    camera_pivot.rotation_degrees.x=camera_pitch
-    var cam_rot := Basis(Vector3.UP,deg_to_rad(camera_yaw))
-    var cam_offset := cam_rot * Vector3(0,2.7,6.3)
-    var desired_cam := player.global_position + cam_offset
-    camera.global_position = camera.global_position.lerp(desired_cam,1.0-exp(-delta*12.0))
-    camera.look_at(player.global_position + Vector3(0,1.25,0),Vector3.UP)
+    var yaw:=deg_to_rad(camera_yaw)
+    var pitch:=deg_to_rad(camera_pitch)
+    var rot:=Basis(Vector3.UP,yaw)*Basis(Vector3.RIGHT,pitch)
+    var desired_cam:=player.global_position+Vector3(0,camera_height,0)+rot*Vector3(0,0,camera_distance)
+    camera.global_position=camera.global_position.lerp(desired_cam,1.0-exp(-delta*14.0))
+    camera.look_at(player.global_position+Vector3(0,1.15,0),Vector3.UP)
     if gyro_enabled and not look_touching:
         var acc:=Input.get_accelerometer()
         if acc.length()>0.3:
@@ -644,22 +714,25 @@ func _animate_player(delta):
 
 func _animate_npcs(delta):
     for n in npcs:
-        var phase:=float(n.get_meta("phase"))+elapsed*float(n.get_meta("speed"))
-        n.position.x+=sin(phase*0.7)*delta*0.22
-        n.position.z+=cos(phase*0.53)*delta*0.22
-        n.position.x=clamp(n.position.x,-90.0,90.0)
-        n.position.z=clamp(n.position.z,-90.0,90.0)
-        n.rotation.y=sin(phase)*0.35
-        var walk:=sin(phase*1.8)
-        var arm_l:=n.get_node_or_null("Arm")
-        var leg_l:=n.get_node_or_null("Leg")
-        if arm_l: arm_l.rotation.x=walk*0.45
-        if leg_l: leg_l.rotation.x=-walk*0.55
-        var arm_r:=n.get_node_or_null("Arm2")
-        var leg_r:=n.get_node_or_null("Leg2")
-        if arm_r: arm_r.rotation.x=-walk*0.45
-        if leg_r: leg_r.rotation.x=walk*0.55
-        n.position.y=abs(sin(phase*0.9))*0.035
+        var target:Vector3=n.get_meta("target",n.global_position)
+        var to_target:=target-n.global_position; to_target.y=0.0
+        if to_target.length()<1.5:
+            target=Vector3(rng.randf_range(-86.0,86.0),0.0,rng.randf_range(-86.0,86.0))
+            n.set_meta("target",target); to_target=target-n.global_position; to_target.y=0.0
+        var speed:=float(n.get_meta("speed"))
+        if to_target.length()>0.2:
+            var dir:=to_target.normalized()
+            n.position+=dir*speed*delta
+            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*5.0)
+        var phase:=elapsed*speed*3.0+float(n.get_meta("phase"))
+        var walk:=sin(phase)
+        var arm_l:=n.get_node_or_null("Arm"); var leg_l:=n.get_node_or_null("Leg")
+        var arm_r:=n.get_node_or_null("Arm2"); var leg_r:=n.get_node_or_null("Leg2")
+        if arm_l: arm_l.rotation.x=walk*0.55
+        if leg_l: leg_l.rotation.x=-walk*0.65
+        if arm_r: arm_r.rotation.x=-walk*0.55
+        if leg_r: leg_r.rotation.x=walk*0.65
+        n.position.y=abs(sin(phase))*0.035
 
 func _animate_cars(delta):
     for c in cars:
@@ -669,7 +742,10 @@ func _animate_cars(delta):
         if c.position.z>96:c.position.z=-96
         if c.position.z<-96:c.position.z=96
         c.rotation.y=0 if dir>0 else PI
-        c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.035
+        c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.018
+        var throttle:=clamp(float(c.get_meta("speed"))/14.0,0.0,1.0)
+        for smoke in c.find_children("ExhaustSmoke","CPUParticles3D",true,false):
+            smoke.amount=10+int(throttle*32.0); smoke.speed_scale=0.7+throttle*1.6
 
 func _update_day_night():
     var hour:=fmod(18.0+elapsed*0.12,24.0)
@@ -693,4 +769,5 @@ func _update_hud():
     if not is_instance_valid(hud): return
     hud.text="STREET SOVEREIGN 3D\\n$%d   HP %d   WANTED %d/5   •   %s" % [money,int(health),wanted,districts[mission%3]]
     objective.text="MISSION %d/6  —  %s\\nReach the gold marker" % [mission+1,missions[mission][0]]
-    status.text="44 CIVILIANS • 20 TRAFFIC CARS • TOUCH CAMERA • GYRO "+("ON" if gyro_enabled else "OFF");
+    status.text="44 NPCs • 20 VARIED CARS • EXHAUST FX • TOUCH + GYRO"
+    if is_instance_valid(fps_label): fps_label.text="FPS %d  •  GFX %s" % [Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
