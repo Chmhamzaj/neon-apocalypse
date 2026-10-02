@@ -192,7 +192,7 @@ func cylinder(parent: Node3D, pos: Vector3, radius: float, height: float, mat: M
 
 func _setup_world():
     world_env = WorldEnvironment.new()
-    var env := Environment.new()
+    var env: Environment = Environment.new()
     env.background_mode = Environment.BG_COLOR
     env.background_color = Color("#081226")
     env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -599,7 +599,7 @@ func _input(event):
             if event.index==look_id: look_id=-1
     elif event is InputEventScreenDrag:
         if event.index==joystick_id:
-            var offset:=event.position-joystick_center
+            var offset: Vector2 = event.position-joystick_center
             if offset.length()>joystick_radius: offset=offset.normalized()*joystick_radius
             move_input=offset/joystick_radius
         elif event.index==look_id:
@@ -744,8 +744,11 @@ func _animate_cars(delta):
         c.rotation.y=0 if dir>0 else PI
         c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.018
         var throttle:=clamp(float(c.get_meta("speed"))/14.0,0.0,1.0)
-        for smoke in c.find_children("ExhaustSmoke","CPUParticles3D",true,false):
-            smoke.amount=10+int(throttle*32.0); smoke.speed_scale=0.7+throttle*1.6
+        var smoke_nodes: Array[Node] = c.find_children("ExhaustSmoke","CPUParticles3D",true,false)
+        for smoke_node in smoke_nodes:
+            var smoke: CPUParticles3D = smoke_node as CPUParticles3D
+            if smoke:
+                smoke.amount=10+int(throttle*32.0); smoke.speed_scale=0.7+throttle*1.6
 
 func _update_day_night():
     var hour:=fmod(18.0+elapsed*0.12,24.0)
