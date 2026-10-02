@@ -1251,7 +1251,9 @@ func _update_hud():
         fps_label.text="FPS %d  |  GFX %s"%[Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
     if is_instance_valid(joystick_knob):
         var knob_center:=Vector2(58,58)
-        joystick_knob.position=knob_center+move_input*48.0func _toggle_drive():
+        joystick_knob.position=knob_center+move_input*48.0
+
+func _toggle_drive():
     if driving:
         driving=false
         if is_instance_valid(active_car):
