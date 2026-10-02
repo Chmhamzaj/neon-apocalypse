@@ -1098,7 +1098,7 @@ func _cycle_graphics():
 func _apply_quality():
     if not is_instance_valid(sun): return
     var names=["LOW","MED","HIGH"]
-    graphics_button.text="GRAPHICS: "+names[graphics] if is_instance_valid(graphics_button) else ""
+    graphics_button.text="SET" if is_instance_valid(graphics_button) else ""
     sun.shadow_enabled=graphics>1
     sun.directional_shadow_max_distance=[45.0,75.0,105.0][graphics]
     world_env.environment.ambient_light_energy=[0.68,0.82,0.95][graphics]
