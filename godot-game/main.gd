@@ -743,7 +743,7 @@ func _animate_cars(delta):
         if c.position.z<-96:c.position.z=96
         c.rotation.y=0 if dir>0 else PI
         c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.018
-        var throttle:=clamp(float(c.get_meta("speed"))/14.0,0.0,1.0)
+        var throttle: float=clamp(float(c.get_meta("speed"))/14.0,0.0,1.0)
         var smoke_nodes: Array[Node] = c.find_children("ExhaustSmoke","CPUParticles3D",true,false)
         for smoke_node in smoke_nodes:
             var smoke: CPUParticles3D = smoke_node as CPUParticles3D
