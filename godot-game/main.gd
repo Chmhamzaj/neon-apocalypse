@@ -204,7 +204,7 @@ func _normalize_model_height(root:Node3D,target_height:float)->float:
 func _tint_model(model:Node3D,index:int):
     # Preserve embedded textures while giving NPCs distinct clothing/overall palette variation.
     var tints=[Color("#d7b79c"),Color("#9db7d9"),Color("#b7d09f"),Color("#d3a5c2"),Color("#c5a777"),Color("#9bc6c5")]
-    var tint:=tints[index%tints.size()]
+    var tint:Color=tints[index%tints.size()]
     for mesh_node in model.find_children("*","MeshInstance3D",true,false):
         var mi:=mesh_node as MeshInstance3D
         if mi==null: continue
@@ -324,7 +324,7 @@ func _spawn_population_async():
             c.set_meta("player_car",true)
             c.set_meta("speed",0.0)
             c.set_meta("dir",1.0)
-        var fleet_index:=i%max(1,external_car_scenes.size())
+        var fleet_index:int=i%max(1,external_car_scenes.size())
         if external_car_scenes.size()>0:
             _create_external_car(c,fleet_index)
         elif external_car_scene:
@@ -339,6 +339,70 @@ func _spawn_population_async():
         add_child(c)
         if i%3==0:
             await get_tree().process_frame
+
+func _create_external_human(root:Node3D,index:int):
+    if external_human_scene==null:
+        return
+    var model:=external_human_scene.instantiate()
+    root.add_child(model)
+    _normalize_model_height(model,1.68 if index%3 else 1.76)
+    _tint_model(model,index+1)
+    var ap:=_find_animation_player(model)
+    root.set_meta("model",model)
+    root.set_meta("anim_player",ap)
+    root.set_meta("idle_anim",_find_animation(ap,["idle","stand"]))
+    root.set_meta("walk_anim",_find_animation(ap,["walk"]))
+    root.set_meta("run_anim",_find_animation(ap,["run"]))
+    if ap:
+        var idle_name:String=String(root.get_meta("idle_anim"))
+        if idle_name!="":
+            ap.play(idle_name)
+
+func _create_external_car(root:Node3D,index:int):
+    if external_car_scenes.is_empty():
+        return
+    var model:=external_car_scenes[index%external_car_scenes.size()].instantiate()
+    root.add_child(model)
+    _normalize_model_length(model,4.35)
+    model.position.y=0.05
+    root.set_meta("model",model)
+    root.set_meta("fleet_index",index%external_car_scenes.size())
+    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
+
+func _create_external_car_from_scene(root:Node3D,scene:PackedScene,index:int):
+    if scene==null:
+        return
+    var model:=scene.instantiate()
+    root.add_child(model)
+    _normalize_model_length(model,4.35)
+    model.position.y=0.05
+    root.set_meta("model",model)
+    root.set_meta("fleet_index",index)
+    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
+
+func _normalize_model_length(root:Node3D,target_length:float):
+    var min_z:float=INF
+    var max_z:float=-INF
+    var found:=false
+    for mesh_node in root.find_children("*","MeshInstance3D",true,false):
+        var mi:=mesh_node as MeshInstance3D
+        if mi==null or mi.mesh==null:
+            continue
+        var a:=mi.get_aabb()
+        var corners:Array[Vector3]=[
+            Vector3(a.position.x,a.position.y,a.position.z),
+            Vector3(a.end.x,a.position.y,a.position.z),
+            Vector3(a.position.x,a.position.y,a.end.z),
+            Vector3(a.end.x,a.position.y,a.end.z)]
+        for c in corners:
+            var local_p:=root.to_local(mi.to_global(c))
+            min_z=min(min_z,local_p.z)
+            max_z=max(max_z,local_p.z)
+            found=true
+    if found and max_z-min_z>0.01:
+        var f:float=target_length/(max_z-min_z)
+        root.scale*=f
+        root.position.z=-min_z*f
 
 func material(color: Color, roughness := 0.72, metallic := 0.0, emission := Color.TRANSPARENT) -> StandardMaterial3D:
     var m := StandardMaterial3D.new()
