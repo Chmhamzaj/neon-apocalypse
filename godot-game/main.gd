@@ -322,7 +322,11 @@ func _process(delta):
         _new_mission()
 
 func _move_player(delta):
-    var input_vec=Input.get_vector("left","right","forward","back")
+    var input_vec=Vector2.ZERO
+    if Input.is_key_pressed(KEY_A): input_vec.x-=1
+    if Input.is_key_pressed(KEY_D): input_vec.x+=1
+    if Input.is_key_pressed(KEY_W): input_vec.y-=1
+    if Input.is_key_pressed(KEY_S): input_vec.y+=1
     if touch_dir.length()>0.1: input_vec=touch_dir
     var speed=12.0 if driving else 7.0
     if input_vec.length()>1:input_vec=input_vec.normalized()
