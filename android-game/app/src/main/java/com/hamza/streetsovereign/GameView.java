@@ -5,7 +5,7 @@ import android.graphics.*;
 import android.view.*;
 import java.util.*;
 
-public class GameView extends SurfaceView implements Runnable {
+public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     private final Paint p = new Paint(3);
     private final Random rng = new Random(77);
     private Thread loop; private boolean running;
@@ -28,7 +28,7 @@ public class GameView extends SurfaceView implements Runnable {
     private final float WORLD_W=3200, WORLD_H=2400;
     private final String[] names={"THE FIRST RUN","HOT MERCH","DOCKSIDE PROBLEM","CROSS-TOWN","NIGHT SHIFT","HEAT CHECK","THE FINAL SCORE"};
 
-    public GameView(Context c){ super(c); setFocusable(true); buildWorld(); }
+    public GameView(Context c){ super(c); setFocusable(true); getHolder().addCallback(this); buildWorld(); }
 
     void buildWorld(){
         cars.clear(); npcs.clear(); cops.clear(); buildings.clear();
@@ -57,7 +57,7 @@ public class GameView extends SurfaceView implements Runnable {
         while(running){
             long now=System.nanoTime(); float dt=Math.min(0.033f,(now-last)/1e9f); last=now;
             if(started && !paused) update(dt);
-            drawFrame();
+            postInvalidate();
             try{ Thread.sleep(12); }catch(Exception ignored){}
         }
     }
@@ -94,7 +94,7 @@ public class GameView extends SurfaceView implements Runnable {
         heat-=dt*(wanted>0?2.1f:5f);
         if(heat<0){heat=0;if(wanted>0 && missionTimer%9<dt && !firing){wanted--;}}
         if(wanted>0 && cops.size()<wanted*4) cops.add(new Npc(playerX+500+rng.nextFloat()*250,playerY+300+rng.nextFloat()*250,true));
-        for(Npc c:cops) if(!c.dead && dist(c.x,c.y,playerX)<60){health-=18*dt;}
+        for(Npc c:cops) if(!c.dead && dist(c.x,c.y,playerX,playerY)<60){health-=18*dt;}
         updateMission(dt);
     }
 
