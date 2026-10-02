@@ -336,8 +336,8 @@ func _create_npc_visual(root:Node3D,index:int):
     var sm:=SphereMesh.new();sm.radius=0.22;sm.height=0.44
     head.mesh=sm;head.position=Vector3(0,1.62,0);head.material_override=skin;root.add_child(head)
     for side in [-1.0,1.0]:
-        box(root,Vector3(0.16*side,0.50,0),Vector3(0.18,0.65,0.20),cloth,"Leg")
-        box(root,Vector3(0.34*side,1.08,0),Vector3(0.14,0.62,0.18),cloth,"Arm")
+        box(root,Vector3(0.16*side,0.50,0),Vector3(0.18,0.65,0.20),cloth,"Leg"+("2" if side>0 else ""))
+        box(root,Vector3(0.34*side,1.08,0),Vector3(0.14,0.62,0.18),cloth,"Arm"+("2" if side>0 else ""))
 
 func _create_car(root:Node3D,index:int):
     var colors=[Color("#d83d55"),Color("#3274d8"),Color("#d6a33d"),Color("#40ad7b"),Color("#9b5ed0"),Color("#e1e5e8")]
@@ -355,7 +355,7 @@ func _create_car(root:Node3D,index:int):
             var wm:=CylinderMesh.new();wm.top_radius=0.38;wm.bottom_radius=0.38;wm.height=0.18;wm.radial_segments=12
             wheel.mesh=wm;wheel.rotation_degrees=Vector3(90,0,0);wheel.position=Vector3(x, -0.05,z);wheel.material_override=tire;root.add_child(wheel)
             wheels.append(wheel)
-        car_wheel_sets.append(wheels)
+    car_wheel_sets.append(wheels)
     box(root,Vector3(-0.58,0.20, -2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
     box(root,Vector3(0.58,0.20,-2.05),Vector3(0.32,0.14,0.06),material(Color("#ffe7a1"),0.25,0.1,Color("#ffe7a1")),"Headlight")
 
