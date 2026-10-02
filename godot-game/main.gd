@@ -397,7 +397,8 @@ func _create_humanoid(root:Node3D):
         sphere_part(root,Vector3(0.31*side,2.23,0),0.075,skin_shadow,"Ear")
 
     # Nose bridge/tip and real mouth construction.
-    cylinder(root,Vector3(0,2.22,-0.345),0.040,0.14,skin_shadow,Vector3(deg_to_rad(90),0,0))
+    var nose_bridge:=cylinder(root,Vector3(0,2.22,-0.345),0.040,0.14,skin_shadow,"NoseBridge")
+    nose_bridge.rotation_degrees.x=90.0
     sphere_part(root,Vector3(0,2.17,-0.405),0.055,skin,"NoseTip")
     player_jaw=sphere_part(root,Vector3(0,-0.018,2.065),0.205,skin,"Jaw")
     player_jaw.scale=Vector3(1.15,0.58,0.55)
@@ -496,7 +497,8 @@ func _create_npc_visual(root:Node3D,index:int):
         sphere_part(root,Vector3(0.31*side,0.78,0),0.085,skin,"Hand")
         capsule(root,Vector3(0.16*side,0.52,0),0.125,0.64,cloth,"Leg")
         sphere_part(root,Vector3(0.16*side,0.15,-0.08),0.13,cloth,"Foot")
-    cylinder(root,Vector3(0,1.67,-0.275),0.038,0.10,skin,Vector3(deg_to_rad(90),0,0))
+    var npc_nose:=cylinder(root,Vector3(0,1.67,-0.275),0.038,0.10,skin,"Nose")
+    npc_nose.rotation_degrees.x=90.0
     var mouth:=box(root,Vector3(0,-0.247,1.58),Vector3(0.075,0.013,0.023),lip,"Mouth")
     var jaw:=sphere_part(root,Vector3(0,-0.02,1.59),0.15,skin,"Jaw")
     jaw.scale=Vector3(1.12,0.60,0.55)
