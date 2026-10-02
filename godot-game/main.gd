@@ -37,6 +37,11 @@ var player_legs: Array[Node3D] = []
 var player_head: Node3D
 var player_body: Node3D
 var player_anim_phase := 0.0
+var player_neck: Node3D
+var player_jaw: Node3D
+var player_mouth: Node3D
+var player_eye_nodes: Array[Node3D] = []
+var player_pupil_nodes: Array[Node3D] = []
 var player_eye_nodes: Array[Node3D] = []
 var player_pupil_nodes: Array[Node3D] = []
 var car_wheel_sets: Array[Array] = []
@@ -130,7 +135,7 @@ func _build_city_async():
         await get_tree().process_frame
 
 func _spawn_population_async():
-    for i in range(28):
+    for i in range(20):
         var n := Node3D.new()
         n.name="Civilian_%02d"%i
         n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
@@ -142,7 +147,7 @@ func _spawn_population_async():
         npcs.append(n)
         if i%4==0:
             await get_tree().process_frame
-    for i in range(12):
+    for i in range(10):
         var c := Node3D.new()
         c.name="Traffic_%02d"%i
         c.position=Vector3([-82,-40,42,82][i%4],0.45,rng.randf_range(-90,90))
@@ -348,40 +353,78 @@ func _spawn_player():
     camera.look_at(player.global_position + Vector3(0,1.2,0), Vector3.UP)
 
 func _create_humanoid(root:Node3D):
-    var skin:=material(Color("#c78468"),0.60)
-    var skin_dark:=material(Color("#915943"),0.66)
-    var hair:=material(Color("#151114"),0.48)
-    var jacket:=material(Color("#304a73"),0.54,0.08)
-    var shirt:=material(Color("#e8edf2"),0.50)
-    var pants:=material(Color("#202735"),0.70)
-    var shoes:=material(Color("#0a0d13"),0.45,0.18)
-    var eye_white:=material(Color("#f6f7fb"),0.18)
-    var iris:=material(Color("#3e6f9c"),0.15,0.10)
-    var mouth:=material(Color("#762b3a"),0.48)
-    capsule(root,Vector3(0,1.28,0),0.34,0.92,jacket,"Torso").scale=Vector3(1.03,1.0,0.70)
-    box(root,Vector3(0,1.43,-0.25),Vector3(0.34,0.44,0.035),shirt,"ShirtFront")
-    cylinder(root,Vector3(0,1.82,0),0.15,0.18,skin,"Neck")
-    var head:=sphere_part(root,Vector3(0,2.19,0),0.32,skin,"Head")
-    head.scale=Vector3(0.98,1.05,0.92)
+    var skin:=material(Color("#c78369"),0.57)
+    var skin_shadow:=material(Color("#8f5140"),0.62)
+    var hair:=material(Color("#4c190e"),0.42)
+    var hair_hi:=material(Color("#a63a18"),0.36)
+    var leather:=material(Color("#28140d"),0.58)
+    var armor:=material(Color("#4a5360"),0.27,0.72)
+    var dark_armor:=material(Color("#1a222c"),0.33,0.68)
+    var green:=material(Color("#173d2d"),0.50)
+    var green_trim:=material(Color("#b49449"),0.36,0.42)
+    var pants:=material(Color("#241c1b"),0.62)
+    var boot_mat:=material(Color("#2b160d"),0.46,0.15)
+    var eye_white:=material(Color("#f6f7fb"),0.16)
+    var iris:=material(Color("#4f9a64"),0.12,0.06)
+    var eye_dark:=material(Color("#17181c"),0.22)
+    var lip:=material(Color("#7a3041"),0.42)
+    var mouth_dark:=material(Color("#260e13"),0.35)
+
+    # Organic silhouette: tapered chest, pelvis, limbs, no rectangular torso.
+    player_body=capsule(root,Vector3(0,1.34,0),0.33,0.96,leather,"Torso")
+    player_body.scale=Vector3(1.12,1.0,0.72)
+    capsule(root,Vector3(0,1.03,0),0.30,0.34,pants,"Hip")
+    box(root,Vector3(0,-0.325,1.38),Vector3(0.21,0.018,0.25),dark_armor,"ChestPlate")
+
+    player_neck=cylinder(root,Vector3(0,1.91,0),0.145,0.18,skin,"Neck")
+    var head:=sphere_part(root,Vector3(0,2.24,0),0.34,skin,"Head")
+    head.scale=Vector3(0.99,1.06,0.92)
     player_head=head
-    cylinder(root,Vector3(0,2.49,0),0.33,0.14,hair,"Hair")
-    box(root,Vector3(0,2.42,-0.265),Vector3(0.42,0.14,0.10),hair,"HairFront")
+
+    # Hair mass with layered front locks.
+    sphere_part(root,Vector3(0,2.49,0.015),0.35,hair,"HairMass")
+    for x,z,lean in [[-0.26,2.49,-0.08],[-0.13,2.58,-0.04],[0.0,2.62,0.0],[0.14,2.58,0.04],[0.27,2.50,0.08]]:
+        var lock:=sphere_part(root,Vector3(x,-0.25,z),0.12,hair_hi,"HairLock")
+        lock.scale=Vector3(1.05,1.55,0.55)
+
+    # Expressive eyes and independently controllable pupils.
     for side in [-1.0,1.0]:
-        sphere_part(root,Vector3(0.305*side,2.18,0),0.075,skin_dark,"Ear")
-        var eye:=sphere_part(root,Vector3(0.115*side,2.23,-0.286),0.058,eye_white,"Eye")
-        var pupil:=sphere_part(root,Vector3(0.115*side,2.23,-0.338),0.026,iris,"Pupil")
+        var eye:=sphere_part(root,Vector3(0.115*side,2.28,-0.315),0.060,eye_white,"Eye")
+        var pupil:=sphere_part(root,Vector3(0.115*side,2.28,-0.365),0.028,iris,"Pupil")
+        sphere_part(root,Vector3(0.115*side,2.282,-0.389),0.010,eye_white,"EyeSpark")
+        box(root,Vector3(0.115*side,2.36,-0.320),Vector3(0.13,0.022,0.025),hair,"Brow")
         player_eye_nodes.append(eye)
         player_pupil_nodes.append(pupil)
-        box(root,Vector3(0.115*side,2.31,-0.293),Vector3(0.13,0.024,0.025),hair,"Brow")
-    cylinder(root,Vector3(0,2.17,-0.34),0.05,0.13,skin_dark,"Nose")
-    box(root,Vector3(0,2.08,-0.327),Vector3(0.15,0.028,0.025),mouth,"Mouth")
+        sphere_part(root,Vector3(0.31*side,2.23,0),0.075,skin_shadow,"Ear")
+
+    # Nose bridge/tip and real mouth construction.
+    cylinder(root,Vector3(0,2.22,-0.345),0.040,0.14,skin_shadow,"NoseBridge",Vector3(deg_to_rad(90),0,0))
+    sphere_part(root,Vector3(0,2.17,-0.405),0.055,skin,"NoseTip")
+    player_jaw=sphere_part(root,Vector3(0,-0.018,2.065),0.205,skin,"Jaw")
+    player_jaw.scale=Vector3(1.15,0.58,0.55)
+    player_mouth=box(root,Vector3(0,-0.351,2.075),Vector3(0.105,0.018,0.038),mouth_dark,"Mouth")
+    box(root,Vector3(0,-0.366,2.088),Vector3(0.074,0.012,0.012),lip,"UpperLip")
+    box(root,Vector3(0,-0.366,2.056),Vector3(0.066,0.012,0.010),lip,"LowerLip")
+
+    # Layered shoulders, arms, gloves, pants and boots.
     for side in [-1.0,1.0]:
-        var arm:=capsule(root,Vector3(0.49*side,1.31,0),0.105,0.68,jacket,"Arm")
-        player_arms.append(arm)
-        sphere_part(root,Vector3(0.49*side,0.89,0),0.11,skin,"Hand")
-        var leg:=capsule(root,Vector3(0.19*side,0.64,0),0.16,0.84,pants,"Leg")
-        player_legs.append(leg)
-        box(root,Vector3(0.19*side,0.15,-0.02),Vector3(0.34,0.18,0.56),shoes,"Shoe")
+        var s:=-1 if side<0 else 1
+        sphere_part(root,Vector3(0.51*side,1.74,0),0.20,armor,"Shoulder")
+        capsule(root,Vector3(0.55*side,1.45,0),0.11,0.58,leather,"UpperArm")
+        capsule(root,Vector3(0.57*side,1.02,0),0.095,0.46,armor,"Forearm")
+        sphere_part(root,Vector3(0.57*side,0.73,0),0.11,skin,"Hand")
+        capsule(root,Vector3(0.21*side,0.63,0),0.16,0.82,pants,"Thigh")
+        capsule(root,Vector3(0.21*side,0.18,0),0.13,0.58,boot_mat,"Shin")
+        box(root,Vector3(0.21*side,-0.12,-0.12),Vector3(0.20,0.34,0.14),boot_mat,"Boot",0.05)
+
+    # Cape panels and gold trim give the silhouette from the supplied reference.
+    var cape_l:=sphere_part(root,Vector3(-0.31,1.27,0.10),0.65,green,"Cape")
+    cape_l.scale=Vector3(0.62,1.20,0.18)
+    var cape_r:=sphere_part(root,Vector3(0.31,1.27,0.10),0.65,green,"Cape")
+    cape_r.scale=Vector3(0.62,1.20,0.18)
+    box(root,Vector3(-0.47,-0.20,1.35),Vector3(0.025,0.018,0.56),green_trim,"CapeTrim")
+    box(root,Vector3(0.47,-0.20,1.35),Vector3(0.025,0.018,0.56),green_trim,"CapeTrim",0.01)
+    box(root,Vector3(0,-0.37,1.08),Vector3(0.42,0.018,0.035),green_trim,"BeltTrim")
 
 func capsule(parent:Node3D,pos:Vector3,radius:float,height:float,mat:Material,node_name:String)->MeshInstance3D:
     var n:=MeshInstance3D.new()
@@ -431,25 +474,40 @@ func _spawn_population():
 
 func _create_npc_visual(root:Node3D,index:int):
     var skins=[Color("#9b604a"),Color("#d08a67"),Color("#704738"),Color("#c99a76"),Color("#7f523f"),Color("#d9a27c")]
-    var outfits=[Color("#d44c5d"),Color("#3f73bd"),Color("#4aa878"),Color("#b46ad2"),Color("#d08a3c"),Color("#2f9aa1")]
-    var skin:=material(skins[index%skins.size()],0.66)
-    var cloth:=material(outfits[index%outfits.size()],0.58,0.05)
-    capsule(root,Vector3(0,1.03,0),0.26,0.76,cloth,"Body")
-    cylinder(root,Vector3(0,1.48,0),0.10,0.11,skin,"Neck")
-    var head:=sphere_part(root,Vector3(0,1.64,0),0.235,skin,"Head")
-    cylinder(root,Vector3(0,1.86,0),0.245,0.10,material(Color("#17120f"),0.48),"Hair")
-    box(root,Vector3(0,1.76,-0.19),Vector3(0.06,0.10,0.035),material(Color("#5b3126"),0.60),"Nose")
-    box(root,Vector3(0,1.55,-0.20),Vector3(0.11,0.025,0.022),material(Color("#702735"),0.55),"Mouth")
+    var outfits=[Color("#7d3348"),Color("#355f94"),Color("#3d765c"),Color("#754f98"),Color("#8f622f"),Color("#327985")]
+    var hairs=[Color("#1a1210"),Color("#4a2116"),Color("#a0441f"),Color("#252a32"),Color("#6b351d"),Color("#3a273e")]
+    var skin:=material(skins[index%skins.size()],0.62)
+    var cloth:=material(outfits[index%outfits.size()],0.58,0.04)
+    var hair:=material(hairs[index%hairs.size()],0.42)
+    var eye_white:=material(Color("#f2f5f8"),0.19)
+    var iris:=material([Color("#4f9a64"),Color("#527bad"),Color("#8d6b38")][index%3],0.15,0.04)
+    var lip:=material(Color("#73323d"),0.45)
+    capsule(root,Vector3(0,1.05,0),0.27,0.78,cloth,"Body").scale=Vector3(1.05,1.0,0.76)
+    capsule(root,Vector3(0,0.60,0),0.18,0.50,cloth,"Hip")
+    cylinder(root,Vector3(0,1.50,0),0.105,0.12,skin,"Neck")
+    var head:=sphere_part(root,Vector3(0,1.67,0),0.245,skin,"Head")
+    head.scale=Vector3(0.98,1.05,0.92)
+    sphere_part(root,Vector3(0,1.86,0.015),0.255,hair,"Hair")
     for side in [-1.0,1.0]:
-        sphere_part(root,Vector3(0.082*side,1.68,-0.205),0.040,material(Color("#eef3f7"),0.20),"Eye")
-        capsule(root,Vector3(0.17*side,0.52,0),0.11,0.64,cloth,"Leg")
-        capsule(root,Vector3(0.31*side,1.05,0),0.080,0.56,cloth,"Arm")
+        sphere_part(root,Vector3(0.18*side,1.70,-0.22),0.048,eye_white,"Eye")
+        sphere_part(root,Vector3(0.18*side,1.70,-0.263),0.024,iris,"Pupil")
+        box(root,Vector3(0.18*side,1.775,-0.222),Vector3(0.09,0.016,0.018),hair,"Brow")
+        sphere_part(root,Vector3(0.245*side,1.67,0),0.060,skin,"Ear")
+        capsule(root,Vector3(0.31*side,1.09,0),0.085,0.56,cloth,"Arm")
+        sphere_part(root,Vector3(0.31*side,0.78,0),0.085,skin,"Hand")
+        capsule(root,Vector3(0.16*side,0.52,0),0.125,0.64,cloth,"Leg")
+        sphere_part(root,Vector3(0.16*side,0.15,-0.08),0.13,cloth,"Foot")
+    cylinder(root,Vector3(0,1.67,-0.275),0.038,0.10,skin,"Nose",Vector3(deg_to_rad(90),0,0))
+    var mouth:=box(root,Vector3(0,-0.247,1.58),Vector3(0.075,0.013,0.023),lip,"Mouth")
+    var jaw:=sphere_part(root,Vector3(0,-0.02,1.59),0.15,skin,"Jaw")
+    jaw.scale=Vector3(1.12,0.60,0.55)
     root.set_meta("head_node",head)
-    root.set_meta("target",Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0)))
-    root.set_meta("life_clock",0.0)
-    root.set_meta("phase",rng.randf_range(0.0,TAU))
-    root.set_meta("check_clock",rng.randf_range(1.0,5.0))
-    root.set_meta("checking_time",false)
+    root.set_meta("jaw_node",jaw)
+    root.set_meta("mouth_node",mouth)
+    root.set_meta("eye_l",root.get_node_or_null("Eye"))
+    root.set_meta("eye_r",root.get_node_or_null("Eye2"))
+    root.set_meta("pupil_l",root.get_node_or_null("Pupil"))
+    root.set_meta("pupil_r",root.get_node_or_null("Pupil2"))
 
 func _create_car(root:Node3D,index:int):
     var colors=[Color("#d83d55"),Color("#3274d8"),Color("#d6a33d"),Color("#40ad7b"),Color("#9b5ed0"),Color("#e1e5e8")]
@@ -757,54 +815,99 @@ func _animate_npcs(delta):
         var target:Vector3=n.get_meta("target",n.global_position)
         var to_target:=target-n.global_position
         to_target.y=0.0
-        if to_target.length()<1.6:
-            target=Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0))
-            n.set_meta("target",target)
-            to_target=target-n.global_position
-            to_target.y=0.0
         var speed:float=float(n.get_meta("speed"))
-        var moving:=to_target.length()>0.25
         var life:float=float(n.get_meta("life_clock"))+delta
         n.set_meta("life_clock",life)
-        var phase:float=life*speed*4.0+float(n.get_meta("phase"))
-        var head:Node3D=n.get_meta("head_node") as Node3D
-        var arm_l:Node3D=n.get_node_or_null("Arm") as Node3D
-        var arm_r:Node3D=n.get_node_or_null("Arm2") as Node3D
-        var leg_l:Node3D=n.get_node_or_null("Leg") as Node3D
-        var leg_r:Node3D=n.get_node_or_null("Leg2") as Node3D
-        if moving:
-            var dir:=to_target.normalized()
-            n.position+=dir*speed*delta
-            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*6.0)
-            var walk:=sin(phase)
-            if arm_l: arm_l.rotation.x=walk*0.52
-            if arm_r: arm_r.rotation.x=-walk*0.52
-            if leg_l: leg_l.rotation.x=-walk*0.62
-            if leg_r: leg_r.rotation.x=walk*0.62
-            if head: head.rotation.y=sin(phase*0.31)*0.10
-        else:
-            var glance:=sin(life*0.72+float(n.get_meta("phase")))
+
+        # Occasionally pair nearby NPCs and have them converse naturally.
+        var partner:Node3D=n.get_meta("partner",null) as Node3D
+        if not is_instance_valid(partner) and not bool(n.get_meta("conversation_cooldown",false)) and fmod(life+float(n.get_meta("phase")),11.0)<0.035:
+            var nearest:=_nearest_npc(n)
+            if nearest and n.global_position.distance_to(nearest.global_position)<5.0:
+                n.set_meta("partner",nearest)
+                nearest.set_meta("partner",n)
+                n.set_meta("talk_clock",0.0)
+                nearest.set_meta("talk_clock",0.0)
+
+        partner=n.get_meta("partner",null) as Node3D
+        var talking:=is_instance_valid(partner) and n.global_position.distance_to(partner.global_position)<5.5
+        var head:=n.get_meta("head_node") as Node3D
+        var jaw:=n.get_meta("jaw_node") as Node3D
+        var mouth:=n.get_meta("mouth_node") as Node3D
+        var arm_l:=n.get_node_or_null("Arm") as Node3D
+        var arm_r:=n.get_node_or_null("Arm2") as Node3D
+        var leg_l:=n.get_node_or_null("Leg") as Node3D
+        var leg_r:=n.get_node_or_null("Leg2") as Node3D
+
+        if talking:
+            var talk_clock:float=float(n.get_meta("talk_clock",0.0))+delta
+            n.set_meta("talk_clock",talk_clock)
+            var face_dir:=partner.global_position-n.global_position
+            face_dir.y=0.0
+            if face_dir.length()>0.1:
+                n.rotation.y=lerp_angle(n.rotation.y,atan2(face_dir.x,face_dir.z),delta*4.0)
             if head:
-                head.rotation.y=lerp(head.rotation.y,glance*0.48,delta*3.5)
-                head.rotation.x=sin(life*0.45)*0.04
-            if arm_l: arm_l.rotation.x=0.02*sin(life)
-            if arm_r: arm_r.rotation.x=-0.02*sin(life)
-            var check_clock:float=float(n.get_meta("check_clock"))+delta
-            if check_clock>8.0:
-                check_clock=0.0
-                n.set_meta("checking_time",true)
-            n.set_meta("check_clock",check_clock)
-            if bool(n.get_meta("checking_time")):
-                if arm_r:
-                    arm_r.rotation.z=lerp(arm_r.rotation.z,-1.10,delta*4.0)
-                    arm_r.rotation.x=lerp(arm_r.rotation.x,-0.50,delta*4.0)
+                head.rotation.y=sin(talk_clock*1.7+float(n.get_meta("phase")))*0.14
+                head.rotation.x=sin(talk_clock*0.9)*0.04
+            var syllable:=abs(sin(talk_clock*8.0+float(n.get_meta("phase"))))
+            if jaw: jaw.rotation.x=syllable*0.11
+            if mouth: mouth.scale.y=1.0+syllable*1.8
+            if arm_r:
+                arm_r.rotation.x=sin(talk_clock*1.35)*0.10
+                arm_r.rotation.z=-0.18+sin(talk_clock*0.9)*0.08
+            if fmod(talk_clock,5.5)>4.8:
+                n.set_meta("partner",null)
+                partner.set_meta("partner",null)
+                n.set_meta("conversation_cooldown",true)
+                partner.set_meta("conversation_cooldown",true)
+        else:
+            if to_target.length()<1.6:
+                target=Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0))
+                n.set_meta("target",target)
+                to_target=target-n.global_position
+                to_target.y=0.0
+            var moving:=to_target.length()>0.25
+            var phase:float=life*speed*4.0+float(n.get_meta("phase"))
+            if moving:
+                var dir:=to_target.normalized()
+                n.position+=dir*speed*delta
+                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*5.5)
+                var walk:=sin(phase)
+                if arm_l: arm_l.rotation.x=walk*0.50
+                if arm_r: arm_r.rotation.x=-walk*0.50
+                if leg_l: leg_l.rotation.x=-walk*0.60
+                if leg_r: leg_r.rotation.x=walk*0.60
+                if head: head.rotation.y=sin(phase*0.31)*0.08
+            else:
+                var glance:=sin(life*0.65+float(n.get_meta("phase")))
                 if head:
-                    head.rotation.y=lerp(head.rotation.y,0.30,delta*4.0)
-                if check_clock>1.9:
-                    n.set_meta("checking_time",false)
-            elif arm_r:
-                arm_r.rotation.z=lerp(arm_r.rotation.z,0.0,delta*3.0)
+                    head.rotation.y=glance*0.42
+                    head.rotation.x=sin(life*0.4)*0.035
+                if arm_l: arm_l.rotation.z=sin(life*0.7)*0.04
+                if arm_r: arm_r.rotation.z=-sin(life*0.7)*0.04
+                var check_clock:float=float(n.get_meta("check_clock",0.0))+delta
+                if check_clock>8.0:
+                    check_clock=0.0
+                    n.set_meta("checking_time",true)
+                n.set_meta("check_clock",check_clock)
+                if bool(n.get_meta("checking_time",false)):
+                    if arm_r:
+                        arm_r.rotation.z=lerp(arm_r.rotation.z,-1.05,delta*4.0)
+                        arm_r.rotation.x=lerp(arm_r.rotation.x,-0.45,delta*4.0)
+                    if head: head.rotation.y=lerp(head.rotation.y,0.24,delta*3.5)
+                    if check_clock>2.0: n.set_meta("checking_time",false)
         n.position.y=0.0
+
+func _nearest_npc(source:Node3D)->Node3D:
+    var best:Node3D=null
+    var best_d:=999.0
+    for other in npcs:
+        if other==source: continue
+        var d:=source.global_position.distance_to(other.global_position)
+        if d<best_d:
+            best_d=d
+            best=other
+    return best
 
 func _animate_cars(delta):
     for c in cars:
@@ -844,5 +947,5 @@ func _update_hud():
     if not is_instance_valid(hud): return
     hud.text="STREET SOVEREIGN 3D\\n$%d   HP %d   WANTED %d/5   •   %s" % [money,int(health),wanted,districts[mission%3]]
     objective.text="MISSION %d/6  —  %s\\nReach the gold marker" % [mission+1,missions[mission][0]]
-    status.text="28 NPCs • 12 VARIED CARS • EXHAUST FX • TOUCH + GYRO"
+    status.text="20 HUMAN NPCs • 10 VARIED CARS • FACIAL AI • TOUCH + GYRO"
     if is_instance_valid(fps_label): fps_label.text="FPS %d  •  GFX %s" % [Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
