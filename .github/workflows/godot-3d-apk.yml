@@ -18,10 +18,10 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.5.stable
           unzip -q Godot_v4.5-stable_export_templates.tpz -d /tmp/godot-templates
           cp -r /tmp/godot-templates/templates/* ~/.local/share/godot/export_templates/4.5.stable/
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Install Android packages
-        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - name: Configure Android SDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - name: Export APK
         run: |
           mkdir -p dist
