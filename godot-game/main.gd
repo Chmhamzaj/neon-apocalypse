@@ -425,17 +425,26 @@ func _spawn_population():
         add_child(c)
 
 func _create_npc_visual(root:Node3D,index:int):
-    var skin_colors=[Color("#9b604a"),Color("#d08a67"),Color("#704738"),Color("#c99a76")]
-    var clothes=[Color("#d44c5d"),Color("#3f73bd"),Color("#4aa878"),Color("#b46ad2")]
-    var skin:=material(skin_colors[index%4],0.8)
-    var cloth:=material(clothes[index%4],0.72)
-    box(root,Vector3(0,1.05,0),Vector3(0.5,0.72,0.30),cloth,"Body")
-    var head:=MeshInstance3D.new()
-    var sm:=SphereMesh.new();sm.radius=0.22;sm.height=0.44
-    head.mesh=sm;head.position=Vector3(0,1.62,0);head.material_override=skin;root.add_child(head)
+    var skins=[Color("#9b604a"),Color("#d08a67"),Color("#704738"),Color("#c99a76"),Color("#7f523f"),Color("#d9a27c")]
+    var outfits=[Color("#d44c5d"),Color("#3f73bd"),Color("#4aa878"),Color("#b46ad2"),Color("#d08a3c"),Color("#2f9aa1")]
+    var skin:=material(skins[index%skins.size()],0.66)
+    var cloth:=material(outfits[index%outfits.size()],0.58,0.05)
+    capsule(root,Vector3(0,1.03,0),0.26,0.76,cloth,"Body")
+    cylinder(root,Vector3(0,1.48,0),0.10,0.11,skin,"Neck")
+    var head:=sphere_part(root,Vector3(0,1.64,0),0.235,skin,"Head")
+    cylinder(root,Vector3(0,1.86,0),0.245,0.10,material(Color("#17120f"),0.48),"Hair")
+    box(root,Vector3(0,1.76,-0.19),Vector3(0.06,0.10,0.035),material(Color("#5b3126"),0.60),"Nose")
+    box(root,Vector3(0,1.55,-0.20),Vector3(0.11,0.025,0.022),material(Color("#702735"),0.55),"Mouth")
     for side in [-1.0,1.0]:
-        box(root,Vector3(0.16*side,0.50,0),Vector3(0.18,0.65,0.20),cloth,"Leg"+("2" if side>0 else ""))
-        box(root,Vector3(0.34*side,1.08,0),Vector3(0.14,0.62,0.18),cloth,"Arm"+("2" if side>0 else ""))
+        sphere_part(root,Vector3(0.082*side,1.68,-0.205),0.040,material(Color("#eef3f7"),0.20),"Eye")
+        capsule(root,Vector3(0.17*side,0.52,0),0.11,0.64,cloth,"Leg")
+        capsule(root,Vector3(0.31*side,1.05,0),0.080,0.56,cloth,"Arm")
+    root.set_meta("head_node",head)
+    root.set_meta("target",Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0)))
+    root.set_meta("life_clock",0.0)
+    root.set_meta("phase",rng.randf_range(0.0,TAU))
+    root.set_meta("check_clock",rng.randf_range(1.0,5.0))
+    root.set_meta("checking_time",false)
 
 func _create_car(root:Node3D,index:int):
     var colors=[Color("#d83d55"),Color("#3274d8"),Color("#d6a33d"),Color("#40ad7b"),Color("#9b5ed0"),Color("#e1e5e8")]
