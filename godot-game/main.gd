@@ -81,7 +81,6 @@ func _boot_world():
     await get_tree().process_frame
     boot_label.text = "LOADING • WORLD LIGHTING"
     _setup_world()
-    _setup_audio()
     await get_tree().process_frame
     boot_label.text = "LOADING • CITY 10%"
     await _build_city_async()
@@ -105,10 +104,10 @@ func _build_city_async():
         [Color("#352c42"),Color("#65506f"),Color("#ffbf4b")],
         [Color("#263d35"),Color("#4e765f"),Color("#8ef08d")]
     ]
-    var total:=120
+    var total:=72
     var done:=0
     for ds in range(4):
-        for i in range(30):
+        for i in range(18):
             var bx: float = float(district_centers[ds]) + rng.randf_range(-16.0,16.0)
             var bz: float = rng.randf_range(-82.0,82.0)
             if abs(bx) < 8: bx += 12.0
@@ -129,7 +128,7 @@ func _build_city_async():
         await get_tree().process_frame
 
 func _spawn_population_async():
-    for i in range(44):
+    for i in range(28):
         var n := Node3D.new()
         n.name="Civilian_%02d"%i
         n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
@@ -141,7 +140,7 @@ func _spawn_population_async():
         npcs.append(n)
         if i%4==0:
             await get_tree().process_frame
-    for i in range(20):
+    for i in range(12):
         var c := Node3D.new()
         c.name="Traffic_%02d"%i
         c.position=Vector3([-82,-40,42,82][i%4],0.45,rng.randf_range(-90,90))
@@ -306,7 +305,7 @@ func _create_bridge(z:float):
 
 func _build_instanced_props():
     # Deliberately sparse decorative props around roads; avoids thousands of active nodes.
-    for i in range(90):
+    for i in range(36):
         var x := rng.randf_range(-88,88)
         var z := rng.randf_range(-88,88)
         if abs(x) < 10: continue
@@ -430,9 +429,8 @@ func _create_car(root:Node3D,index:int):
     var paint:=material(colors[index%colors.size()],0.32,0.45)
     var glass:=material(Color("#0b1623"),0.12,0.75)
     var tire:=material(Color("#090a0d"),0.92)
-    box(root,Vector3(0,0,0),Vector3(2.0,0.62,4.1),paint,"CarBody")
     var style:=index%4
-    var body_w:=2.0 if style!=1 else 2.15
+    var body_w:float=2.0 if style!=1 else 2.15
     var body_h:=0.62 if style!=3 else 0.82
     box(root,Vector3(0,0,0),Vector3(body_w,body_h,4.1+float(style)*0.25),paint,"CarBody")
     box(root,Vector3(0,0.45,-0.15),Vector3(1.45,0.48,1.85 if style<3 else 1.55),glass,"Cabin")
@@ -772,5 +770,5 @@ func _update_hud():
     if not is_instance_valid(hud): return
     hud.text="STREET SOVEREIGN 3D\\n$%d   HP %d   WANTED %d/5   •   %s" % [money,int(health),wanted,districts[mission%3]]
     objective.text="MISSION %d/6  —  %s\\nReach the gold marker" % [mission+1,missions[mission][0]]
-    status.text="44 NPCs • 20 VARIED CARS • EXHAUST FX • TOUCH + GYRO"
+    status.text="28 NPCs • 12 VARIED CARS • EXHAUST FX • TOUCH + GYRO"
     if is_instance_valid(fps_label): fps_label.text="FPS %d  •  GFX %s" % [Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
