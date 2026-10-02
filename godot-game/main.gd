@@ -255,24 +255,18 @@ func _build_optimized_city():
         _create_bridge(z)
 
 func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:int):
-    var root := Node3D.new()
-    root.position = Vector3(x,0,z)
+    var root:=Node3D.new()
+    root.position=Vector3(x,0,z)
     city.add_child(root)
-    var facade: Color = palette[i%2]
-    box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),material(facade,0.65),"Building")
-    # Vertical side tower / architectural crown.
+    var facade:Color=palette[i%2]
+    box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),material(facade,0.58),"Building")
+    var accent:=material(palette[2],0.22,0.30,palette[2])
+    box(root,Vector3(-w*0.30,h*0.52,d*0.515),Vector3(w*0.06,h*0.72,0.06),accent,"FacadeAccent")
+    box(root,Vector3(w*0.30,h*0.34,d*0.515),Vector3(w*0.06,h*0.40,0.06),accent,"FacadeAccent2")
     if i%3==0:
-        box(root,Vector3(w*0.28,h+1.5,0),Vector3(w*0.22,3.0,d*0.45),material(palette[1],0.55,0.15),"Crown")
-    # Windows in two bands, recognizable as a building rather than a plain cube.
-    var window_mat := material(Color("#101b2b"),0.22,0.45,palette[2])
-    for band in range(min(5,int(h/4.5))):
-        var yy := 2.0 + band*4.0
-        box(root,Vector3(-w*0.18,yy,d*0.515),Vector3(w*0.23,1.0,0.08),window_mat,"Window")
-        box(root,Vector3(w*0.18,yy,d*0.515),Vector3(w*0.23,1.0,0.08),window_mat,"Window")
-    if i%4==0:
-        box(root,Vector3(0,h*0.72,d*0.515),Vector3(w*0.78,0.22,0.08),material(palette[2],0.2,0.2,palette[2]),"NeonSign")
-    if i%5==0:
-        cylinder(root,Vector3(0,h+2,0),0.65,4.0,material(Color("#1c202a"),0.45,0.3),"RoofTank")
+        box(root,Vector3(0,h+0.55,0),Vector3(w*0.50,0.65,d*0.50),material(palette[1],0.45,0.18),"Crown")
+    elif i%3==1:
+        cylinder(root,Vector3(0,h+0.90,0),0.45,1.8,material(Color("#222932"),0.45,0.28),"RoofUnit")
 
 func _build_roads():
     var road_mat := material(Color("#10141b"),0.96)
