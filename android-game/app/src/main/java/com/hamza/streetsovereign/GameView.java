@@ -243,6 +243,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     @Override public void surfaceCreated(SurfaceHolder h){running=true;loop=new Thread(this);loop.start();}
     @Override public void surfaceDestroyed(SurfaceHolder h){running=false;try{if(loop!=null)loop.join();}catch(Exception ignored){}}
+    @Override public void surfaceChanged(SurfaceHolder h,int format,int width,int height){}
 
     static class Bld{float x,y,w,h;int t;Bld(float x,float y,float w,float h,int t){this.x=x;this.y=y;this.w=w;this.h=h;this.t=t;}}
     class Car{float x,y;int t;boolean special;Car(float x,float y,int t,boolean s){this.x=x;this.y=y;this.t=t;this.special=s;}}
