@@ -23,6 +23,11 @@ jobs:
           set -e
           mkdir -p godot-game/assets/external
           curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human.glb" -o godot-game/assets/external/human.glb
+          # Multiple distinct, CC0 Kenney Car Kit models (car-kit mirror with embedded GLB files)
+          mkdir -p godot-game/assets/external/kenney-cars
+          for f in sedan sedan-sports suv suv-luxury hatchback-sports taxi police ambulance firetruck truck van delivery race; do
+            curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/$f.glb" -o "godot-game/assets/external/kenney-cars/$f.glb"
+          done
           curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb" -o godot-game/assets/external/CarConcept.glb
 
           mkdir -p godot-game/assets/external/polyhaven
@@ -42,7 +47,7 @@ jobs:
           curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_nor_gl_2k.jpg
 
           ls -lh godot-game/assets/external
-          file godot-game/assets/external/human.glb godot-game/assets/external/CarConcept.glb
+          file godot-game/assets/external/human.glb godot-game/assets/external/CarConcept.glb godot-game/assets/external/kenney-cars/sedan.glb
       - name: Configure Android SDK
         uses: android-actions/setup-android@v3
         with:
