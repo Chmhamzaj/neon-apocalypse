@@ -30,3 +30,14 @@ Poly Haven states that its assets are CC0.
 
 ## Build policy
 External downloads happen in GitHub Actions, then Godot imports the assets before the APK is exported. No network downloads are performed by the game at runtime.
+
+
+## Vehicle fleet
+
+Kenney Car Kit assets are sourced from a public mirror of the Kenney assets used by Godot racing projects:
+https://github.com/Hidencod/tge-assets/tree/main/packs/car-kit
+
+Selected GLBs in this build: sedan, sedan-sports, suv, suv-luxury, hatchback-sports, taxi, police, ambulance, firetruck, truck, van, delivery, race. The mirror identifies these models as Kenney Car Kit assets and the associated project documentation identifies the car-kit assets as CC0/public-domain use.
+
+The build also includes KhronosGroup CarConcept as an additional distinct vehicle:
+https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept
