@@ -56,6 +56,11 @@ var camera_distance := 7.0
 var camera_height := 2.8
 var external_human_scene: PackedScene
 var external_car_scene: PackedScene
+var external_car_scenes: Array[PackedScene] = []
+var drive_button: Button
+var active_car: Node3D
+var building_obstacles: Array[Rect2] = []
+var sidewalk_waypoints: Array[Vector3] = []
 var external_lamp_scene: PackedScene
 var asphalt_pbr: StandardMaterial3D
 var concrete_pbr: StandardMaterial3D
@@ -128,6 +133,15 @@ func _prepare_external_assets():
         external_human_scene=load("res://assets/external/human.glb") as PackedScene
     if ResourceLoader.exists("res://assets/external/CarConcept.glb"):
         external_car_scene=load("res://assets/external/CarConcept.glb") as PackedScene
+    external_car_scenes.clear()
+    var fleet:=["sedan","sedan-sports","suv","suv-luxury","hatchback-sports","taxi","police","ambulance","firetruck","truck","van","delivery","race","CarConcept"]
+    for model_name in fleet:
+        var path:="res://assets/external/kenney-cars/%s.glb"%model_name
+        if model_name=="CarConcept":
+            path="res://assets/external/CarConcept.glb"
+        if ResourceLoader.exists(path):
+            var scene:=load(path) as PackedScene
+            if scene: external_car_scenes.append(scene)
     if ResourceLoader.exists("res://assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf"):
         external_lamp_scene=load("res://assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf") as PackedScene
     asphalt_pbr=_make_pbr_material(
@@ -157,6 +171,57 @@ func _make_pbr_material(albedo_path:String,normal_path:String,rough_path:String,
     m.uv1_scale=tiling
     return m
 
+func _normalize_model_height(root:Node3D,target_height:float)->float:
+    var min_y:=INF
+    var max_y:=-INF
+    var found:=false
+    for mesh_node in root.find_children("*","MeshInstance3D",true,false):
+        var mi:=mesh_node as MeshInstance3D
+        if mi==null or mi.mesh==null: continue
+        var a:=mi.get_aabb()
+        var corners=[Vector3(a.position.x,a.position.y,a.position.z),
+            Vector3(a.end.x,a.position.y,a.position.z),
+            Vector3(a.position.x,a.end.y,a.position.z),
+            Vector3(a.position.x,a.position.y,a.end.z),
+            Vector3(a.end.x,a.end.y,a.position.z),
+            Vector3(a.end.x,a.position.y,a.end.z),
+            Vector3(a.position.x,a.end.y,a.end.z),
+            Vector3(a.end.x,a.end.y,a.end.z)]
+        for c in corners:
+            var p:=mi.to_global(c)
+            var local_p:=root.to_local(p)
+            min_y=min(min_y,local_p.y)
+            max_y=max(max_y,local_p.y)
+            found=true
+    if not found or max_y-min_y<0.01:
+        return 1.0
+    var current_height:=max_y-min_y
+    var scale_factor:=target_height/current_height
+    root.scale*=scale_factor
+    root.position.y=-min_y*scale_factor
+    return scale_factor
+
+func _tint_model(model:Node3D,index:int):
+    # Preserve embedded textures while giving NPCs distinct clothing/overall palette variation.
+    var tints=[Color("#d7b79c"),Color("#9db7d9"),Color("#b7d09f"),Color("#d3a5c2"),Color("#c5a777"),Color("#9bc6c5")]
+    var tint:=tints[index%tints.size()]
+    for mesh_node in model.find_children("*","MeshInstance3D",true,false):
+        var mi:=mesh_node as MeshInstance3D
+        if mi==null: continue
+        var count:=mi.get_surface_override_material_count()
+        if count<=0 and mi.mesh:
+            count=mi.mesh.get_surface_count()
+        for si in range(count):
+            var base:Material=mi.get_active_material(si)
+            if base is StandardMaterial3D:
+                var m:StandardMaterial3D=(base as StandardMaterial3D).duplicate()
+                m.albedo_color=Color(
+                    clamp(m.albedo_color.r*tint.r*1.35,0.0,1.0),
+                    clamp(m.albedo_color.g*tint.g*1.35,0.0,1.0),
+                    clamp(m.albedo_color.b*tint.b*1.35,0.0,1.0),
+                    m.albedo_color.a)
+                mi.set_surface_override_material(si,m)
+
 func _replace_player_with_external_asset():
     if external_human_scene==null or not is_instance_valid(player):
         return
@@ -171,8 +236,8 @@ func _replace_player_with_external_asset():
     player.add_child(player_visual)
     var model:=external_human_scene.instantiate()
     player_visual.add_child(model)
-    model.scale=Vector3.ONE
-    model.position.y=0.02
+    _normalize_model_height(model,1.78)
+    _tint_model(model,0)
     player_model_animation=_find_animation_player(model)
     if player_model_animation:
         player_idle_anim=_find_animation(player_model_animation,["idle","stand"])
@@ -180,6 +245,7 @@ func _replace_player_with_external_asset():
         player_run_anim=_find_animation(player_model_animation,["run"])
         if player_idle_anim!="":
             player_model_animation.play(player_idle_anim)
+
 
 func _find_animation_player(root:Node)->AnimationPlayer:
     var players:=root.find_children("*","AnimationPlayer",true,false)
@@ -232,36 +298,98 @@ func _build_city_async():
         await get_tree().process_frame
 
 func _spawn_population_async():
+    _build_sidewalk_waypoints()
     for i in range(20):
         var n:=Node3D.new()
         n.name="Civilian_%02d"%i
-        n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
+        n.position=_nearest_safe_sidewalk_point(PLAYER_START + Vector3(rng.randf_range(-34,34),0,rng.randf_range(-34,34)))
         if external_human_scene:
             _create_external_human(n,i)
         else:
             _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
-        n.set_meta("speed",rng.randf_range(0.65,1.35))
-        n.set_meta("target",Vector3(rng.randf_range(-86.0,86.0),0.0,rng.randf_range(-86.0,86.0)))
+        n.set_meta("speed",rng.randf_range(0.72,1.20))
+        n.set_meta("target",_random_sidewalk_point(n.position))
         npcs.append(n)
         if i%3==0:
             await get_tree().process_frame
-    for i in range(10):
+
+    for i in range(13):
         var c:=Node3D.new()
         c.name="Traffic_%02d"%i
-        c.position=Vector3([-82,-40,42,82][i%4],0.0,rng.randf_range(-90,90))
-        if external_car_scene:
-            _create_external_car(c,i)
+        c.position=Vector3([ -82.0,-40.0,42.0,82.0 ][i%4],0.0,rng.randf_range(-88,88))
+        if i==0:
+            c.position=PLAYER_START+Vector3(4.0,0.0,3.5)
+            c.set_meta("player_car",true)
+            c.set_meta("speed",0.0)
+            c.set_meta("dir",1.0)
+        var fleet_index:=i%max(1,external_car_scenes.size())
+        if external_car_scenes.size()>0:
+            _create_external_car(c,fleet_index)
+        elif external_car_scene:
+            _create_external_car_from_scene(c,external_car_scene,fleet_index)
         else:
             _create_car(c,i)
-        c.set_meta("speed",rng.randf_range(4.0,8.0))
-        c.set_meta("dir",1.0 if i%2==0 else -1.0)
+        if not bool(c.get_meta("player_car",false)):
+            c.set_meta("speed",rng.randf_range(4.0,8.0))
+            c.set_meta("dir",1.0 if i%2==0 else -1.0)
         c.set_meta("lane",c.position.x)
         cars.append(c)
         add_child(c)
         if i%3==0:
             await get_tree().process_frame
+
+func _create_external_human(root:Node3D,index:int):
+    var model:=external_human_scene.instantiate()
+    root.add_child(model)
+    _normalize_model_height(model,1.68 if index%3 else 1.76)
+    _tint_model(model,index+1)
+    var ap:=_find_animation_player(model)
+    root.set_meta("model",model)
+    root.set_meta("anim_player",ap)
+    root.set_meta("idle_anim",_find_animation(ap,["idle","stand"]))
+    root.set_meta("walk_anim",_find_animation(ap,["walk"]))
+    root.set_meta("run_anim",_find_animation(ap,["run"]))
+    if ap:
+        var idle_name:String=String(root.get_meta("idle_anim"))
+        if idle_name!="": ap.play(idle_name)
+
+func _create_external_car(root:Node3D,index:int):
+    if external_car_scenes.is_empty():
+        return
+    var model:=external_car_scenes[index%external_car_scenes.size()].instantiate()
+    root.add_child(model)
+    _normalize_model_length(model,4.35)
+    model.position.y=0.05
+    root.set_meta("model",model)
+    root.set_meta("fleet_index",index%external_car_scenes.size())
+    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
+
+func _create_external_car_from_scene(root:Node3D,scene:PackedScene,index:int):
+    var model:=scene.instantiate()
+    root.add_child(model)
+    _normalize_model_length(model,4.35)
+    model.position.y=0.05
+    root.set_meta("model",model)
+    root.set_meta("fleet_index",index)
+    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
+
+func _normalize_model_length(root:Node3D,target_length:float):
+    var min_z:=INF
+    var max_z:=-INF
+    var found:=false
+    for mesh_node in root.find_children("*","MeshInstance3D",true,false):
+        var mi:=mesh_node as MeshInstance3D
+        if mi==null or mi.mesh==null: continue
+        var a:=mi.get_aabb()
+        for c in [Vector3(a.position.x,a.position.y,a.position.z),Vector3(a.end.x,a.position.y,a.position.z),Vector3(a.position.x,a.position.y,a.end.z),Vector3(a.end.x,a.position.y,a.end.z)]:
+            var local_p:=root.to_local(mi.to_global(c))
+            min_z=min(min_z,local_p.z); max_z=max(max_z,local_p.z); found=true
+    if found and max_z-min_z>0.01:
+        var f:=target_length/(max_z-min_z)
+        root.scale*=f
+        root.position.z=-min_z*f
 
 func _create_external_human(root:Node3D,index:int):
     var model:=external_human_scene.instantiate()
@@ -392,6 +520,7 @@ func _build_optimized_city():
         _create_bridge(z)
 
 func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:int):
+    building_obstacles.append(Rect2(x-w*0.5,z-d*0.5,w,d))
     var root:=Node3D.new()
     root.position=Vector3(x,0,z)
     city.add_child(root)
@@ -441,6 +570,49 @@ func _create_bridge(z:float):
     for x in range(-9,10,3):
         cylinder(city,Vector3(x,2.4,z-3.5),0.10,3.0,material(Color("#d5b15a"),0.5,0.25),"BridgeLamp")
 
+func _build_sidewalk_waypoints():
+    sidewalk_waypoints.clear()
+    var zs:Array[float]=[-84.0,-63.0,-42.0,-21.0,0.0,21.0,42.0,63.0,84.0]
+    var xs:Array[float]=[-82.0,-40.0,42.0,82.0]
+    for z in zs:
+        for offset in [-4.15,4.15]:
+            for x in range(-84,85,7):
+                var p:=Vector3(float(x),0.0,z+offset)
+                if not _walk_point_blocked(p):
+                    sidewalk_waypoints.append(p)
+    for x in xs:
+        for offset in [-4.15,4.15]:
+            for z in range(-84,85,7):
+                var p:=Vector3(x+offset,0.0,float(z))
+                if not _walk_point_blocked(p):
+                    sidewalk_waypoints.append(p)
+
+func _walk_point_blocked(p:Vector3)->bool:
+    for r in building_obstacles:
+        if r.grow(0.7).has_point(Vector2(p.x,p.z)):
+            return true
+    return false
+
+func _nearest_safe_sidewalk_point(p:Vector3)->Vector3:
+    var best:=Vector3(0,0,0)
+    var best_d:=INF
+    for wp in sidewalk_waypoints:
+        var d:=Vector2(wp.x-p.x,wp.z-p.z).length()
+        if d<best_d:
+            best_d=d; best=wp
+    return best
+
+func _random_sidewalk_point(from_pos:Vector3)->Vector3:
+    if sidewalk_waypoints.is_empty():
+        return from_pos
+    var candidates:Array[Vector3]=[]
+    for wp in sidewalk_waypoints:
+        var d:=Vector2(wp.x-from_pos.x,wp.z-from_pos.z).length()
+        if d<18.0:
+            candidates.append(wp)
+    if candidates.is_empty():
+        return _nearest_safe_sidewalk_point(from_pos)
+    return candidates[rng.randi_range(0,candidates.size()-1)]
 func _build_instanced_props():
     for i in range(30):
         var x:float=rng.randf_range(-88,88)
@@ -456,6 +628,7 @@ func _build_instanced_props():
             cylinder(city,Vector3(x,0.65,z),0.22,1.3,material(Color("#63442d"),0.90),"TreeTrunk")
         else:
             box(city,Vector3(x,0.5,z),Vector3(1.2,1.0,0.8),material(Color("#6c4c36"),0.85),"StreetCrate")
+
 
 func _spawn_player():
     player = CharacterBody3D.new()
@@ -760,10 +933,10 @@ func _setup_ui():
     jump.position.x=-220; jump.position.y=-92
     jump.pressed.connect(func(): jump_requested=true)
 
-    var drive:=_ui_button(ui_layer,"CAR",Vector2(-224,-174),Vector2(82,58),12)
-    drive.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
-    drive.position.x=-224; drive.position.y=-174
-    drive.pressed.connect(_toggle_drive)
+    drive_button=_ui_button(ui_layer,"ENTER CAR",Vector2(-250,-174),Vector2(110,58),11)
+    drive_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
+    drive_button.position.x=-250; drive_button.position.y=-174
+    drive_button.pressed.connect(_toggle_drive)
 
     joystick_ring=_ui_panel(Vector2(24,-198),Vector2(176,176),Color(0.02,0.035,0.045,0.30),Color(0.58,0.82,0.90,0.30),88)
     joystick_ring.set_anchors_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE)
@@ -927,29 +1100,46 @@ func _move_player(delta):
     var input_vec:=move_input
     var keyboard:=Input.get_vector("ui_left","ui_right","ui_up","ui_down")
     if keyboard.length()>0.1: input_vec=keyboard
-    var speed:=11.0 if driving else 5.8
     var yaw:=deg_to_rad(camera_yaw)
     var forward:=Vector3(-sin(yaw),0,-cos(yaw))
     var right:=Vector3(cos(yaw),0,-sin(yaw))
     var dir:Vector3=(right*input_vec.x+forward*(-input_vec.y))
     if dir.length()>1: dir=dir.normalized()
-    player.velocity.x=move_toward(player.velocity.x,dir.x*speed,delta*22.0)
-    player.velocity.z=move_toward(player.velocity.z,dir.z*speed,delta*22.0)
-    player.velocity.y=0
-    player.move_and_slide()
-    if jump_requested and player.is_on_floor() and not driving:
-        player.velocity.y=7.0
-        jump_requested=false
+
+    if driving and is_instance_valid(active_car):
+        var car_speed:float=10.5
+        var steer:=input_vec.x
+        if input_vec.length()>0.05:
+            active_car.rotation.y=lerp_angle(active_car.rotation.y,active_car.rotation.y-steer*delta*2.6,delta*5.0)
+            var cf:=active_car.transform.basis.z.normalized()
+            active_car.position+=(-cf)*(-input_vec.y)*car_speed*delta
+            active_car.position.x=clamp(active_car.position.x,-93.0,93.0)
+            active_car.position.z=clamp(active_car.position.z,-93.0,93.0)
+        player.global_position=active_car.global_position+Vector3(0,0.05,0)
+        player.velocity=Vector3.ZERO
+    else:
+        var speed:=5.8
+        player.velocity.x=move_toward(player.velocity.x,dir.x*speed,delta*22.0)
+        player.velocity.z=move_toward(player.velocity.z,dir.z*speed,delta*22.0)
+        player.velocity.y=0.0
+        player.move_and_slide()
+        if jump_requested and player.is_on_floor():
+            player.velocity.y=7.0
+            jump_requested=false
+
     player.position.x=clamp(player.position.x,-93.0,93.0)
     player.position.z=clamp(player.position.z,-93.0,93.0)
-    if dir.length()>0.1:
+
+    if dir.length()>0.1 and not driving:
         player_visual.rotation.y=lerp_angle(player_visual.rotation.y,atan2(dir.x,dir.z),delta*10.0)
+
     var cam_yaw_rad:=deg_to_rad(camera_yaw)
     var cam_pitch_rad:=deg_to_rad(camera_pitch)
     var rot:=Basis(Vector3.UP,cam_yaw_rad)*Basis(Vector3.RIGHT,cam_pitch_rad)
-    var desired_cam:=player.global_position+Vector3(0,camera_height,0)+rot*Vector3(0,0,camera_distance)
+    var cam_target:=active_car.global_position+Vector3(0,1.3,0) if driving and is_instance_valid(active_car) else player.global_position+Vector3(0,1.15,0)
+    var desired_cam:=cam_target+rot*Vector3(0,0,camera_distance)
     camera.global_position=camera.global_position.lerp(desired_cam,1.0-exp(-delta*14.0))
-    camera.look_at(player.global_position+Vector3(0,1.15,0),Vector3.UP)
+    camera.look_at(cam_target,Vector3.UP)
     if gyro_enabled and not look_touching:
         var acc:=Input.get_accelerometer()
         if acc.length()>0.3:
@@ -957,16 +1147,6 @@ func _move_player(delta):
             camera_pitch=clamp(camera_pitch+clamp(acc.y,-3.0,3.0)*delta*0.9,-35.0,18.0)
     if shooting and not driving and fire_cooldown<=0:
         _fire()
-
-func _toggle_drive():
-    var nearest:=_nearest_car()
-    if nearest and player.global_position.distance_to(nearest.global_position)<4.5:
-        driving=!driving
-        if driving:
-            player.position=nearest.position+Vector3(0,0.05,0)
-            player_visual.visible=false
-        else:
-            player_visual.visible=true
 
 func _nearest_car()->Node3D:
     var best:Node3D=null
@@ -1023,10 +1203,9 @@ func _animate_npcs(delta):
         var speed:float=float(n.get_meta("speed"))
         var life:float=float(n.get_meta("life_clock",0.0))+delta
         n.set_meta("life_clock",life)
-        var partner:Node3D=n.get_meta("partner",null) as Node3D
 
         if external_human_scene and n.has_meta("anim_player"):
-            var moving:=to_target.length()>1.6 and not is_instance_valid(partner)
+            var moving:=to_target.length()>1.6
             var ap:AnimationPlayer=n.get_meta("anim_player") as AnimationPlayer
             var idle_name:String=String(n.get_meta("idle_anim",""))
             var walk_name:String=String(n.get_meta("walk_anim",""))
@@ -1036,31 +1215,186 @@ func _animate_npcs(delta):
             if moving:
                 var dir:=to_target.normalized()
                 n.position+=dir*speed*delta
-                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*5.0)
+                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*6.0)
             else:
-                n.rotation.y+=sin(life*0.55+float(n.get_meta("phase")))*delta*0.25
-                var check_clock:float=float(n.get_meta("check_clock",0.0))+delta
-                if check_clock>7.5:
-                    n.set_meta("check_clock",0.0)
-                    n.set_meta("checking_time",true)
-                n.set_meta("check_clock",check_clock)
-                if bool(n.get_meta("checking_time",false)) and check_clock>1.6:
-                    n.set_meta("checking_time",false)
+                n.rotation.y=sin(life*0.6+float(n.get_meta("phase")))*0.15
             if to_target.length()<1.6:
-                n.set_meta("target",Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0)))
-            continue
-
-        # Fallback procedural NPC logic.
-        var moving_fallback:=to_target.length()>0.25
-        if moving_fallback:
-            var dir_fallback:=to_target.normalized()
-            n.position+=dir_fallback*speed*delta
-            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir_fallback.x,dir_fallback.z),delta*5.5)
+                n.set_meta("target",_random_sidewalk_point(n.position))
+            n.position=_nearest_safe_sidewalk_point(n.position)
         else:
-            n.rotation.y+=sin(life*0.65+float(n.get_meta("phase")))*delta*0.25
-        if to_target.length()<1.6:
-            n.set_meta("target",Vector3(rng.randf_range(-82.0,82.0),0.0,rng.randf_range(-82.0,82.0)))
-        n.position.y=0.0
+            if to_target.length()<1.6:
+                n.set_meta("target",_random_sidewalk_point(n.position))
+            var dir_fallback:Vector3=to_target.normalized() if to_target.length()>0.1 else Vector3.ZERO
+            n.position+=dir_fallback*speed*delta
+            n.position=_nearest_safe_sidewalk_point(n.position)
+            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir_fallback.x,dir_fallback.z),delta*5.0)
+            n.position.y=0.0
+
+func _nearest_npc(source:Node3D)->Node3D:
+    var best:Node3D=null
+    var best_d:=999.0
+    for other in npcs:
+        if other==source: continue
+        var d:=source.global_position.distance_to(other.global_position)
+        if d<best_d:
+            best_d=d
+            best=other
+    return best
+
+func _animate_cars(delta):
+    for c in cars:
+        var speed:=float(c.get_meta("speed"))
+        var dir:=float(c.get_meta("dir"))
+        c.position.z+=speed*dir*delta
+        if c.position.z>96:c.position.z=-96
+        if c.position.z<-96:c.position.z=96
+        c.rotation.y=0 if dir>0 else PI
+        c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.018
+        var throttle: float=clamp(float(c.get_meta("speed"))/14.0,0.0,1.0)
+        var smoke_nodes: Array[Node] = c.find_children("ExhaustSmoke","CPUParticles3D",true,false)
+        for smoke_node in smoke_nodes:
+            var smoke: CPUParticles3D = smoke_node as CPUParticles3D
+            if smoke:
+                smoke.amount=10+int(throttle*32.0); smoke.speed_scale=0.7+throttle*1.6
+
+func _update_day_night():
+    var hour:=fmod(18.0+elapsed*0.12,24.0)
+    sun.rotation_degrees=Vector3(-38.0-(hour-12.0)*2.0,-28,0)
+    sun.light_energy=0.42 if hour>20.0 or hour<6.0 else 1.2
+
+func _cycle_graphics():
+    graphics=(graphics+1)%3
+    _apply_quality()
+
+func _apply_quality():
+    if not is_instance_valid(sun): return
+    var names=["LOW","MED","HIGH"]
+    graphics_button.text="SET" if is_instance_valid(graphics_button) else ""
+    sun.shadow_enabled=graphics>1
+    sun.directional_shadow_max_distance=[45.0,75.0,105.0][graphics]
+    world_env.environment.ambient_light_energy=[0.68,0.82,0.95][graphics]
+    world_env.environment.glow_enabled=false
+
+func _update_hud():
+    if is_instance_valid(health_bar):
+        health_bar.value=health
+    if is_instance_valid(stamina_bar):
+        stamina_bar.value=clamp(70.0+sin(elapsed*1.4)*12.0,0.0,100.0)
+    if is_instance_valid(cash_value):
+        cash_value.text="$ %d"%money
+    if is_instance_valid(wanted_value):
+        wanted_value.text="W %d/5"%wanted
+    if is_instance_valid(district_value):
+        district_value.text=districts[mission%3]
+    if is_instance_valid(mission_value):
+        mission_value.text=missions[mission][0]
+    if is_instance_valid(objective):
+        objective.text="Reach the gold marker"
+    if is_instance_valid(fps_label):
+        fps_label.text="FPS %d  |  GFX %s"%[Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
+    if is_instance_valid(joystick_knob):
+        var knob_center:=Vector2(58,58)
+        joystick_knob.position=knob_center+move_input*48.0func _toggle_drive():
+    if driving:
+        driving=false
+        if is_instance_valid(active_car):
+            player.global_position=active_car.global_position+Vector3(2.2,0.0,0.0)
+        player_visual.visible=true
+        active_car=null
+        if is_instance_valid(drive_button): drive_button.text="ENTER CAR"
+        return
+    var nearest:=_nearest_car()
+    if nearest and player.global_position.distance_to(nearest.global_position)<6.5:
+        driving=true
+        active_car=nearest
+        player.global_position=nearest.global_position+Vector3(0,0.05,0)
+        player_visual.visible=false
+        if is_instance_valid(drive_button): drive_button.text="EXIT CAR"
+    else:
+        if is_instance_valid(drive_button): drive_button.text="NEAR CAR"
+
+
+func _nearest_car()->Node3D:
+    var best:Node3D=null
+    var dist:=999.0
+    for c in cars:
+        var d:=player.global_position.distance_to(c.global_position)
+        if d<dist: dist=d;best=c
+    return best
+
+func _fire():
+    fire_cooldown=0.22
+    shooting=false
+    wanted=min(5,wanted+1)
+    for n in npcs:
+        if n.global_position.distance_to(player.global_position)<7.0:
+            n.set_meta("speed",min(2.0,float(n.get_meta("speed"))+0.8))
+
+func _animate_player(delta):
+    if player_model_animation:
+        var speed_now:=Vector2(player.velocity.x,player.velocity.z).length()
+        var clip:=player_idle_anim
+        if speed_now>7.5 and player_run_anim!="":
+            clip=player_run_anim
+        elif speed_now>0.35 and player_walk_anim!="":
+            clip=player_walk_anim
+        if clip!="" and player_model_animation.current_animation!=clip:
+            player_model_animation.play(clip)
+        return
+    if not is_instance_valid(player_visual):
+        return
+    var speed_fallback:=Vector2(player.velocity.x,player.velocity.z).length()
+    var moving_fallback:=speed_fallback>0.35
+    player_anim_phase+=delta*(7.0+speed_fallback*1.5 if moving_fallback else 1.6)
+    var stride:float=sin(player_anim_phase)
+    var stride2:float=sin(player_anim_phase+PI)
+    player_visual.position.y=abs(sin(player_anim_phase*0.5))*(0.040 if moving_fallback else 0.010)
+    if player_head:
+        var heading:=player_visual.rotation.y
+        var body_to_camera:=wrapf(deg_to_rad(camera_yaw)-heading,-PI,PI)
+        player_head.rotation.y=clamp(body_to_camera*0.34,-0.50,0.50)+sin(elapsed*0.42)*0.13
+        player_head.rotation.x=clamp(-deg_to_rad(camera_pitch)*0.18,-0.16,0.16)
+    if player_arms.size()>=2:
+        player_arms[0].rotation.x=stride*0.62 if moving_fallback else 0.0
+        player_arms[1].rotation.x=stride2*0.62 if moving_fallback else 0.0
+    if player_legs.size()>=2:
+        player_legs[0].rotation.x=stride2*0.68 if moving_fallback else 0.0
+        player_legs[1].rotation.x=stride*0.68 if moving_fallback else 0.0
+
+func _animate_npcs(delta):
+    for n in npcs:
+        var target:Vector3=n.get_meta("target",n.global_position)
+        var to_target:=target-n.global_position
+        to_target.y=0.0
+        var speed:float=float(n.get_meta("speed"))
+        var life:float=float(n.get_meta("life_clock",0.0))+delta
+        n.set_meta("life_clock",life)
+
+        if external_human_scene and n.has_meta("anim_player"):
+            var moving:=to_target.length()>1.6
+            var ap:AnimationPlayer=n.get_meta("anim_player") as AnimationPlayer
+            var idle_name:String=String(n.get_meta("idle_anim",""))
+            var walk_name:String=String(n.get_meta("walk_anim",""))
+            var chosen:=walk_name if moving else idle_name
+            if ap and chosen!="" and ap.current_animation!=chosen:
+                ap.play(chosen)
+            if moving:
+                var dir:=to_target.normalized()
+                n.position+=dir*speed*delta
+                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*6.0)
+            else:
+                n.rotation.y=sin(life*0.6+float(n.get_meta("phase")))*0.15
+            if to_target.length()<1.6:
+                n.set_meta("target",_random_sidewalk_point(n.position))
+            n.position=_nearest_safe_sidewalk_point(n.position)
+        else:
+            if to_target.length()<1.6:
+                n.set_meta("target",_random_sidewalk_point(n.position))
+            var dir_fallback:Vector3=to_target.normalized() if to_target.length()>0.1 else Vector3.ZERO
+            n.position+=dir_fallback*speed*delta
+            n.position=_nearest_safe_sidewalk_point(n.position)
+            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir_fallback.x,dir_fallback.z),delta*5.0)
+            n.position.y=0.0
 
 func _nearest_npc(source:Node3D)->Node3D:
     var best:Node3D=null
