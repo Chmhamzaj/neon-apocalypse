@@ -47,7 +47,10 @@ jobs:
             exit 1
           fi
 
-          echo "PROJECT_ROOT=$PROJECT_ROOT" >> "$GITHUB_ENV"
+          rm -rf /tmp/neon_unity_project
+          mkdir -p /tmp/neon_unity_project
+          cp -a "$PROJECT_ROOT"/. /tmp/neon_unity_project/
+          echo "PROJECT_ROOT=/tmp/neon_unity_project" >> "$GITHUB_ENV"
           echo "Detected Unity project at: $PROJECT_ROOT"
 
       - name: Replace repository contents with Unity project
@@ -58,7 +61,7 @@ jobs:
 
           cp -a "$PROJECT_ROOT"/. .
 
-          rm -rf import_tmp extracted
+          rm -rf import_tmp extracted /tmp/neon_unity_project
 
           echo "Imported Unity project:"
           test -d Assets
