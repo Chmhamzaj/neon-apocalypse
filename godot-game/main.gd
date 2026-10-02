@@ -528,6 +528,15 @@ func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:in
     var facade_mat:=concrete_pbr.duplicate() if concrete_pbr else material(facade,0.65)
     facade_mat.albedo_color=facade
     box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),facade_mat,"Building")
+    var body:=StaticBody3D.new()
+    body.name="BuildingCollision"
+    var shape:=CollisionShape3D.new()
+    var box_shape:=BoxShape3D.new()
+    box_shape.size=Vector3(w,h,d)
+    shape.shape=box_shape
+    shape.position.y=h*0.5
+    body.add_child(shape)
+    root.add_child(body)
     var glass:=material(Color("#152432"),0.20,0.35)
     for side in [-1.0,1.0]:
         box(root,Vector3(side*w*0.26,h*0.46,d*0.515),Vector3(w*0.14,h*0.60,0.05),glass,"WindowBand")
@@ -953,6 +962,7 @@ func _setup_ui():
     drive_button=_ui_button(ui_layer,"ENTER CAR",Vector2(-250,-174),Vector2(110,58),11)
     drive_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
     drive_button.position.x=-250; drive_button.position.y=-174
+    drive_button.z_index=30
     drive_button.pressed.connect(_toggle_drive)
 
     joystick_ring=_ui_panel(Vector2(24,-198),Vector2(176,176),Color(0.02,0.035,0.045,0.30),Color(0.58,0.82,0.90,0.30),88)
@@ -1052,15 +1062,18 @@ func _ui_button(parent:Node,text_value:String,pos:Vector2,size:Vector2,font_size
     b.text=text_value
     b.position=pos
     b.size=size
+    b.z_index=25
+    b.mouse_filter=Control.MOUSE_FILTER_STOP
     b.add_theme_font_size_override("font_size",font_size)
     b.add_theme_color_override("font_color",Color("#edf9ff"))
     b.add_theme_color_override("font_hover_color",Color("#ffffff"))
     b.add_theme_color_override("font_pressed_color",Color("#ffffff"))
-    b.add_theme_stylebox_override("normal",_ui_style(Color(0.05,0.09,0.12,0.86),Color(0.39,0.70,0.82,0.36),18))
-    b.add_theme_stylebox_override("pressed",_ui_style(Color(0.10,0.22,0.28,0.95),Color(0.55,0.90,1.0,0.72),18))
-    b.add_theme_stylebox_override("hover",_ui_style(Color(0.08,0.15,0.19,0.92),Color(0.50,0.82,0.92,0.52),18))
+    b.add_theme_stylebox_override("normal",_ui_style(Color(0.05,0.09,0.12,0.92),Color(0.39,0.70,0.82,0.55),18))
+    b.add_theme_stylebox_override("pressed",_ui_style(Color(0.10,0.22,0.28,0.98),Color(0.55,0.90,1.0,0.85),18))
+    b.add_theme_stylebox_override("hover",_ui_style(Color(0.08,0.15,0.19,0.96),Color(0.50,0.82,0.92,0.65),18))
     parent.add_child(b)
     return b
+
 
 func _toggle_settings():
     if is_instance_valid(settings_panel):
@@ -1262,19 +1275,22 @@ func _nearest_npc(source:Node3D)->Node3D:
 
 func _animate_cars(delta):
     for c in cars:
-        var speed:=float(c.get_meta("speed"))
-        var dir:=float(c.get_meta("dir"))
+        if bool(c.get_meta("player_car",false)):
+            continue
+        var speed:float=float(c.get_meta("speed",5.0))
+        var dir:float=float(c.get_meta("dir",1.0))
         c.position.z+=speed*dir*delta
-        if c.position.z>96:c.position.z=-96
-        if c.position.z<-96:c.position.z=96
-        c.rotation.y=0 if dir>0 else PI
-        c.position.y=0.45+sin(elapsed*7.0+float(c.get_instance_id()%11))*0.018
-        var throttle: float=clamp(float(c.get_meta("speed"))/14.0,0.0,1.0)
-        var smoke_nodes: Array[Node] = c.find_children("ExhaustSmoke","CPUParticles3D",true,false)
+        if c.position.z>96: c.position.z=-96
+        if c.position.z<-96: c.position.z=96
+        c.rotation.y=0.0 if dir>0.0 else PI
+        c.position.y=0.45
+        var throttle:float=clamp(speed/14.0,0.0,1.0)
+        var smoke_nodes:Array[Node]=c.find_children("ExhaustSmoke","CPUParticles3D",true,false)
         for smoke_node in smoke_nodes:
-            var smoke: CPUParticles3D = smoke_node as CPUParticles3D
+            var smoke:=smoke_node as CPUParticles3D
             if smoke:
-                smoke.amount=10+int(throttle*32.0); smoke.speed_scale=0.7+throttle*1.6
+                smoke.amount=10+int(throttle*32.0)
+                smoke.speed_scale=0.7+throttle*1.6
 
 func _update_day_night():
     var hour:=fmod(18.0+elapsed*0.12,24.0)
