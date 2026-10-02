@@ -599,20 +599,37 @@ func _nearest_safe_sidewalk_point(p:Vector3)->Vector3:
     for wp in sidewalk_waypoints:
         var d:=Vector2(wp.x-p.x,wp.z-p.z).length()
         if d<best_d:
-            best_d=d; best=wp
+            best_d=d
+            best=wp
+    return best
+
+func _next_sidewalk_point(from_pos:Vector3)->Vector3:
+    if sidewalk_waypoints.is_empty():
+        return from_pos
+    var current:=_nearest_safe_sidewalk_point(from_pos)
+    var candidates:Array[Vector3]=[]
+    for wp in sidewalk_waypoints:
+        var d:=wp.distance_to(current)
+        if d<8.6 and d>0.2:
+            candidates.append(wp)
+    if candidates.is_empty():
+        return current
+    var best:=candidates[rng.randi_range(0,candidates.size()-1)]
+    var best_score:float=-999.0
+    var last_dir:=Vector2(from_pos.x-current.x,from_pos.z-current.z)
+    for wp in candidates:
+        var v:=Vector2(wp.x-current.x,wp.z-current.z).normalized()
+        var score:float=rng.randf_range(0.0,0.25)
+        if last_dir.length()>0.2:
+            score += v.dot(last_dir.normalized())
+        if score>best_score:
+            best_score=score
+            best=wp
     return best
 
 func _random_sidewalk_point(from_pos:Vector3)->Vector3:
-    if sidewalk_waypoints.is_empty():
-        return from_pos
-    var candidates:Array[Vector3]=[]
-    for wp in sidewalk_waypoints:
-        var d:=Vector2(wp.x-from_pos.x,wp.z-from_pos.z).length()
-        if d<18.0:
-            candidates.append(wp)
-    if candidates.is_empty():
-        return _nearest_safe_sidewalk_point(from_pos)
-    return candidates[rng.randi_range(0,candidates.size()-1)]
+    return _next_sidewalk_point(from_pos)
+
 func _build_instanced_props():
     for i in range(30):
         var x:float=rng.randf_range(-88,88)
@@ -1218,15 +1235,17 @@ func _animate_npcs(delta):
                 n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*6.0)
             else:
                 n.rotation.y=sin(life*0.6+float(n.get_meta("phase")))*0.15
-            if to_target.length()<1.6:
-                n.set_meta("target",_random_sidewalk_point(n.position))
-            n.position=_nearest_safe_sidewalk_point(n.position)
+            if to_target.length()<1.0:
+                n.position=_nearest_safe_sidewalk_point(n.position)
+                n.set_meta("target",_next_sidewalk_point(n.position))
         else:
-            if to_target.length()<1.6:
-                n.set_meta("target",_random_sidewalk_point(n.position))
+            if to_target.length()<1.0:
+                n.position=_nearest_safe_sidewalk_point(n.position)
+                n.set_meta("target",_next_sidewalk_point(n.position))
+                target=Vector3(n.get_meta("target"))
+                to_target=target-n.position
             var dir_fallback:Vector3=to_target.normalized() if to_target.length()>0.1 else Vector3.ZERO
             n.position+=dir_fallback*speed*delta
-            n.position=_nearest_safe_sidewalk_point(n.position)
             n.rotation.y=lerp_angle(n.rotation.y,atan2(dir_fallback.x,dir_fallback.z),delta*5.0)
             n.position.y=0.0
 
