@@ -62,24 +62,83 @@ func _ready():
     RenderingServer.set_default_clear_color(Color("#050a18"))
     _setup_ui()
     _spawn_player()
-    boot_label.text = "BOOT 1/5  •  CAMERA ONLINE"
+    boot_label.text = "STARTING • CAMERA ONLINE"
+    set_process(true)
+    call_deferred("_boot_world")
+
+func _boot_world():
     await get_tree().process_frame
+    boot_label.text = "LOADING • WORLD LIGHTING"
     _setup_world()
-    boot_label.text = "BOOT 2/5  •  WORLD LIGHTING ONLINE"
     await get_tree().process_frame
-    _build_optimized_city()
-    boot_label.text = "BOOT 3/5  •  CITY ONLINE"
-    await get_tree().process_frame
-    _spawn_population()
-    boot_label.text = "BOOT 4/5  •  TRAFFIC & CITIZENS ONLINE"
-    await get_tree().process_frame
+    boot_label.text = "LOADING • CITY 10%"
+    await _build_city_async()
+    boot_label.text = "LOADING • PEOPLE & TRAFFIC"
+    await _spawn_population_async()
     _new_mission()
     _apply_quality()
-    boot_label.text = "STREET SOVEREIGN  •  READY"
-    await get_tree().create_timer(0.8).timeout
+    boot_label.text = "STREET SOVEREIGN • READY"
+    await get_tree().create_timer(0.7).timeout
     if is_instance_valid(boot_label):
         boot_label.queue_free()
-    set_process(true)
+
+func _build_city_async():
+    city = Node3D.new()
+    city.name = "OptimizedMegaCity"
+    add_child(city)
+    var district_centers := [-62.0, -20.0, 24.0, 67.0]
+    var palettes := [
+        [Color("#242b46"),Color("#47517a"),Color("#f04f79")],
+        [Color("#263c42"),Color("#426e78"),Color("#3ed6e8")],
+        [Color("#352c42"),Color("#65506f"),Color("#ffbf4b")],
+        [Color("#263d35"),Color("#4e765f"),Color("#8ef08d")]
+    ]
+    var total:=120
+    var done:=0
+    for ds in range(4):
+        for i in range(30):
+            var bx := district_centers[ds] + rng.randf_range(-16,16)
+            var bz := rng.randf_range(-82,82)
+            if abs(bx) < 8: bx += 12.0
+            _create_building(bx,bz,rng.randf_range(6,11),rng.randf_range(8,30),rng.randf_range(6,12),palettes[ds],i)
+            done+=1
+            if done%4==0:
+                boot_label.text="LOADING • CITY %d%%"%int(float(done)/total*100.0)
+                await get_tree().process_frame
+    _build_roads()
+    await get_tree().process_frame
+    _build_landmarks()
+    _build_instanced_props()
+    box(city,Vector3(0,-0.15,0),Vector3(10,0.25,WORLD),material(Color("#0b3454"),0.15,0.55),"River")
+    box(city,Vector3(-5.8,0.08,0),Vector3(0.35,0.18,WORLD),material(Color("#21a8d8"),0.2,0.3,Color("#21a8d8")),"RiverGlow")
+    box(city,Vector3(5.8,0.08,0),Vector3(0.35,0.18,WORLD),material(Color("#21a8d8"),0.2,0.3,Color("#21a8d8")),"RiverGlow")
+    for z in [-62.0,0.0,62.0]:
+        _create_bridge(z)
+        await get_tree().process_frame
+
+func _spawn_population_async():
+    for i in range(44):
+        var n := Node3D.new()
+        n.name="Civilian_%02d"%i
+        n.position=Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86))
+        _create_npc_visual(n,i)
+        add_child(n)
+        n.set_meta("phase",rng.randf_range(0,TAU))
+        n.set_meta("speed",rng.randf_range(0.35,0.85))
+        npcs.append(n)
+        if i%4==0:
+            await get_tree().process_frame
+    for i in range(20):
+        var c := Node3D.new()
+        c.name="Traffic_%02d"%i
+        c.position=Vector3([-82,-40,42,82][i%4],0.45,rng.randf_range(-90,90))
+        _create_car(c,i)
+        c.set_meta("speed",rng.randf_range(4.0,8.0))
+        c.set_meta("dir",1.0 if i%2==0 else -1.0)
+        cars.append(c)
+        add_child(c)
+        if i%4==0:
+            await get_tree().process_frame
 
 func material(color: Color, roughness := 0.72, metallic := 0.0, emission := Color.TRANSPARENT) -> StandardMaterial3D:
     var m := StandardMaterial3D.new()
