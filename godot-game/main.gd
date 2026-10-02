@@ -733,46 +733,46 @@ func _setup_ui():
     objective=_ui_label(mission_panel,"Reach the gold marker",Vector2(14,50),Vector2(250,18),11,Color("#d9e5ed"))
 
     var compass:=_ui_panel(Vector2(0,12),Vector2(260,38),Color(0.02,0.03,0.04,0.68),Color(0.40,0.82,0.96,0.22),18)
-    compass.set_anchors_preset(Control.PRESET_TOP_WIDE,Control.PRESET_MODE_MINSIZE,0)
+    compass.set_anchors_preset(Control.PRESET_TOP_WIDE,Control.PRESET_MODE_MINSIZE)
     compass.position.x=0
     _ui_label(compass,"W       NW       N       NE       E",Vector2(18,6),Vector2(224,26),11,Color("#d9eef8"),HORIZONTAL_ALIGNMENT_CENTER)
 
     map_panel=_ui_panel(Vector2(-132,14),Vector2(112,112),Color(0.02,0.035,0.045,0.82),Color(0.48,0.86,0.95,0.36),56)
-    map_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,14)
+    map_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE)
     map_panel.position.x=-132
     _ui_label(map_panel,"N",Vector2(46,8),Vector2(20,18),11,Color("#f2fbff"),HORIZONTAL_ALIGNMENT_CENTER)
     _ui_label(map_panel,"+",Vector2(46,46),Vector2(20,20),15,Color("#8ee8ff"),HORIZONTAL_ALIGNMENT_CENTER)
     _ui_label(map_panel,"MISSION",Vector2(23,82),Vector2(66,16),9,Color("#ffe18a"),HORIZONTAL_ALIGNMENT_CENTER)
 
     graphics_button=_ui_button(ui_layer,"SET",Vector2(-204,14),Vector2(60,48),12)
-    graphics_button.set_anchors_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE,14)
+    graphics_button.set_anchors_preset(Control.PRESET_TOP_RIGHT,Control.PRESET_MODE_MINSIZE)
     graphics_button.position.x=-204
     graphics_button.pressed.connect(_toggle_settings)
 
     var fire:=_ui_button(ui_layer,"FIRE",Vector2(-126,-146),Vector2(108,108),17)
-    fire.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    fire.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
     fire.position.x=-126; fire.position.y=-146
     fire.button_down.connect(func(): shooting=true)
     fire.button_up.connect(func(): shooting=false)
 
     var jump:=_ui_button(ui_layer,"JUMP",Vector2(-220,-92),Vector2(76,76),13)
-    jump.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    jump.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
     jump.position.x=-220; jump.position.y=-92
     jump.pressed.connect(func(): jump_requested=true)
 
     var drive:=_ui_button(ui_layer,"CAR",Vector2(-224,-174),Vector2(82,58),12)
-    drive.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    drive.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
     drive.position.x=-224; drive.position.y=-174
     drive.pressed.connect(_toggle_drive)
 
     joystick_ring=_ui_panel(Vector2(24,-198),Vector2(176,176),Color(0.02,0.035,0.045,0.30),Color(0.58,0.82,0.90,0.30),88)
-    joystick_ring.set_anchors_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE,18)
+    joystick_ring.set_anchors_preset(Control.PRESET_BOTTOM_LEFT,Control.PRESET_MODE_MINSIZE)
     joystick_ring.position.x=24; joystick_ring.position.y=-198
     joystick_knob=_ui_panel(Vector2(58,58),Vector2(60,60),Color(0.68,0.86,0.93,0.18),Color(0.82,0.95,1,0.45),30)
     joystick_ring.add_child(joystick_knob)
     _ui_label(ui_layer,"MOVE",Vector2(24,-220),Vector2(176,18),9,Color("#b7cad5"),HORIZONTAL_ALIGNMENT_CENTER)
     var touch_hint:=_ui_label(ui_layer,"DRAG RIGHT = LOOK",Vector2(-210,-30),Vector2(190,18),9,Color(0.72,0.84,0.90,0.60),HORIZONTAL_ALIGNMENT_RIGHT)
-    touch_hint.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE,18)
+    touch_hint.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT,Control.PRESET_MODE_MINSIZE)
     touch_hint.position.x=-210; touch_hint.position.y=-30
 
     boot_label=Label.new()
@@ -785,7 +785,7 @@ func _setup_ui():
     ui_layer.add_child(boot_label)
 
     settings_panel=_ui_panel(Vector2(0,0),Vector2(330,350),Color(0.025,0.045,0.065,0.97),Color(0.46,0.82,0.94,0.48),20)
-    settings_panel.set_anchors_preset(Control.PRESET_CENTER,Control.PRESET_MODE_MINSIZE,0)
+    settings_panel.set_anchors_preset(Control.PRESET_CENTER,Control.PRESET_MODE_MINSIZE)
     settings_panel.position=Vector2(-165,-175)
     _ui_label(settings_panel,"GRAPHICS & CONTROLS",Vector2(22,20),Vector2(285,28),18,Color("#f3fbff"))
     _ui_label(settings_panel,"Performance presets for mobile",Vector2(22,50),Vector2(285,18),10,Color("#8da6b7"))
