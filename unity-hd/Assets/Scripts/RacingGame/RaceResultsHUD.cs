@@ -25,6 +25,8 @@ namespace NitroStreetRush.Racing
             if (!resultsPanel) return;
             resultsPanel.SetActive(true);
             if (!saveGame) return;
+            var timer = FindFirstObjectByType<RaceTimer>();
+            if (timer) SetRaceTime(Mathf.RoundToInt(timer.ElapsedSeconds * 1000f));
             if (rewardText) rewardText.text = "REWARD  +500";
             if (bestText) bestText.text = saveGame.Data.bestTimeMs == int.MaxValue ? "BEST  --:--.---" : $"BEST  {FormatTime(saveGame.Data.bestTimeMs)}";
         }
