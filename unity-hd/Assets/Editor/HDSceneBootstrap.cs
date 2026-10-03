@@ -153,8 +153,7 @@ namespace NitroStreetRush.Editor
             button.transition = Selectable.Transition.ColorTint;
             var text = CreateText(go.transform, label, Vector2.zero, 24);
             text.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
-            go.AddComponent<NitroStreetRacing.MobileControlButton>();
-            SetPrivate(go.GetComponent<NitroStreetRacing.MobileControlButton>(), "action", action);
+            go.AddComponent<NitroStreetRacing.MobileControlButton>().Configure(action);
         }
         private static GameObject CreateText(Transform parent, string name, Vector2 position, int size)
         {
