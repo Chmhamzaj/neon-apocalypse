@@ -26,8 +26,8 @@ namespace NitroStreetRush.Racing
                 Quaternion facing = Quaternion.LookRotation(tangent, Vector3.up);
                 Spawn(buildingPrefabs, center + right * sideOffset, facing, 0.82f + Random.value * 0.55f);
                 Spawn(buildingPrefabs, center - right * sideOffset, facing * Quaternion.Euler(0f, 180f, 0f), 0.82f + Random.value * 0.55f);
-                if (streetLightPrefabs.Length > 0 && i % 2 == 0) Spawn(streetLightPrefabs, center + right * 6f, facing, 0.95f);
-                if (vegetationPrefabs.Length > 0 && i % 3 == 0) Spawn(vegetationPrefabs, center - right * 7f, facing, 0.9f + Random.value * 0.3f);
+                if (streetLightPrefabs != null && streetLightPrefabs.Length > 0 && i % 2 == 0 Spawn(streetLightPrefabs, center + right * 6f, facing, 0.95f);
+                if (vegetationPrefabs != null && vegetationPrefabs.Length > 0 && i % 3 == 0 Spawn(vegetationPrefabs, center - right * 7f, facing, 0.9f + Random.value * 0.3f);
             }
         }
 
