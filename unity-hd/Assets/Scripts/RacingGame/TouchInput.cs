@@ -29,16 +29,38 @@ namespace NitroStreetRush.Racing
             {
                 foreach (var control in touchscreen.touches)
                 {
-                    if (!control.press.isPressed) continue;
                     int finger = control.touchId.ReadValue();
                     Vector2 position = control.position.ReadValue();
-                    if (control.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began && position.x < Screen.width * 0.7f)
+                    var phase = control.phase.ReadValue();
+
+                    if (finger == steeringFinger && (phase == UnityEngine.InputSystem.TouchPhase.Ended ||
+                                                     phase == UnityEngine.InputSystem.TouchPhase.Canceled))
+                    {
+                        steeringFinger = -1;
+                        continue;
+                    }
+
+                    // Keep the upper/middle screen as the swipe-steering surface so the
+                    // persistent bottom controls cannot also drive the swipe value.
+                    bool inSteeringZone = position.x < Screen.width * 0.68f &&
+                                          position.y > Screen.height * 0.30f;
+                    if (phase == UnityEngine.InputSystem.TouchPhase.Began && inSteeringZone)
                     {
                         steeringFinger = finger;
                         steeringStart = position;
                     }
-                    if (finger == steeringFinger)
-                        Steer = Mathf.Clamp((position.x - steeringStart.x) / (Screen.width * 0.22f), -1f, 1f);
+
+                    if (finger == steeringFinger &&
+                        (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+                         phase == UnityEngine.InputSystem.TouchPhase.Stationary))
+                    {
+                        Steer = Mathf.Clamp(
+                            (position.x - steeringStart.x) / (Screen.width * 0.22f),
+                            -1f, 1f);
+                    }
+
+                    if (!control.press.isPressed) continue;
+
                     if (position.x > Screen.width * 0.72f)
                     {
                         if (position.y > Screen.height * 0.52f) NitroHeld = true;
@@ -59,12 +81,35 @@ namespace NitroStreetRush.Racing
             for (int i = 0; i < Input.touchCount; i++)
             {
                 Touch t = Input.GetTouch(i);
-                if (t.phase == TouchPhase.Began && t.position.x < Screen.width * 0.7f) { steeringFinger = t.fingerId; steeringStart = t.position; }
-                if (t.fingerId == steeringFinger && (t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary))
+
+                if (t.fingerId == steeringFinger &&
+                    (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled))
+                {
+                    steeringFinger = -1;
+                    continue;
+                }
+
+                bool inSteeringZone = t.position.x < Screen.width * 0.68f &&
+                                      t.position.y > Screen.height * 0.30f;
+                if (t.phase == TouchPhase.Began && inSteeringZone)
+                {
+                    steeringFinger = t.fingerId;
+                    steeringStart = t.position;
+                }
+
+                if (t.fingerId == steeringFinger &&
+                    (t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary))
+                {
                     Steer = Mathf.Clamp((t.position.x - steeringStart.x) / (Screen.width * 0.22f), -1f, 1f);
-                if (t.fingerId == steeringFinger && (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)) steeringFinger = -1;
-                if (t.position.x > Screen.width * 0.72f) { if (t.position.y > Screen.height * 0.52f) NitroHeld = true; else BrakeHeld = true; }
+                }
+
+                if (t.position.x > Screen.width * 0.72f)
+                {
+                    if (t.position.y > Screen.height * 0.52f) NitroHeld = true;
+                    else BrakeHeld = true;
+                }
             }
+
             NitroHeld |= Input.GetKey(KeyCode.LeftShift);
             BrakeHeld |= Input.GetKey(KeyCode.Space);
 #endif
