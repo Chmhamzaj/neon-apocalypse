@@ -4,6 +4,11 @@ extends Node3D
 
 const WORLD := 190.0
 const PLAYER_START := Vector3(-58, 0.1, 54)
+# One shared human specification is used by the hero and every civilian.
+# This removes per-NPC scale drift and keeps physics/visual proportions identical.
+const HUMAN_HEIGHT:float = 1.72
+const HUMAN_COLLIDER_RADIUS:float = 0.28
+const HUMAN_COLLIDER_HEIGHT:float = 1.82
 
 var player: CharacterBody3D
 var player_visual: Node3D
@@ -368,15 +373,18 @@ func _replace_player_with_external_asset():
     player.add_child(player_visual)
     var model:=external_human_scene.instantiate()
     player_visual.add_child(model)
-    _normalize_model_height(model,1.72)
+    _normalize_model_height(model,HUMAN_HEIGHT)
     _tint_model(model,0)
     player_model_animation=_find_animation_player(model)
     if player_model_animation:
-        player_idle_anim=_find_animation(player_model_animation,["idle","stand"])
-        player_walk_anim=_find_animation(player_model_animation,["walk"])
-        player_run_anim=_find_animation(player_model_animation,["run"])
-        if player_idle_anim!="":
-            player_model_animation.play(player_idle_anim)
+        # The imported rig's animation tracks are responsible for the detached/
+        # oversized limb artifact seen on mobile. Use the clean bind pose and
+        # animate the character root procedurally instead.
+        player_model_animation.stop()
+        player_model_animation.active=false
+        player_idle_anim=""
+        player_walk_anim=""
+        player_run_anim=""
 
 
 func _find_animation_player(root:Node)->AnimationPlayer:
@@ -442,10 +450,10 @@ func _spawn_population_async():
         var npc_shape:=CollisionShape3D.new()
         var npc_capsule:=CapsuleShape3D.new()
         # Civilians use the EXACT same physical body dimensions as the hero.
-        npc_capsule.radius=0.28
-        npc_capsule.height=1.82
+        npc_capsule.radius=HUMAN_COLLIDER_RADIUS
+        npc_capsule.height=HUMAN_COLLIDER_HEIGHT
         npc_shape.shape=npc_capsule
-        npc_shape.position.y=0.91
+        npc_shape.position.y=HUMAN_COLLIDER_HEIGHT*0.5
         n.add_child(npc_shape)
         n.position=_find_npc_spawn_point()
         if external_human_scene:
@@ -504,7 +512,7 @@ func _create_external_human(root:Node3D,index:int):
     # Keep civilians clearly human-sized and a little smaller than the hero,
     # with gentle variation so the crowd does not look cloned.
     # Match the hero's rendered height EXACTLY. No height variation.
-    var target_height:float=1.72
+    var target_height:float=HUMAN_HEIGHT
     _normalize_model_height(model,target_height)
     _tint_model(model,index+1)
     # Imported walk animation can contain transform tracks. Preserve the
@@ -922,10 +930,10 @@ func _spawn_player():
     add_child(player)
     var cs := CollisionShape3D.new()
     var capsule := CapsuleShape3D.new()
-    capsule.radius = 0.28
-    capsule.height = 1.82
+    capsule.radius = HUMAN_COLLIDER_RADIUS
+    capsule.height = HUMAN_COLLIDER_HEIGHT
     cs.shape = capsule
-    cs.position.y = 0.91
+    cs.position.y = HUMAN_COLLIDER_HEIGHT*0.5
     player.collision_layer = 1
     player.collision_mask = 7
     player.add_child(cs)
@@ -1578,13 +1586,21 @@ func _animate_npcs(delta):
             if chosen!="" and ap.current_animation!=chosen:
                 if ap.current_animation!=chosen:
                     ap.play(chosen)
-            # Keep civilians at a slow, ordinary walking cadence.
-            ap.speed_scale=clamp(speed/0.82,0.40,0.58) if moving else 1.0
+                    # Rig animation is intentionally disabled; use subtle root motion
+            # instead so the walk never stretches or detaches the mesh.
+            ap.stop()
+            ap.active=false
 
         var npc_model:Node3D=n.get_meta("model",null) as Node3D
         if npc_model:
             var base_scale:Vector3=n.get_meta("base_model_scale",Vector3.ONE)
             npc_model.scale=base_scale
+            if moving:
+                npc_model.position.y=0.025+sin(life*9.0)*0.018
+                npc_model.rotation.z=sin(life*4.5)*0.018
+            else:
+                npc_model.position.y=0.025
+                npc_model.rotation.z=0.0
 
         n.position.y=0.0
 
