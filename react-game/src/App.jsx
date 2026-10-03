@@ -72,7 +72,7 @@ function useSharedHuman() {
   }, [gltf]);
 }
 
-function Human({ position, rotationY=0, moving=false, tint="#dce7f5", isPlayer=false }) {
+function Human({ position, rotationY=0, moving=false, tint="#dce7f5", isPlayer=false, paused=false }) {
   const { scene, scale, clips } = useSharedHuman();
   const ref=useRef();
   const mixer=useRef(null);
@@ -100,14 +100,14 @@ function Human({ position, rotationY=0, moving=false, tint="#dce7f5", isPlayer=f
       action.current=mixer.current.clipAction(clip);
       action.current.reset().fadeIn(.18).play();
       action.current.setLoop(THREE.LoopRepeat, Infinity);
-      action.current.setEffectiveTimeScale(moving ? 0.46 : 0.24);
+      action.current.setEffectiveTimeScale(paused ? 0 : (moving ? 0.46 : 0.24));
     }
     return () => { mixer.current?.stopAllAction(); };
   }, [scene, scale, clips, tint]);
 
   useFrame((_,dt)=>{
     if (mixer.current && action.current) {
-      action.current.setEffectiveTimeScale(moving ? 0.46 : 0.24);
+      action.current.setEffectiveTimeScale(paused ? 0 : (moving ? 0.46 : 0.24));
       mixer.current.update(dt);
     }
   });
@@ -249,7 +249,7 @@ function Crowd({ playerPos, setPlayerPos }) {
   });
 
   return <>
-    {people.map(p=><Human key={p.id} position={p} rotationY={p.heading} moving={p.moving} tint={p.tint}/>)}
+    {people.map(p=><Human key={p.id} position={p} rotationY={p.heading} moving={p.moving} tint={p.tint} paused={paused}/>)}
   </>;
 }
 
