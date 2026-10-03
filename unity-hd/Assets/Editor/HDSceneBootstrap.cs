@@ -25,6 +25,9 @@ namespace NitroStreetRush.Editor
             var save = systems.AddComponent<NitroStreetRacing.SaveGame>();
             var progress = systems.AddComponent<NitroStreetRacing.RaceProgress>();
             systems.AddComponent<NitroStreetRacing.RaceFlowController>();
+            systems.AddComponent<NitroStreetRacing.RaceTimer>();
+            systems.AddComponent<NitroStreetRacing.RaceComboSystem>();
+            systems.AddComponent<NitroStreetRacing.GameplayFeedback>();
             systems.AddComponent<NitroStreetRacing.RaceResultsController>();
             systems.AddComponent<NitroStreetRacing.RacePauseController>();
             systems.AddComponent<NitroStreetRacing.MobileSteering>();
@@ -92,9 +95,13 @@ namespace NitroStreetRush.Editor
             var stateTextGo = CreateText(canvasGo.transform, "RaceState", new Vector2(0f, 170f), 48);
             var speedTextGo = CreateText(canvasGo.transform, "Speed", new Vector2(0f, 90f), 40);
             var progressTextGo = CreateText(canvasGo.transform, "Progress", new Vector2(0f, 30f), 30);
+            var scoreTextGo = CreateText(canvasGo.transform, "Score", new Vector2(0f, -35f), 28);
+            var comboTextGo = CreateText(canvasGo.transform, "Combo", new Vector2(0f, -80f), 24);
             var stateText = stateTextGo.GetComponent<Text>();
             var speedText = speedTextGo.GetComponent<Text>();
             var progressText = progressTextGo.GetComponent<Text>();
+            var scoreText = scoreTextGo.GetComponent<Text>();
+            var comboText = comboTextGo.GetComponent<Text>();
 
             SetPrivate(hud, "flow", systems.GetComponent<NitroStreetRacing.RaceFlowController>());
             SetPrivate(hud, "car", car.GetComponent<NitroStreetRacing.CarController>());
@@ -102,6 +109,11 @@ namespace NitroStreetRush.Editor
             SetPrivate(hud, "stateText", stateText);
             SetPrivate(hud, "speedText", speedText);
             SetPrivate(hud, "progressText", progressText);
+
+            var scoreHud = canvasGo.AddComponent<NitroStreetRacing.RaceScoreHUD>();
+            SetPrivate(scoreHud, "combo", systems.GetComponent<NitroStreetRacing.RaceComboSystem>());
+            SetPrivate(scoreHud, "scoreText", scoreText);
+            SetPrivate(scoreHud, "comboText", comboText);
 
             progress.SetPlayer(car.transform);
             progress.SetFinish(finish);
