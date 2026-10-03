@@ -13,6 +13,7 @@ namespace NitroStreetRush.Editor
         {
             HDSceneBootstrap.EnsureScene();
             AssetDatabase.Refresh();
+            HDSceneValidator.Validate();
             const string output = "Builds/NitroStreetRush-HD.apk";
             Directory.CreateDirectory("Builds");
             EditorUserBuildSettings.buildAppBundle = false;
