@@ -29,7 +29,7 @@ jobs:
           # characters and other 3D content without runtime network downloads.
           rm -rf /tmp/tge-assets
           git clone --depth 1 --filter=blob:none --sparse https://github.com/Hidencod/tge-assets.git /tmp/tge-assets
-          git -C /tmp/tge-assets sparse-checkout set packs
+          git -C /tmp/tge-assets sparse-checkout set packs catalog.json LICENSE
           mkdir -p godot-game/assets/external/kenney-library
           cp -R /tmp/tge-assets/packs godot-game/assets/external/kenney-library/
           cp /tmp/tge-assets/catalog.json /tmp/tge-assets/LICENSE godot-game/assets/external/kenney-library/
