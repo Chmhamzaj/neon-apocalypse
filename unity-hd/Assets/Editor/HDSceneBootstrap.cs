@@ -30,26 +30,75 @@ namespace NitroStreetRush.Editor
             systems.AddComponent<NitroStreetRacing.GameplayFeedback>();
             systems.AddComponent<NitroStreetRacing.RaceResultsController>();
             systems.AddComponent<NitroStreetRacing.RaceObjectiveSystem>();
+            systems.AddComponent<NitroStreetRacing.RaceMarkers>();
+            systems.AddComponent<NitroStreetRacing.TrackProgressTracker>();
             var pauseController = systems.AddComponent<NitroStreetRacing.RacePauseController>();
             var restartController = systems.AddComponent<NitroStreetRacing.RaceRestartController>();
             systems.AddComponent<NitroStreetRacing.MobileSteering>();
 
-            var roadRoot = new GameObject("Road");
-            for (int i = 0; i < 20; i++)
+            var pathGo = new GameObject("RacePath");
+            var racePath = pathGo.AddComponent<NitroStreetRacing.RaceSplinePath>();
+            var controlParent = new GameObject("ControlPoints");
+            controlParent.transform.SetParent(pathGo.transform);
+            Vector3[] controlPositions =
             {
+                new Vector3(0f, 0f, 0f),
+                new Vector3(65f, 0f, 180f),
+                new Vector3(140f, 5f, 390f),
+                new Vector3(-130f, 12f, 620f),
+                new Vector3(-220f, 3f, 900f),
+                new Vector3(-40f, 18f, 1160f),
+                new Vector3(180f, 10f, 1440f),
+                new Vector3(125f, 6f, 1700f),
+                new Vector3(0f, 0f, 2020f)
+            };
+            var controlPoints = new Transform[controlPositions.Length];
+            for (int i = 0; i < controlPositions.Length; i++)
+            {
+                var point = new GameObject($"ControlPoint_{i:00}");
+                point.transform.SetParent(controlParent.transform);
+                point.transform.position = controlPositions[i];
+                controlPoints[i] = point.transform;
+            }
+            var splineSerialized = new SerializedObject(racePath);
+            var pointsProperty = splineSerialized.FindProperty("controlPoints");
+            pointsProperty.arraySize = controlPoints.Length;
+            for (int i = 0; i < controlPoints.Length; i++)
+                pointsProperty.GetArrayElementAtIndex(i).objectReferenceValue = controlPoints[i];
+            splineSerialized.ApplyModifiedPropertiesWithoutUndo();
+            racePath.Rebuild();
+
+            var roadRoot = new GameObject("Road");
+            const int roadSegmentCount = 28;
+            float segmentLength = racePath.TotalLength / roadSegmentCount;
+            for (int i = 0; i < roadSegmentCount; i++)
+            {
+                float d0 = i * segmentLength;
+                float d1 = (i + 1) * segmentLength;
+                float mid = (d0 + d1) * 0.5f;
                 var road = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 road.name = $"RoadSegment_{i:00}";
                 road.transform.SetParent(roadRoot.transform);
-                road.transform.position = new Vector3(0f, -0.15f, i * 100f + 50f);
-                road.transform.localScale = new Vector3(11f, 0.3f, 100f);
+                road.transform.position = racePath.GetPoint(mid) + Vector3.down * 0.15f;
+                var tangent = racePath.GetTangent(mid);
+                road.transform.rotation = Quaternion.LookRotation(tangent, Vector3.up);
+                road.transform.localScale = new Vector3(11f, 0.3f, segmentLength + 1f);
+
+                var centerDash = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                centerDash.name = $"LaneDash_{i:00}";
+                centerDash.transform.SetParent(roadRoot.transform);
+                centerDash.transform.position = racePath.GetPoint(mid) + Vector3.up * 0.015f;
+                centerDash.transform.rotation = road.transform.rotation;
+                centerDash.transform.localScale = new Vector3(0.09f, 0.025f, Mathf.Min(5.5f, segmentLength * 0.23f));
             }
 
             var finish = new GameObject("FinishLine").transform;
-            finish.position = new Vector3(0f, 0f, 2000f);
+            finish.position = racePath.GetPoint(racePath.TotalLength);
+            finish.rotation = Quaternion.LookRotation(racePath.GetTangent(racePath.TotalLength), Vector3.up);
 
             var car = new GameObject("PlayerCar");
-            car.transform.position = new Vector3(0f, 0.8f, 8f);
-            car.transform.rotation = Quaternion.identity;
+            car.transform.position = racePath.GetPoint(12f) + Vector3.up * 0.8f;
+            car.transform.rotation = Quaternion.LookRotation(racePath.GetTangent(12f), Vector3.up);
             var body = car.AddComponent<Rigidbody>();
             body.mass = 1420f;
             car.AddComponent<NitroStreetRacing.CarController>();
@@ -167,9 +216,10 @@ namespace NitroStreetRush.Editor
             SetPrivate(scoreHud, "scoreText", scoreText);
             SetPrivate(scoreHud, "comboText", comboText);
 
+            progress.SetPath(racePath);
             progress.SetPlayer(car.transform);
             progress.SetFinish(finish);
-            progress.SetRaceDistance(2000f);
+            progress.SetRaceDistance(racePath.TotalLength);
             cameraGo.GetComponent<NitroStreetRacing.RaceCamera>().SetTarget(car.transform);
 
             var flow = systems.GetComponent<NitroStreetRacing.RaceFlowController>();
