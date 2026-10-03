@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace NitroStreetRush.Racing
 {
@@ -80,9 +83,23 @@ namespace NitroStreetRush.Racing
 
         private void ReadInput()
         {
+            steerInput = 0f;
+            brakeInput = false;
+            nitroInput = false;
+
+#if ENABLE_INPUT_SYSTEM
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
+            {
+                steerInput = (keyboard.dKey.isPressed ? 1f : 0f) - (keyboard.aKey.isPressed ? 1f : 0f);
+                brakeInput = keyboard.spaceKey.isPressed;
+                nitroInput = keyboard.leftShiftKey.isPressed;
+            }
+#else
             steerInput = Mathf.Clamp(Input.GetAxisRaw("Horizontal"), -1f, 1f);
             brakeInput = Input.GetKey(KeyCode.Space);
             nitroInput = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.JoystickButton0);
+#endif
 
             if (TouchInput.Instance)
             {
