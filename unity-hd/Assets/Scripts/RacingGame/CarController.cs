@@ -1,0 +1,97 @@
+using UnityEngine;
+
+namespace NitroStreetRush.Racing
+{
+    [RequireComponent(typeof(Rigidbody))]
+    public sealed class CarController : MonoBehaviour
+    {
+        [Header("Handling")]
+        [SerializeField] private float maxSpeedKph = 320f;
+        [SerializeField] private float acceleration = 42f;
+        [SerializeField] private float brakeForce = 70f;
+        [SerializeField] private float steerRate = 2.6f;
+        [SerializeField] private float lateralGrip = 7.5f;
+        [SerializeField] private float driftGrip = 2.2f;
+        [SerializeField] private float downforce = 1.8f;
+
+        [Header("Nitro")]
+        [SerializeField] private float nitroCapacity = 100f;
+        [SerializeField] private float nitroAcceleration = 95f;
+        [SerializeField] private float nitroDrainPerSecond = 26f;
+        [SerializeField] private float nitroRechargePerSecond = 7f;
+
+        private Rigidbody body;
+        private float steerInput;
+        private float throttleInput = 1f;
+        private bool brakeInput;
+        private bool nitroInput;
+        private float nitro;
+
+        public float SpeedKph => body.linearVelocity.magnitude * 3.6f;
+        public float Nitro => nitro;
+        public bool IsBoosting => nitroInput && nitro > 0.5f && throttleInput > 0f;
+
+        private void Awake()
+        {
+            body = GetComponent<Rigidbody>();
+            body.mass = 1420f;
+            body.linearDamping = 0.08f;
+            body.angularDamping = 3.5f;
+            nitro = nitroCapacity;
+        }
+
+        private void FixedUpdate()
+        {
+            ReadInput();
+            Vector3 velocity = body.linearVelocity;
+            float forwardSpeed = Vector3.Dot(velocity, transform.forward);
+            float maxSpeed = maxSpeedKph / 3.6f;
+
+            float driveForce = acceleration * throttleInput;
+            if (IsBoosting)
+            {
+                driveForce += nitroAcceleration;
+                nitro = Mathf.Max(0f, nitro - nitroDrainPerSecond * Time.fixedDeltaTime);
+            }
+            else
+            {
+                nitro = Mathf.Min(nitroCapacity, nitro + nitroRechargePerSecond * Time.fixedDeltaTime);
+            }
+
+            if (forwardSpeed < maxSpeed)
+                body.AddForce(transform.forward * driveForce, ForceMode.Acceleration);
+
+            if (brakeInput)
+                body.AddForce(-velocity.normalized * brakeForce, ForceMode.Acceleration);
+
+            float grip = Mathf.Abs(steerInput) > 0.65f ? driftGrip : lateralGrip;
+            Vector3 lateralVelocity = transform.right * Vector3.Dot(velocity, transform.right);
+            body.AddForce(-lateralVelocity * grip, ForceMode.Acceleration);
+
+            float steerScale = Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 18f);
+            float yaw = steerInput * steerRate * steerScale * Time.fixedDeltaTime;
+            body.MoveRotation(body.rotation * Quaternion.Euler(0f, yaw * Mathf.Rad2Deg, 0f));
+
+            body.AddForce(-transform.up * downforce * velocity.sqrMagnitude, ForceMode.Force);
+        }
+
+        private void ReadInput()
+        {
+            float keyboardSteer = Input.GetAxisRaw("Horizontal");
+            steerInput = Mathf.Clamp(keyboardSteer, -1f, 1f);
+
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Moved)
+                {
+                    steerInput = Mathf.Clamp(touch.deltaPosition.x / 70f, -1f, 1f);
+                }
+            }
+
+            throttleInput = 1f;
+            brakeInput = Input.GetKey(KeyCode.Space);
+            nitroInput = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.JoystickButton0);
+        }
+    }
+}
