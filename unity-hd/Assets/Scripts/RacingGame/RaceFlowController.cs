@@ -13,6 +13,13 @@ namespace NitroStreetRush.Racing
         public State CurrentState { get; private set; } = State.Countdown;
         public float CountdownRemaining { get; private set; }
 
+        private void Awake()
+        {
+            if (!events) events = FindFirstObjectByType<RaceStateEvents>();
+            if (!player) player = FindFirstObjectByType<CarController>();
+            if (!progress) progress = FindFirstObjectByType<RaceProgress>();
+        }
+
         private void Start()
         {
             StartCoroutine(BeginRace());
