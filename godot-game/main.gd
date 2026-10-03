@@ -57,6 +57,14 @@ var camera_height := 2.8
 var external_human_scene: PackedScene
 var external_car_scene: PackedScene
 var external_car_scenes: Array[PackedScene] = []
+var kenney_building_paths:Array[String]=[]
+var kenney_car_paths:Array[String]=[]
+var kenney_tree_paths:Array[String]=[]
+var kenney_street_prop_paths:Array[String]=[]
+var kenney_furniture_paths:Array[String]=[]
+var kenney_food_paths:Array[String]=[]
+var kenney_graveyard_paths:Array[String]=[]
+var kenney_space_paths:Array[String]=[]
 var drive_button: Button
 var active_car: Node3D
 var building_obstacles: Array[Rect2] = []
@@ -144,6 +152,7 @@ func _prepare_external_assets():
             if scene: external_car_scenes.append(scene)
     if ResourceLoader.exists("res://assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf"):
         external_lamp_scene=load("res://assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf") as PackedScene
+    _prepare_kenney_asset_catalog()
     asphalt_pbr=_make_pbr_material(
         "res://assets/external/polyhaven/asphalt_07_diff_2k.jpg",
         "res://assets/external/polyhaven/asphalt_07_nor_gl_2k.jpg",
@@ -156,6 +165,120 @@ func _prepare_external_assets():
         "res://assets/external/polyhaven/concrete_rough_2k.jpg",
         Vector3(1.25,1.25,1.25)
     )
+
+func _scan_glb_paths(root_path:String)->Array[String]:
+    var results:Array[String]=[]
+    var dir:=DirAccess.open(root_path)
+    if dir==null:
+        return results
+    dir.list_dir_begin()
+    while true:
+        var file_name:String=dir.get_next()
+        if file_name=="":
+            break
+        if file_name.begins_with("."):
+            continue
+        var full_path:String=root_path+"/"+file_name
+        if dir.current_is_dir():
+            results.append_array(_scan_glb_paths(full_path))
+        elif file_name.to_lower().ends_with(".glb"):
+            results.append(full_path)
+    dir.list_dir_end()
+    results.sort()
+    return results
+
+func _prepare_kenney_asset_catalog():
+    var base:="res://assets/external/kenney-library/packs"
+    kenney_building_paths.clear()
+    kenney_car_paths.clear()
+    kenney_tree_paths.clear()
+    kenney_street_prop_paths.clear()
+    kenney_furniture_paths.clear()
+    kenney_food_paths.clear()
+    kenney_graveyard_paths.clear()
+    kenney_space_paths.clear()
+
+    var commercial:=_scan_glb_paths(base+"/city-kit-commercial")
+    var suburban:=_scan_glb_paths(base+"/city-kit-suburban")
+    for path in commercial+suburban:
+        var n:String=path.get_file().to_lower()
+        if n.contains("building"):
+            kenney_building_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/car-kit"):
+        var n:String=path.get_file().to_lower()
+        if not n.contains("debris") and not n.contains("wheel") and not n.contains("cone") and not n.contains("barrier"):
+            kenney_car_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/nature-kit"):
+        var n:String=path.get_file().to_lower()
+        if n.contains("tree") or n.contains("bush") or n.contains("plant") or n.contains("flower") or n.contains("grass"):
+            kenney_tree_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/city-kit-roads"):
+        var n:String=path.get_file().to_lower()
+        if not n.contains("road") and not n.contains("sidewalk") and not n.contains("tile") and not n.contains("lane"):
+            kenney_street_prop_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/furniture-kit"):
+        var n:String=path.get_file().to_lower()
+        if n.contains("chair") or n.contains("table") or n.contains("bench") or n.contains("lamp") or n.contains("trash") or n.contains("plant") or n.contains("shelf") or n.contains("cabinet"):
+            kenney_furniture_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/food-kit"):
+        kenney_food_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/graveyard-kit"):
+        kenney_graveyard_paths.append(path)
+
+    for path in _scan_glb_paths(base+"/space-kit"):
+        kenney_space_paths.append(path)
+
+func _instantiate_glb(path:String)->Node3D:
+    var packed:=load(path) as PackedScene
+    if packed==null:
+        return null
+    return packed.instantiate() as Node3D
+
+func _normalize_model_to_box(root:Node3D,target_size:Vector3)->float:
+    var min_v:=Vector3(INF,INF,INF)
+    var max_v:=Vector3(-INF,-INF,-INF)
+    var found:=false
+    for mesh_node in root.find_children("*","MeshInstance3D",true,false):
+        var mi:=mesh_node as MeshInstance3D
+        if mi==null or mi.mesh==null:
+            continue
+        var a:=mi.get_aabb()
+        var corners:Array[Vector3]=[
+            Vector3(a.position.x,a.position.y,a.position.z),
+            Vector3(a.end.x,a.position.y,a.position.z),
+            Vector3(a.position.x,a.end.y,a.position.z),
+            Vector3(a.position.x,a.position.y,a.end.z),
+            Vector3(a.end.x,a.end.y,a.position.z),
+            Vector3(a.end.x,a.position.y,a.end.z),
+            Vector3(a.position.x,a.end.y,a.end.z),
+            Vector3(a.end.x,a.end.y,a.end.z)]
+        for corner in corners:
+            var world_p:Vector3=mi.to_global(corner)
+            var local_p:Vector3=root.to_local(world_p)
+            min_v.x=min(min_v.x,local_p.x)
+            min_v.y=min(min_v.y,local_p.y)
+            min_v.z=min(min_v.z,local_p.z)
+            max_v.x=max(max_v.x,local_p.x)
+            max_v.y=max(max_v.y,local_p.y)
+            max_v.z=max(max_v.z,local_p.z)
+            found=true
+    if not found:
+        return 1.0
+    var size:=max_v-min_v
+    if size.x<0.01 or size.y<0.01 or size.z<0.01:
+        return 1.0
+    var scale_factor:float=min(target_size.x/size.x,min(target_size.y/size.y,target_size.z/size.z))
+    root.scale*=scale_factor
+    var center_x:float=(min_v.x+max_v.x)*0.5
+    var center_z:float=(min_v.z+max_v.z)*0.5
+    root.position=Vector3(-center_x*scale_factor,-min_v.y*scale_factor,-center_z*scale_factor)
+    return scale_factor
 
 func _make_pbr_material(albedo_path:String,normal_path:String,rough_path:String,tiling:Vector3)->StandardMaterial3D:
     var m:=StandardMaterial3D.new()
@@ -331,7 +454,7 @@ func _spawn_population_async():
         if i%3==0:
             await get_tree().process_frame
 
-    for i in range(13):
+    for i in range(20):
         var c:=AnimatableBody3D.new()
         c.name="Traffic_%02d"%i
         c.collision_layer=4
@@ -348,8 +471,11 @@ func _spawn_population_async():
             c.set_meta("player_car",true)
             c.set_meta("speed",0.0)
             c.set_meta("dir",1.0)
-        var fleet_index:int=i%max(1,external_car_scenes.size())
-        if external_car_scenes.size()>0:
+        var fleet_index:int=i%max(1,kenney_car_paths.size())
+        if not kenney_car_paths.is_empty():
+            _create_kenney_car(c,i)
+        elif external_car_scenes.size()>0:
+            fleet_index=i%max(1,external_car_scenes.size())
             _create_external_car(c,fleet_index)
         elif external_car_scene:
             _create_external_car_from_scene(c,external_car_scene,fleet_index)
@@ -381,6 +507,20 @@ func _create_external_human(root:Node3D,index:int):
         var idle_name:String=String(root.get_meta("idle_anim"))
         if idle_name!="":
             ap.play(idle_name)
+
+func _create_kenney_car(root:Node3D,index:int):
+    if kenney_car_paths.is_empty():
+        return
+    var model:=_instantiate_glb(kenney_car_paths[index%kenney_car_paths.size()])
+    if model==null:
+        return
+    root.add_child(model)
+    _normalize_model_length(model,4.35)
+    model.position.y=0.05
+    root.set_meta("model",model)
+    root.set_meta("fleet_index",index%kenney_car_paths.size())
+    root.set_meta("source","Kenney Car Kit")
+    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
 
 func _create_external_car(root:Node3D,index:int):
     if external_car_scenes.is_empty():
@@ -536,6 +676,28 @@ func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:in
     var root:=Node3D.new()
     root.position=Vector3(x,0,z)
     city.add_child(root)
+
+    if not kenney_building_paths.is_empty():
+        var model:=_instantiate_glb(kenney_building_paths[i%kenney_building_paths.size()])
+        if model:
+            root.add_child(model)
+            # Fit every imported building to the same real-world street scale.
+            _normalize_model_to_box(model,Vector3(w*0.96,h*0.98,d*0.96))
+            model.set_meta("source","Kenney City Kit")
+            var body:=StaticBody3D.new()
+            body.name="BuildingCollision"
+            body.collision_layer=1
+            body.collision_mask=7
+            var shape:=CollisionShape3D.new()
+            var box_shape:=BoxShape3D.new()
+            box_shape.size=Vector3(w*0.92,h*0.96,d*0.92)
+            shape.shape=box_shape
+            shape.position.y=h*0.48
+            body.add_child(shape)
+            root.add_child(body)
+            return
+
+    # Safe fallback when an asset pack is unavailable.
     var facade:Color=palette[i%2]
     var facade_mat:=concrete_pbr.duplicate() if concrete_pbr else material(facade,0.65)
     facade_mat.albedo_color=facade
@@ -551,14 +713,6 @@ func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:in
     shape.position.y=h*0.5
     body.add_child(shape)
     root.add_child(body)
-    var glass:=material(Color("#152432"),0.20,0.35)
-    for side in [-1.0,1.0]:
-        box(root,Vector3(side*w*0.26,h*0.46,d*0.515),Vector3(w*0.14,h*0.60,0.05),glass,"WindowBand")
-    if i%3==0:
-        box(root,Vector3(0,h+0.55,0),Vector3(w*0.48,0.65,d*0.48),material(palette[1],0.48,0.18),"Crown")
-    elif i%3==1:
-        cylinder(root,Vector3(0,h+0.88,0),0.42,1.75,material(Color("#282d33"),0.45,0.28),"RoofUnit")
-
 func _build_roads():
     var road_mat:Material=asphalt_pbr if asphalt_pbr else material(Color("#14171c"),0.92)
     var lane_mat:=material(Color("#d7b24f"),0.48,0.05)
@@ -653,21 +807,97 @@ func _next_sidewalk_point(from_pos:Vector3)->Vector3:
 func _random_sidewalk_point(from_pos:Vector3)->Vector3:
     return _next_sidewalk_point(from_pos)
 
+func _is_on_road(p:Vector3)->bool:
+    for z in range(-84,85,21):
+        if abs(p.z-float(z))<4.2:
+            return true
+    for x in [-82.0,-40.0,42.0,82.0]:
+        if abs(p.x-x)<4.2:
+            return true
+    return false
+
+func _safe_prop_spot(p:Vector3,min_building_gap:float=1.5)->bool:
+    if abs(p.x)<7.0:
+        return false
+    if _is_on_road(p):
+        return false
+    for r in building_obstacles:
+        if r.grow(min_building_gap).has_point(Vector2(p.x,p.z)):
+            return false
+    return true
+
+func _place_kenney_height_asset(path:String,position:Vector3,target_height:float,rotation_y:float=0.0)->Node3D:
+    var node:=_instantiate_glb(path)
+    if node==null:
+        return null
+    node.position=position
+    node.rotation.y=rotation_y
+    city.add_child(node)
+    _normalize_model_height(node,target_height)
+    return node
+
+func _place_kenney_prop(path:String,position:Vector3,max_dimension:float,rotation_y:float=0.0)->Node3D:
+    var node:=_instantiate_glb(path)
+    if node==null:
+        return null
+    node.position=position
+    node.rotation.y=rotation_y
+    city.add_child(node)
+    _normalize_model_to_box(node,Vector3(max_dimension,max_dimension,max_dimension))
+    return node
+
 func _build_instanced_props():
-    for i in range(30):
-        var x:float=rng.randf_range(-88,88)
-        var z:float=rng.randf_range(-88,88)
-        if abs(x)<10: continue
-        if i%3==0 and external_lamp_scene:
-            var lamp:=external_lamp_scene.instantiate()
-            lamp.position=Vector3(x,0,z)
-            lamp.scale=Vector3(0.70,0.70,0.70)
-            city.add_child(lamp)
-        elif i%3==1:
-            cylinder(city,Vector3(x,1.0,z),0.78,2.0,material(Color("#2b744f"),0.86),"TreeCanopy")
-            cylinder(city,Vector3(x,0.65,z),0.22,1.3,material(Color("#63442d"),0.90),"TreeTrunk")
-        else:
-            box(city,Vector3(x,0.5,z),Vector3(1.2,1.0,0.8),material(Color("#6c4c36"),0.85),"StreetCrate")
+    # Trees and foliage: real 3D Nature Kit assets, scaled to adult-world proportions.
+    if not kenney_tree_paths.is_empty():
+        for i in range(92):
+            var p:=Vector3(rng.randf_range(-90.0,90.0),0.0,rng.randf_range(-90.0,90.0))
+            if not _safe_prop_spot(p,2.0):
+                continue
+            var tree_path:String=kenney_tree_paths[i%kenney_tree_paths.size()]
+            var tree:=_place_kenney_height_asset(tree_path,p,rng.randf_range(3.2,6.2),rng.randf_range(0.0,TAU))
+            if tree:
+                tree.set_meta("source","Kenney Nature Kit")
+
+    # Urban street furniture and public-space props.
+    if not kenney_street_prop_paths.is_empty():
+        for i in range(60):
+            var wp:=_random_sidewalk_point(Vector3(rng.randf_range(-86,86),0,rng.randf_range(-86,86)))
+            var p:=wp+Vector3(rng.randf_range(-0.7,0.7),0.0,rng.randf_range(-0.7,0.7))
+            var prop_path:String=kenney_street_prop_paths[i%kenney_street_prop_paths.size()]
+            var prop:=_place_kenney_prop(prop_path,p,rng.randf_range(0.6,1.8),rng.randf_range(0.0,TAU))
+            if prop:
+                prop.set_meta("source","Kenney City Kit Roads")
+
+    # A smaller amount of furniture gives shop fronts and public areas physical detail.
+    if not kenney_furniture_paths.is_empty():
+        for i in range(28):
+            var p:=Vector3(rng.randf_range(-86,86),0.0,rng.randf_range(-86,86))
+            if not _safe_prop_spot(p,1.0):
+                continue
+            var prop:=_place_kenney_prop(kenney_furniture_paths[i%kenney_furniture_paths.size()],p,rng.randf_range(0.8,1.8),rng.randf_range(0.0,TAU))
+            if prop:
+                prop.set_meta("source","Kenney Furniture Kit")
+
+    # Food props become small market/stall dressing around selected city blocks.
+    if not kenney_food_paths.is_empty():
+        for i in range(18):
+            var p:=Vector3(rng.randf_range(-80,80),0.0,rng.randf_range(-80,80))
+            if not _safe_prop_spot(p,1.0):
+                continue
+            var prop:=_place_kenney_prop(kenney_food_paths[i%kenney_food_paths.size()],p,rng.randf_range(0.35,1.0),rng.randf_range(0.0,TAU))
+            if prop:
+                prop.set_meta("source","Kenney Food Kit")
+
+    # A few graveyard/space props create optional themed micro-zones without replacing the city.
+    var special_paths:Array[String]=kenney_graveyard_paths+kenney_space_paths
+    if not special_paths.is_empty():
+        for i in range(14):
+            var p:=Vector3(rng.randf_range(-82,82),0.0,rng.randf_range(-82,82))
+            if not _safe_prop_spot(p,1.0):
+                continue
+            var prop:=_place_kenney_prop(special_paths[i%special_paths.size()],p,rng.randf_range(0.5,2.0),rng.randf_range(0.0,TAU))
+            if prop:
+                prop.set_meta("source","Kenney 3D Library")
 
 
 func _spawn_player():
@@ -1378,7 +1608,8 @@ func _update_hud():
     if is_instance_valid(objective):
         objective.text="Reach the gold marker"
     if is_instance_valid(fps_label):
-        fps_label.text="FPS %d  |  GFX %s"%[Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics]]
+        var library_count:int=kenney_building_paths.size()+kenney_car_paths.size()+kenney_tree_paths.size()+kenney_street_prop_paths.size()+kenney_furniture_paths.size()+kenney_food_paths.size()+kenney_graveyard_paths.size()+kenney_space_paths.size()
+        fps_label.text="FPS %d  |  GFX %s  |  3D LIB %d"%[Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics],library_count]
     if is_instance_valid(joystick_knob):
         var knob_center:=Vector2(58,58)
         joystick_knob.position=knob_center+move_input*48.0
