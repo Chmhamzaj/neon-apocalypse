@@ -172,14 +172,18 @@ func _make_pbr_material(albedo_path:String,normal_path:String,rough_path:String,
     return m
 
 func _normalize_model_height(root:Node3D,target_height:float)->float:
-    var min_y:=INF
-    var max_y:=-INF
+    # Normalize from the complete rendered mesh bounds, including nested GLB transforms.
+    # This prevents imported humanoid assets with unusual source units from becoming oversized.
+    var min_y:float=INF
+    var max_y:float=-INF
     var found:=false
     for mesh_node in root.find_children("*","MeshInstance3D",true,false):
         var mi:=mesh_node as MeshInstance3D
-        if mi==null or mi.mesh==null: continue
+        if mi==null or mi.mesh==null:
+            continue
         var a:=mi.get_aabb()
-        var corners=[Vector3(a.position.x,a.position.y,a.position.z),
+        var corners:Array[Vector3]=[
+            Vector3(a.position.x,a.position.y,a.position.z),
             Vector3(a.end.x,a.position.y,a.position.z),
             Vector3(a.position.x,a.end.y,a.position.z),
             Vector3(a.position.x,a.position.y,a.end.z),
@@ -187,16 +191,16 @@ func _normalize_model_height(root:Node3D,target_height:float)->float:
             Vector3(a.end.x,a.position.y,a.end.z),
             Vector3(a.position.x,a.end.y,a.end.z),
             Vector3(a.end.x,a.end.y,a.end.z)]
-        for c in corners:
-            var p:=mi.to_global(c)
-            var local_p:=root.to_local(p)
+        for corner in corners:
+            var world_p:Vector3=mi.to_global(corner)
+            var local_p:Vector3=root.to_local(world_p)
             min_y=min(min_y,local_p.y)
             max_y=max(max_y,local_p.y)
             found=true
     if not found or max_y-min_y<0.01:
         return 1.0
-    var current_height:=max_y-min_y
-    var scale_factor:=target_height/current_height
+    var current_height:float=max_y-min_y
+    var scale_factor:float=target_height/current_height
     root.scale*=scale_factor
     root.position.y=-min_y*scale_factor
     return scale_factor
@@ -236,7 +240,7 @@ func _replace_player_with_external_asset():
     player.add_child(player_visual)
     var model:=external_human_scene.instantiate()
     player_visual.add_child(model)
-    _normalize_model_height(model,1.78)
+    _normalize_model_height(model,1.72)
     _tint_model(model,0)
     player_model_animation=_find_animation_player(model)
     if player_model_animation:
@@ -303,8 +307,9 @@ func _spawn_population_async():
         var n:=CharacterBody3D.new()
         n.name="Civilian_%02d"%i
         n.collision_layer=2
-        n.collision_mask=5
-        n.safe_margin=0.04
+        n.collision_mask=7
+        n.safe_margin=0.08
+        n.max_slides=6
         n.floor_snap_length=0.15
         var npc_shape:=CollisionShape3D.new()
         var npc_capsule:=CapsuleShape3D.new()
@@ -320,7 +325,7 @@ func _spawn_population_async():
             _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
-        n.set_meta("speed",rng.randf_range(0.72,1.20))
+        n.set_meta("speed",rng.randf_range(0.62,0.92))
         n.set_meta("target",_random_sidewalk_point(n.position))
         npcs.append(n)
         if i%3==0:
@@ -364,7 +369,7 @@ func _create_external_human(root:Node3D,index:int):
         return
     var model:=external_human_scene.instantiate()
     root.add_child(model)
-    _normalize_model_height(model,1.75)
+    _normalize_model_height(model,1.68)
     _tint_model(model,index+1)
     var ap:=_find_animation_player(model)
     root.set_meta("model",model)
@@ -1221,6 +1226,7 @@ func _animate_player(delta):
             clip=player_walk_anim
         if clip!="" and player_model_animation.current_animation!=clip:
             player_model_animation.play(clip)
+        player_model_animation.speed_scale=clamp(speed_now/3.2,0.72,1.08) if speed_now>0.35 else 1.0
         return
     if not is_instance_valid(player_visual):
         return
@@ -1246,45 +1252,66 @@ func _animate_npcs(delta):
     for n in npcs:
         var body:=n as CharacterBody3D
         if body==null: continue
+
         var target:Vector3=n.get_meta("target",n.global_position)
-        var to_target:=target-n.global_position
+        var to_target:Vector3=target-n.global_position
         to_target.y=0.0
         var speed:float=float(n.get_meta("speed"))
         var life:float=float(n.get_meta("life_clock",0.0))+delta
         n.set_meta("life_clock",life)
 
         if to_target.length()<1.0:
-            n.position=_nearest_safe_sidewalk_point(n.position)
             n.set_meta("target",_next_sidewalk_point(n.position))
             target=Vector3(n.get_meta("target"))
             to_target=target-n.position
+            to_target.y=0.0
 
-        var moving:=to_target.length()>0.8
-        var dir:=to_target.normalized() if moving else Vector3.ZERO
-        body.velocity=dir*speed
+        var moving:bool=to_target.length()>0.8
+        var dir:Vector3=to_target.normalized() if moving else Vector3.ZERO
+
+        # Gentle local avoidance keeps pedestrians from occupying the same
+        # physical space while preserving natural sidewalk movement.
+        var separation:=Vector3.ZERO
+        for other in npcs:
+            if other==n:
+                continue
+            var offset:Vector3=n.global_position-other.global_position
+            offset.y=0.0
+            var distance:float=offset.length()
+            if distance>0.01 and distance<1.05:
+                separation += offset.normalized()*((1.05-distance)/1.05)
+        if separation.length()>0.01:
+            dir=(dir+separation.normalized()*0.72).normalized()
+
+        body.velocity=dir*speed if moving else Vector3.ZERO
         body.velocity.y=0.0
         body.move_and_slide()
 
-        # A physical collision with a building/car is a hard stop; choose a new
-        # connected sidewalk node so pedestrians turn rather than ghost through it.
+        # CharacterBody3D collision now blocks buildings, cars, the player,
+        # and other pedestrians. On contact, choose another connected point.
         if body.is_on_wall():
             body.velocity=Vector3.ZERO
             body.set_meta("target",_next_sidewalk_point(body.position))
             var next_target:Vector3=body.get_meta("target")
-            var next_dir:=next_target-body.position
+            var next_dir:Vector3=next_target-body.position
             next_dir.y=0.0
             if next_dir.length()>0.1:
-                body.rotation.y=lerp_angle(body.rotation.y,atan2(next_dir.x,next_dir.z),delta*10.0)
+                body.rotation.y=lerp_angle(body.rotation.y,atan2(next_dir.x,next_dir.z),delta*5.5)
         elif moving:
-            body.rotation.y=lerp_angle(body.rotation.y,atan2(dir.x,dir.z),delta*7.0)
+            body.rotation.y=lerp_angle(body.rotation.y,atan2(dir.x,dir.z),delta*5.5)
 
         var ap:AnimationPlayer=n.get_meta("anim_player",null) as AnimationPlayer
         if ap:
             var idle_name:String=String(n.get_meta("idle_anim",""))
             var walk_name:String=String(n.get_meta("walk_anim",""))
-            var chosen:=walk_name if moving else idle_name
+            var chosen:String=walk_name if moving else idle_name
             if chosen!="" and ap.current_animation!=chosen:
-                ap.play(chosen)
+                if ap.current_animation!=chosen:
+                    ap.play(chosen)
+            # Match animation cadence to the actual walking speed instead of
+            # letting imported clips run unnaturally fast.
+            ap.speed_scale=clamp(speed/0.82,0.72,1.05) if moving else 1.0
+
         n.position.y=0.0
 
 func _nearest_npc(source:Node3D)->Node3D:
@@ -1360,7 +1387,7 @@ func _toggle_drive():
     if driving:
         driving=false
         player.collision_layer=1
-        player.collision_mask=5
+        player.collision_mask=7
         if is_instance_valid(active_car):
             player.global_position=active_car.global_position+Vector3(2.2,0.0,0.0)
         player_visual.visible=true
