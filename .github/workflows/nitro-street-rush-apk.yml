@@ -47,7 +47,7 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
 
-          godot --headless --path speed-run-game --export-debug "Android"             speed-run-game/dist/NitroStreetRush-unsigned.apk
+          godot --headless --path speed-run-game --export-debug "Android"             dist/NitroStreetRush-unsigned.apk
 
           $ANDROID_HOME/build-tools/35.0.0/apksigner sign             --ks /tmp/nitro-street-rush-debug.keystore             --ks-key-alias androiddebugkey             --ks-pass pass:android             --key-pass pass:android             --out speed-run-game/dist/NitroStreetRush.apk             speed-run-game/dist/NitroStreetRush-unsigned.apk
 
