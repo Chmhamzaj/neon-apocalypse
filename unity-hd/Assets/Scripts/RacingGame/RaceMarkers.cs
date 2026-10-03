@@ -25,11 +25,7 @@ namespace NitroStreetRush.Racing
             float checkpointDistance = distance / (checkpointCount + 1f);
             if (nextCheckpoint <= checkpointCount && travelled >= checkpointDistance * nextCheckpoint)
                 events?.Checkpoint(nextCheckpoint++);
-            if (progress.Finished)
-            {
-                events?.FinishRace();
-                enabled = false;
-            }
+            if (progress.Finished) enabled = false;
         }
     }
 }
