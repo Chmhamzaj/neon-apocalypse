@@ -441,11 +441,11 @@ func _spawn_population_async():
         n.floor_snap_length=0.15
         var npc_shape:=CollisionShape3D.new()
         var npc_capsule:=CapsuleShape3D.new()
-        # Compact human-sized capsule: slightly shorter/narrower than the hero.
-        npc_capsule.radius=0.22
-        npc_capsule.height=1.62
+        # Civilians use the EXACT same physical body dimensions as the hero.
+        npc_capsule.radius=0.28
+        npc_capsule.height=1.82
         npc_shape.shape=npc_capsule
-        npc_shape.position.y=0.81
+        npc_shape.position.y=0.91
         n.add_child(npc_shape)
         n.position=_find_npc_spawn_point()
         if external_human_scene:
@@ -454,7 +454,7 @@ func _spawn_population_async():
             _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
-        n.set_meta("speed",rng.randf_range(0.46,0.64))
+        n.set_meta("speed",rng.randf_range(0.34,0.48))
         n.set_meta("target",_random_sidewalk_point(n.position))
         npcs.append(n)
         if i%3==0:
@@ -503,10 +503,14 @@ func _create_external_human(root:Node3D,index:int):
     root.add_child(model)
     # Keep civilians clearly human-sized and a little smaller than the hero,
     # with gentle variation so the crowd does not look cloned.
-    var target_height:float=1.58+float(index%5)*0.02
+    # Match the hero's rendered height EXACTLY. No height variation.
+    var target_height:float=1.72
     _normalize_model_height(model,target_height)
     _tint_model(model,index+1)
+    # Imported walk animation can contain transform tracks. Preserve the
+    # normalized root scale every frame so walking never changes character size.
     root.set_meta("visual_height",target_height)
+    root.set_meta("base_model_scale",model.scale)
     var ap:=_find_animation_player(model)
     root.set_meta("model",model)
     root.set_meta("anim_player",ap)
@@ -1534,19 +1538,24 @@ func _animate_npcs(delta):
         else:
             body.velocity=dir*speed if moving else Vector3.ZERO
         body.velocity.y=0.0
-        body.move_and_slide()
+        var hit:KinematicCollision3D=body.move_and_collide(body.velocity*delta)
+        if hit:
+            body.velocity=Vector3.ZERO
+            body.set_meta("target",_next_sidewalk_point(body.position))
 
-        # Hard minimum spacing stops two CharacterBodies from visually crossing
-        # each other between physics frames, even on slower/mobile physics.
+        # Hard minimum spacing stops two civilians from ever visually crossing
+        # or occupying one another's capsule, even between physics frames.
         for other in npcs:
             if other==n:
                 continue
             var post_offset:Vector3=body.global_position-other.global_position
             post_offset.y=0.0
             var post_distance:float=post_offset.length()
-            var min_spacing:float=0.60
+            var min_spacing:float=0.72
             if post_distance>0.01 and post_distance<min_spacing:
-                body.global_position += post_offset.normalized()*((min_spacing-post_distance)*0.55)
+                var push:Vector3=post_offset.normalized()*((min_spacing-post_distance)*0.65)
+                body.global_position += push
+                body.velocity=Vector3.ZERO
 
         # CharacterBody3D collision now blocks buildings, cars, the player,
         # and other pedestrians. On contact, choose another connected point.
@@ -1569,9 +1578,13 @@ func _animate_npcs(delta):
             if chosen!="" and ap.current_animation!=chosen:
                 if ap.current_animation!=chosen:
                     ap.play(chosen)
-            # The imported walk clip is deliberately slowed to read as a
-            # relaxed pedestrian walk, not a jog/run.
-            ap.speed_scale=clamp(speed/0.92,0.52,0.76) if moving else 1.0
+            # Keep civilians at a slow, ordinary walking cadence.
+            ap.speed_scale=clamp(speed/0.82,0.40,0.58) if moving else 1.0
+
+        var npc_model:Node3D=n.get_meta("model",null) as Node3D
+        if npc_model:
+            var base_scale:Vector3=n.get_meta("base_model_scale",Vector3.ONE)
+            npc_model.scale=base_scale
 
         n.position.y=0.0
 
