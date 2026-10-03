@@ -41,7 +41,10 @@ namespace NitroStreetRush.Racing
             int lane = Random.Range(0, laneX.Length);
             GameObject prefab = trafficPrefabs[Random.Range(0, trafficPrefabs.Length)];
             Vector3 pos = new(laneX[lane], 0.45f, player.position.z + aheadDistance + Random.Range(-15f, 30f));
-            active.Add(Instantiate(prefab, pos, Quaternion.identity));
+            GameObject vehicle = Instantiate(prefab, pos, Quaternion.identity);
+            if (!vehicle.GetComponent<TrafficVehicleAI>())
+                vehicle.AddComponent<TrafficVehicleAI>();
+            active.Add(vehicle);
         }
     }
 }
