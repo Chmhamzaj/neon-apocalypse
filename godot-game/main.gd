@@ -303,7 +303,7 @@ func _spawn_population_async():
         var n:=CharacterBody3D.new()
         n.name="Civilian_%02d"%i
         n.collision_layer=2
-        n.collision_mask=1
+        n.collision_mask=5
         n.safe_margin=0.04
         n.floor_snap_length=0.15
         var npc_shape:=CollisionShape3D.new()
@@ -330,7 +330,7 @@ func _spawn_population_async():
         var c:=AnimatableBody3D.new()
         c.name="Traffic_%02d"%i
         c.collision_layer=4
-        c.collision_mask=1
+        c.collision_mask=3
         var car_shape:=CollisionShape3D.new()
         var car_box:=BoxShape3D.new()
         car_box.size=Vector3(2.05,1.35,4.45)
@@ -482,6 +482,8 @@ func _setup_world():
 
     var ground := StaticBody3D.new()
     ground.name = "Ground"
+    ground.collision_layer=1
+    ground.collision_mask=7
     add_child(ground)
     box(ground, Vector3(0,-1.1,0), Vector3(WORLD,2,WORLD), material(Color("#26332d")), "GroundMesh")
     var shape := CollisionShape3D.new()
@@ -535,6 +537,8 @@ func _create_building(x:float,z:float,w:float,h:float,d:float,palette:Array,i:in
     box(root,Vector3(0,h*0.5,0),Vector3(w,h,d),facade_mat,"Building")
     var body:=StaticBody3D.new()
     body.name="BuildingCollision"
+    body.collision_layer=1
+    body.collision_mask=7
     var shape:=CollisionShape3D.new()
     var box_shape:=BoxShape3D.new()
     box_shape.size=Vector3(w,h,d)
@@ -673,7 +677,7 @@ func _spawn_player():
     cs.shape = capsule
     cs.position.y = 0.91
     player.collision_layer = 1
-    player.collision_mask = 1
+    player.collision_mask = 5
     player.add_child(cs)
 
     player_visual = Node3D.new()
@@ -1356,7 +1360,7 @@ func _toggle_drive():
     if driving:
         driving=false
         player.collision_layer=1
-        player.collision_mask=1
+        player.collision_mask=5
         if is_instance_valid(active_car):
             player.global_position=active_car.global_position+Vector3(2.2,0.0,0.0)
         player_visual.visible=true
