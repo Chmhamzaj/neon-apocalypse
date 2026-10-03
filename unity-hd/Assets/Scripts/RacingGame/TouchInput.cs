@@ -19,9 +19,9 @@ namespace NitroStreetRush.Racing
 
         private void Update()
         {
-            Steer = 0f;
-            NitroHeld = false;
-            BrakeHeld = false;
+            Steer = (MobileControlButton.RightHeld ? 1f : 0f) - (MobileControlButton.LeftHeld ? 1f : 0f);
+            NitroHeld = MobileControlButton.NitroHeld;
+            BrakeHeld = MobileControlButton.BrakeHeld;
 
 #if ENABLE_INPUT_SYSTEM
             var touchscreen = Touchscreen.current;
@@ -38,9 +38,7 @@ namespace NitroStreetRush.Racing
                         steeringStart = position;
                     }
                     if (finger == steeringFinger)
-                    {
                         Steer = Mathf.Clamp((position.x - steeringStart.x) / (Screen.width * 0.22f), -1f, 1f);
-                    }
                     if (position.x > Screen.width * 0.72f)
                     {
                         if (position.y > Screen.height * 0.52f) NitroHeld = true;
@@ -64,11 +62,9 @@ namespace NitroStreetRush.Racing
                 if (t.phase == TouchPhase.Began && t.position.x < Screen.width * 0.7f) { steeringFinger = t.fingerId; steeringStart = t.position; }
                 if (t.fingerId == steeringFinger && (t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary))
                     Steer = Mathf.Clamp((t.position.x - steeringStart.x) / (Screen.width * 0.22f), -1f, 1f);
-                if (t.fingerId == steeringFinger && (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled))
-                    steeringFinger = -1;
+                if (t.fingerId == steeringFinger && (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)) steeringFinger = -1;
                 if (t.position.x > Screen.width * 0.72f) { if (t.position.y > Screen.height * 0.52f) NitroHeld = true; else BrakeHeld = true; }
             }
-            if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.01f) Steer = Input.GetAxisRaw("Horizontal");
             NitroHeld |= Input.GetKey(KeyCode.LeftShift);
             BrakeHeld |= Input.GetKey(KeyCode.Space);
 #endif
