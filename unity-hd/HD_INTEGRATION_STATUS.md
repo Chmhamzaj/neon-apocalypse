@@ -45,3 +45,15 @@
 
 ### Build environment note
 The GitHub Unity runner currently reaches the Unity Builder but stops at Unity license activation because no `UNITY_LICENSE` or `UNITY_SERIAL` is configured. This is an environment/configuration blocker; it is not evidence of a C# compile failure.
+
+## Installable Android build
+- [x] Godot 3D build generated from the `hd-racing-v2` branch without replacing the Unity HD project.
+- [x] Android APK exported and signed successfully.
+- [x] Runtime smoke test passed.
+- [x] APK signature/installability check passed.
+- [x] APK artifact downloaded and checksum verified locally.
+- Build run: `37153134155`
+- APK: `NitroStreetRush-3D.apk`
+- Local SHA-256: `bb8153396d5a99831a7dc1f9a3228ba86eac29841f36c5ede83cbc54ee4f8435`
+
+The installable APK is a Godot 4.5 build of the substantial 3D game project already present in `godot-game/`. The Unity 6 HD implementation remains preserved separately as the master HD development path.
