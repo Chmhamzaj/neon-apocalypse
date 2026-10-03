@@ -1,0 +1,19 @@
+{
+  "assetLab": {
+    "provider": "Higgsfield 3D Jutsu",
+    "projectId": "17e036da-2752-468b-b314-875d1d1c90dd",
+    "projectName": "Nitro Street Rush — HD Asset Lab",
+    "validatedRevision": 4,
+    "glbSizeBytes": 11724196,
+    "glbEtag": "435c8320d9a714d345644d42264e6bbe",
+    "preview": "nsr_hd_traffic_check.png"
+  },
+  "heroVehicle": { "parts": 46, "role": "player + reusable traffic source" },
+  "driver": { "parts": 36, "role": "hero driver / cockpit presentation" },
+  "traffic": { "variants": 4, "sharedGeometry": true },
+  "environment": ["road", "buildings", "windows", "trees", "street_lights", "guard_rails", "lane_markings"],
+  "unityImportTarget": "Assets/Art/NitroStreetRush/",
+  "materialTarget": "URP Lit / Khronos PBR-compatible",
+  "lodTarget": ["LOD0", "LOD1", "LOD2"],
+  "mobileTarget": { "balanced": 30, "high": 60, "ultra": 60 }
+}
