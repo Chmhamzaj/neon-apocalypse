@@ -110,6 +110,13 @@ namespace NitroStreetRush.Editor
             SetPrivate(hud, "speedText", speedText);
             SetPrivate(hud, "progressText", progressText);
 
+            var controls = canvasGo.AddComponent<NitroStreetRacing.MobileControlOverlay>();
+            controls.Configure(canvas);
+            CreateControlButton(canvasGo.transform, "LEFT", new Vector2(-420f, -260f), NitroStreetRacing.MobileControlButton.ActionType.Left);
+            CreateControlButton(canvasGo.transform, "RIGHT", new Vector2(-250f, -260f), NitroStreetRacing.MobileControlButton.ActionType.Right);
+            CreateControlButton(canvasGo.transform, "BRAKE", new Vector2(300f, -240f), NitroStreetRacing.MobileControlButton.ActionType.Brake);
+            CreateControlButton(canvasGo.transform, "NITRO", new Vector2(470f, -150f), NitroStreetRacing.MobileControlButton.ActionType.Nitro);
+
             var scoreHud = canvasGo.AddComponent<NitroStreetRacing.RaceScoreHUD>();
             SetPrivate(scoreHud, "combo", systems.GetComponent<NitroStreetRacing.RaceComboSystem>());
             SetPrivate(scoreHud, "scoreText", scoreText);
@@ -130,6 +137,25 @@ namespace NitroStreetRush.Editor
             AssetDatabase.SaveAssets();
         }
 
+
+
+        private static void CreateControlButton(Transform parent, string label, Vector2 position, NitroStreetRacing.MobileControlButton.ActionType action)
+        {
+            var go = new GameObject(label + "Button");
+            go.transform.SetParent(parent);
+            var rect = go.AddComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = new Vector2(150f, 100f);
+            var image = go.AddComponent<Image>();
+            image.color = new Color(0.05f, 0.08f, 0.12f, 0.82f);
+            var button = go.AddComponent<Button>();
+            button.transition = Selectable.Transition.ColorTint;
+            var text = CreateText(go.transform, label, Vector2.zero, 24);
+            text.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
+            go.AddComponent<NitroStreetRacing.MobileControlButton>();
+            SetPrivate(go.GetComponent<NitroStreetRacing.MobileControlButton>(), "action", action);
+        }
         private static GameObject CreateText(Transform parent, string name, Vector2 position, int size)
         {
             var go = new GameObject(name);
