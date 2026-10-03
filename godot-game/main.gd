@@ -897,7 +897,8 @@ func _build_instanced_props():
     var special_paths:Array[String]=kenney_graveyard_paths+kenney_space_paths
     if not special_paths.is_empty():
         for i in range(14):
-            var p:=Vector3(rng.randf_range(-82,82),0.0,rng.randf_range(-82,82))
+            var zone_center:Vector3=Vector3(74.0,0.0,74.0) if i<7 else Vector3(-74.0,0.0,-74.0)
+            var p:=zone_center+Vector3(rng.randf_range(-9.0,9.0),0.0,rng.randf_range(-9.0,9.0))
             if not _safe_prop_spot(p,1.0):
                 continue
             var prop:=_place_kenney_prop(special_paths[i%special_paths.size()],p,rng.randf_range(0.5,2.0),rng.randf_range(0.0,TAU))
