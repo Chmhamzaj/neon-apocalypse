@@ -29,6 +29,7 @@ namespace NitroStreetRush.Racing
 
         public float SpeedKph => body.linearVelocity.magnitude * 3.6f;
         public float Nitro => nitro;
+        public float NitroCapacity => nitroCapacity;
         public bool IsBoosting => nitroInput && nitro > 0.5f && throttleInput > 0f;
         public bool IsBraking => brakeInput;
 
@@ -39,6 +40,14 @@ namespace NitroStreetRush.Racing
             body.linearDamping = 0.08f;
             body.angularDamping = 3.5f;
             nitro = nitroCapacity;
+        }
+
+        public void ApplyNitroMultiplier(float multiplier)
+        {
+            multiplier = Mathf.Max(1f, multiplier);
+            float normalized = nitroCapacity > 0f ? nitro / nitroCapacity : 1f;
+            nitroCapacity = 100f * multiplier;
+            nitro = Mathf.Clamp(normalized * nitroCapacity, 0f, nitroCapacity);
         }
 
         private void FixedUpdate()
