@@ -10,7 +10,7 @@ namespace NitroStreetRush.Racing
         private GameObject activeCar;
         public GameObject ActiveCar => activeCar;
 
-        private void Start()
+        private void Awake()
         {
             if (!saveGame) saveGame = FindFirstObjectByType<SaveGame>();
             SpawnSelected();
