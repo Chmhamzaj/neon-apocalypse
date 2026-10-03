@@ -1157,8 +1157,8 @@ func _move_player(delta):
         if input_vec.length()>0.05:
             active_car.rotation.y=lerp_angle(active_car.rotation.y,active_car.rotation.y-steer*delta*2.6,delta*5.0)
             var cf:=active_car.transform.basis.z.normalized()
-            var motion:=(-cf)*(-input_vec.y)*car_speed*delta
-            var collision:=active_car.move_and_collide(motion)
+            var motion:Vector3=(-cf)*(-input_vec.y)*car_speed*delta
+            var collision:KinematicCollision3D=active_car.move_and_collide(motion)
             if collision==null:
                 active_car.position.x=clamp(active_car.position.x,-93.0,93.0)
                 active_car.position.z=clamp(active_car.position.z,-93.0,93.0)
