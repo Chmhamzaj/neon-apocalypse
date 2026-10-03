@@ -143,7 +143,12 @@ func _boot_world():
         boot_label.queue_free()
 
 func _prepare_external_assets():
-    if ResourceLoader.exists("res://assets/external/human.glb"):
+    # Use the clean static Quaternius-derived mesh for every human.
+    # The rigged source is kept as a fallback/reference only; the static mesh
+    # removes the detached-limb/root-motion artifact visible on some phones.
+    if ResourceLoader.exists("res://assets/external/human_posed.glb"):
+        external_human_scene=load("res://assets/external/human_posed.glb") as PackedScene
+    elif ResourceLoader.exists("res://assets/external/human.glb"):
         external_human_scene=load("res://assets/external/human.glb") as PackedScene
     if ResourceLoader.exists("res://assets/external/CarConcept.glb"):
         external_car_scene=load("res://assets/external/CarConcept.glb") as PackedScene
@@ -375,16 +380,10 @@ func _replace_player_with_external_asset():
     player_visual.add_child(model)
     _normalize_model_height(model,HUMAN_HEIGHT)
     _tint_model(model,0)
-    player_model_animation=_find_animation_player(model)
-    if player_model_animation:
-        # The imported rig's animation tracks are responsible for the detached/
-        # oversized limb artifact seen on mobile. Use the clean bind pose and
-        # animate the character root procedurally instead.
-        player_model_animation.stop()
-        player_model_animation.active=false
-        player_idle_anim=""
-        player_walk_anim=""
-        player_run_anim=""
+    player_model_animation=null
+    player_idle_anim=""
+    player_walk_anim=""
+    player_run_anim=""
 
 
 func _find_animation_player(root:Node)->AnimationPlayer:
@@ -509,26 +508,17 @@ func _create_external_human(root:Node3D,index:int):
         return
     var model:=external_human_scene.instantiate()
     root.add_child(model)
-    # Keep civilians clearly human-sized and a little smaller than the hero,
-    # with gentle variation so the crowd does not look cloned.
-    # Match the hero's rendered height EXACTLY. No height variation.
+    # Every civilian uses the exact same static human mesh and height as the hero.
     var target_height:float=HUMAN_HEIGHT
     _normalize_model_height(model,target_height)
     _tint_model(model,index+1)
-    # Imported walk animation can contain transform tracks. Preserve the
-    # normalized root scale every frame so walking never changes character size.
     root.set_meta("visual_height",target_height)
     root.set_meta("base_model_scale",model.scale)
-    var ap:=_find_animation_player(model)
     root.set_meta("model",model)
-    root.set_meta("anim_player",ap)
-    root.set_meta("idle_anim",_find_animation(ap,["idle","stand"]))
-    root.set_meta("walk_anim",_find_animation(ap,["walk"]))
-    root.set_meta("run_anim",_find_animation(ap,["run"]))
-    if ap:
-        var idle_name:String=String(root.get_meta("idle_anim"))
-        if idle_name!="":
-            ap.play(idle_name)
+    root.set_meta("anim_player",null)
+    root.set_meta("idle_anim","")
+    root.set_meta("walk_anim","")
+    root.set_meta("run_anim","")
 
 func _create_kenney_car(root:Node3D,index:int):
     if kenney_car_paths.is_empty():
@@ -1578,19 +1568,8 @@ func _animate_npcs(delta):
         elif moving:
             body.rotation.y=lerp_angle(body.rotation.y,atan2(dir.x,dir.z),delta*5.5)
 
-        var ap:AnimationPlayer=n.get_meta("anim_player",null) as AnimationPlayer
-        if ap:
-            var idle_name:String=String(n.get_meta("idle_anim",""))
-            var walk_name:String=String(n.get_meta("walk_anim",""))
-            var chosen:String=walk_name if moving else idle_name
-            if chosen!="" and ap.current_animation!=chosen:
-                if ap.current_animation!=chosen:
-                    ap.play(chosen)
-                    # Rig animation is intentionally disabled; use subtle root motion
-            # instead so the walk never stretches or detaches the mesh.
-            ap.stop()
-            ap.active=false
-
+        # Procedural root bob replaces rig animation. The mesh stays rigid,
+        # exactly 1.72 m tall, while movement still reads as walking.
         var npc_model:Node3D=n.get_meta("model",null) as Node3D
         if npc_model:
             var base_scale:Vector3=n.get_meta("base_model_scale",Vector3.ONE)
