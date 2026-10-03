@@ -22,14 +22,24 @@ namespace NitroStreetRush.Racing
 
         private void Start()
         {
+            ResolveDependencies();
             StartCoroutine(BeginRace());
+        }
+
+        private void ResolveDependencies()
+        {
+            if (!events) events = FindFirstObjectByType<RaceStateEvents>();
+            if (!player) player = FindFirstObjectByType<CarController>();
+            if (!progress) progress = FindFirstObjectByType<RaceProgress>();
         }
 
         private IEnumerator BeginRace()
         {
+            ResolveDependencies();
             CurrentState = State.Countdown;
             CountdownRemaining = countdownSeconds;
-            if (player) player.enabled = false;
+            if (!player) yield break;
+            player.enabled = false;
             while (CountdownRemaining > 0f)
             {
                 CountdownRemaining -= Time.deltaTime;
