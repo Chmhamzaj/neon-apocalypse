@@ -143,12 +143,9 @@ func _boot_world():
         boot_label.queue_free()
 
 func _prepare_external_assets():
-    # Use the clean static Quaternius-derived mesh for every human.
-    # The rigged source is kept as a fallback/reference only; the static mesh
-    # removes the detached-limb/root-motion artifact visible on some phones.
-    if ResourceLoader.exists("res://assets/external/human_posed.glb"):
-        external_human_scene=load("res://assets/external/human_posed.glb") as PackedScene
-    elif ResourceLoader.exists("res://assets/external/human.glb"):
+    # Use the upright, rigged Quaternius-derived human for every human.
+    # It provides real walk/idle bone animation instead of a rigid stick figure.
+    if ResourceLoader.exists("res://assets/external/human.glb"):
         external_human_scene=load("res://assets/external/human.glb") as PackedScene
     if ResourceLoader.exists("res://assets/external/CarConcept.glb"):
         external_car_scene=load("res://assets/external/CarConcept.glb") as PackedScene
@@ -380,10 +377,13 @@ func _replace_player_with_external_asset():
     player_visual.add_child(model)
     _normalize_model_height(model,HUMAN_HEIGHT)
     _tint_model(model,0)
-    player_model_animation=null
-    player_idle_anim=""
-    player_walk_anim=""
-    player_run_anim=""
+    player_model_animation=_find_animation_player(model)
+    if player_model_animation:
+        player_idle_anim=_find_animation(player_model_animation,["idle","stand"])
+        player_walk_anim=_find_animation(player_model_animation,["walk"])
+        player_run_anim=_find_animation(player_model_animation,["run"])
+        if player_idle_anim!="":
+            player_model_animation.play(player_idle_anim)
 
 
 func _find_animation_player(root:Node)->AnimationPlayer:
@@ -461,7 +461,7 @@ func _spawn_population_async():
             _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
-        n.set_meta("speed",rng.randf_range(0.34,0.48))
+        n.set_meta("speed",rng.randf_range(1.15,1.55))
         n.set_meta("target",_random_sidewalk_point(n.position))
         npcs.append(n)
         if i%3==0:
@@ -508,17 +508,22 @@ func _create_external_human(root:Node3D,index:int):
         return
     var model:=external_human_scene.instantiate()
     root.add_child(model)
-    # Every civilian uses the exact same static human mesh and height as the hero.
+    # Every civilian uses the exact same rigged human mesh and height as the hero.
     var target_height:float=HUMAN_HEIGHT
     _normalize_model_height(model,target_height)
     _tint_model(model,index+1)
     root.set_meta("visual_height",target_height)
     root.set_meta("base_model_scale",model.scale)
     root.set_meta("model",model)
-    root.set_meta("anim_player",null)
-    root.set_meta("idle_anim","")
-    root.set_meta("walk_anim","")
-    root.set_meta("run_anim","")
+    var ap:=_find_animation_player(model)
+    root.set_meta("anim_player",ap)
+    root.set_meta("idle_anim",_find_animation(ap,["idle","stand"]))
+    root.set_meta("walk_anim",_find_animation(ap,["walk"]))
+    root.set_meta("run_anim",_find_animation(ap,["run"]))
+    if ap:
+        var idle_name:String=String(root.get_meta("idle_anim",""))
+        if idle_name!="":
+            ap.play(idle_name)
 
 func _create_kenney_car(root:Node3D,index:int):
     if kenney_car_paths.is_empty():
@@ -527,20 +532,21 @@ func _create_kenney_car(root:Node3D,index:int):
     if model==null:
         return
     root.add_child(model)
-    _normalize_model_length(model,4.35)
-    model.position.y=0.05
+    # Realistic passenger-car envelope: ~4.6m long, <=1.85m wide, <=1.85m tall.
+    _normalize_model_to_box(model,Vector3(4.60,1.85,1.85))
+    model.position.y=0.0
     root.set_meta("model",model)
     root.set_meta("fleet_index",index%kenney_car_paths.size())
     root.set_meta("source","Kenney Car Kit")
-    _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
+    _add_exhaust_smoke(root,Vector3(0,0.32,2.05))
 
 func _create_external_car(root:Node3D,index:int):
     if external_car_scenes.is_empty():
         return
     var model:=external_car_scenes[index%external_car_scenes.size()].instantiate()
     root.add_child(model)
-    _normalize_model_length(model,4.35)
-    model.position.y=0.05
+    _normalize_model_to_box(model,Vector3(4.60,1.85,1.85))
+    model.position.y=0.0
     root.set_meta("model",model)
     root.set_meta("fleet_index",index%external_car_scenes.size())
     _add_exhaust_smoke(root,Vector3(0,0.28,2.0))
@@ -1367,7 +1373,7 @@ func _input(event):
             move_input=offset/joystick_radius
         elif event.index==look_id:
             camera_yaw-=event.relative.x*sensitivity
-            camera_pitch=clamp(camera_pitch-event.relative.y*sensitivity,-55.0,35.0)
+            camera_pitch=clamp(camera_pitch-event.relative.y*sensitivity,-45.0,12.0)
 
 func _process(delta):
     elapsed+=delta
@@ -1413,7 +1419,7 @@ func _move_player(delta):
         player.global_position=active_car.global_position+Vector3(0,0.05,0)
         player.velocity=Vector3.ZERO
     else:
-        var speed:=5.8
+        var speed:=3.8
         player.velocity.x=move_toward(player.velocity.x,dir.x*speed,delta*22.0)
         player.velocity.z=move_toward(player.velocity.z,dir.z*speed,delta*22.0)
         player.velocity.y=0.0
@@ -1439,7 +1445,7 @@ func _move_player(delta):
         var acc:=Input.get_accelerometer()
         if acc.length()>0.3:
             camera_yaw-=clamp(acc.x,-4.0,4.0)*delta*1.8
-            camera_pitch=clamp(camera_pitch+clamp(acc.y,-3.0,3.0)*delta*0.9,-35.0,18.0)
+            camera_pitch=clamp(camera_pitch+clamp(acc.y,-3.0,3.0)*delta*0.9,-40.0,12.0)
     if shooting and not driving and fire_cooldown<=0:
         _fire()
 
@@ -1469,7 +1475,15 @@ func _animate_player(delta):
             clip=player_walk_anim
         if clip!="" and player_model_animation.current_animation!=clip:
             player_model_animation.play(clip)
-        player_model_animation.speed_scale=clamp(speed_now/3.2,0.72,1.08) if speed_now>0.35 else 1.0
+        if speed_now>0.35:
+            # The source walk/run clips provide knee bend, alternating legs,
+            # arm swing and natural body weight shift.
+            if speed_now>3.0 and player_run_anim!="":
+                player_model_animation.speed_scale=clamp(speed_now/3.8,0.82,1.12)
+            else:
+                player_model_animation.speed_scale=clamp(speed_now/2.8,0.72,1.08)
+        else:
+            player_model_animation.speed_scale=1.0
         return
     if not is_instance_valid(player_visual):
         return
@@ -1568,18 +1582,26 @@ func _animate_npcs(delta):
         elif moving:
             body.rotation.y=lerp_angle(body.rotation.y,atan2(dir.x,dir.z),delta*5.5)
 
-        # Procedural root bob replaces rig animation. The mesh stays rigid,
-        # exactly 1.72 m tall, while movement still reads as walking.
+        var ap:AnimationPlayer=n.get_meta("anim_player",null) as AnimationPlayer
+        if ap:
+            var idle_name:String=String(n.get_meta("idle_anim",""))
+            var walk_name:String=String(n.get_meta("walk_anim",""))
+            var run_name:String=String(n.get_meta("run_anim",""))
+            var chosen:String=walk_name if moving else idle_name
+            if moving and speed>2.6 and run_name!="":
+                chosen=run_name
+            if chosen!="" and ap.current_animation!=chosen:
+                ap.play(chosen)
+            # Natural cadence follows physical movement without letting the
+            # imported rig stretch, detach, or turn the walk into a sprint.
+            var cadence:float=0.95 if moving else 1.0
+            ap.speed_scale=clamp(cadence,0.75,1.10)
+
         var npc_model:Node3D=n.get_meta("model",null) as Node3D
         if npc_model:
             var base_scale:Vector3=n.get_meta("base_model_scale",Vector3.ONE)
             npc_model.scale=base_scale
-            if moving:
-                npc_model.position.y=0.025+sin(life*9.0)*0.018
-                npc_model.rotation.z=sin(life*4.5)*0.018
-            else:
-                npc_model.position.y=0.025
-                npc_model.rotation.z=0.0
+            npc_model.position.y=0.0
 
         n.position.y=0.0
 
@@ -1620,7 +1642,7 @@ func _animate_cars(delta):
         if c.position.z>96: c.position.z=-96
         if c.position.z<-96: c.position.z=96
         c.rotation.y=0.0 if dir>0.0 else PI
-        c.position.y=0.45
+        c.position.y=0.0
         var throttle:float=clamp(speed/14.0,0.0,1.0)
         var smoke_nodes:Array[Node]=c.find_children("ExhaustSmoke","CPUParticles3D",true,false)
         for smoke_node in smoke_nodes:
