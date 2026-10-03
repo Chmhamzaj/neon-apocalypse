@@ -20,7 +20,7 @@ namespace NitroStreetRush.Racing
             if (engine) { engine.pitch = Mathf.Lerp(minPitch, maxPitch, speed01); engine.volume = Mathf.Lerp(0.25f, 0.85f, speed01); if (!engine.isPlaying) engine.Play(); }
             bool boosting = car.IsBoosting;
             if (nitro && boosting && !boostLast) nitro.Play();
-            bool braking = Input.GetKey(KeyCode.Space);
+            bool braking = car.IsBraking;
             if (brake && braking && !brakeLast) brake.Play();
             boostLast = boosting; brakeLast = braking;
         }
