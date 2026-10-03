@@ -18,8 +18,10 @@ namespace NitroStreetRush.Racing
         {
             get
             {
+                if (!progress || nextCheckpoint > checkpointCount) return 1f;
                 float target = distance * nextCheckpoint / (checkpointCount + 1f);
-                return Mathf.InverseLerp(progress ? progress.DistanceTravelled : 0f, target, target);
+                float previous = distance * (nextCheckpoint - 1) / (checkpointCount + 1f);
+                return Mathf.Clamp01(Mathf.InverseLerp(previous, target, progress.DistanceTravelled));
             }
         }
 
