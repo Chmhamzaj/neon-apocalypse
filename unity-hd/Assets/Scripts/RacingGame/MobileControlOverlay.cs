@@ -1,5 +1,10 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem.UI;
+#else
+using UnityEngine.EventSystems;
+#endif
 
 namespace NitroStreetRush.Racing
 {
@@ -17,8 +22,12 @@ namespace NitroStreetRush.Racing
         {
             if (Object.FindFirstObjectByType<EventSystem>()) return;
             var go = new GameObject("EventSystem");
-            go.AddComponent<EventSystem>();
+            var eventSystem = go.AddComponent<EventSystem>();
+#if ENABLE_INPUT_SYSTEM
+            go.AddComponent<InputSystemUIInputModule>();
+#else
             go.AddComponent<StandaloneInputModule>();
+#endif
         }
     }
 }
