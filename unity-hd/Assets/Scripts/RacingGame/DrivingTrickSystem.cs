@@ -1,9 +1,13 @@
+using System;
 using UnityEngine;
 
 namespace NitroStreetRush.Racing
 {
     public sealed class DrivingTrickSystem : MonoBehaviour
     {
+        public static event Action DriftStarted;
+        public static event Action JumpStarted;
+
         [SerializeField] private Rigidbody body;
         [SerializeField] private CarController car;
         [SerializeField] private CameraShake cameraShake;
@@ -15,6 +19,7 @@ namespace NitroStreetRush.Racing
         public bool Airborne { get; private set; }
         public bool Drifting { get; private set; }
         private bool wasAirborne;
+        private bool wasDrifting;
         private int groundedFrames;
 
         private void Awake()
@@ -30,12 +35,17 @@ namespace NitroStreetRush.Racing
             bool ground = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, jumpHeightThreshold);
             if (ground) groundedFrames = Mathf.Min(groundedFrames + 1, 5); else groundedFrames = 0;
             Airborne = groundedFrames == 0 && car.SpeedKph >= minimumJumpSpeedKph;
+
             float forward = Vector3.Dot(body.linearVelocity.normalized, transform.forward);
             float lateral = Vector3.Dot(body.linearVelocity.normalized, transform.right);
             float angle = Mathf.Atan2(Mathf.Abs(lateral), Mathf.Max(0.01f, forward)) * Mathf.Rad2Deg;
             Drifting = !Airborne && car.SpeedKph >= driftSpeedKph && angle >= driftAngle;
-            if (Airborne && !wasAirborne) cameraShake?.Impact(0.25f);
+
+            if (Airborne && !wasAirborne) { cameraShake?.Impact(0.25f); JumpStarted?.Invoke(); }
+            if (Drifting && !wasDrifting) DriftStarted?.Invoke();
+
             wasAirborne = Airborne;
+            wasDrifting = Drifting;
         }
     }
 }
