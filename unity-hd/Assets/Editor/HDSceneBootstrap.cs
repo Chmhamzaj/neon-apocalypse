@@ -92,9 +92,23 @@ namespace NitroStreetRush.Editor
                 centerDash.transform.localScale = new Vector3(0.09f, 0.025f, Mathf.Min(5.5f, segmentLength * 0.23f));
             }
 
+            BuildRoadsideWorld(racePath, roadRoot.transform, roadSegmentCount, segmentLength);
+
+            var trafficRoot = new GameObject("Traffic");
+            for (int i = 0; i < 12; i++)
+            {
+                float distance = 150f + i * 145f;
+                float lane = ((i % 3) - 1) * 3.45f;
+                CreateTrafficVehicle(racePath, trafficRoot.transform, i, distance, lane);
+            }
+
+            CreateJumpRamp(racePath, roadRoot.transform, 760f, 12f);
+            CreateJumpRamp(racePath, roadRoot.transform, 1480f, 9f);
+
             var finish = new GameObject("FinishLine").transform;
             finish.position = racePath.GetPoint(racePath.TotalLength);
             finish.rotation = Quaternion.LookRotation(racePath.GetTangent(racePath.TotalLength), Vector3.up);
+            BuildFinishGate(racePath, finish);
 
             var car = new GameObject("PlayerCar");
             car.transform.position = racePath.GetPoint(12f) + Vector3.up * 0.8f;
@@ -256,6 +270,201 @@ namespace NitroStreetRush.Editor
         }
 
 
+
+        private static void BuildRoadsideWorld(NitroStreetRacing.RaceSplinePath path, Transform roadRoot, int segmentCount, float segmentLength)
+        {
+            var worldRoot = new GameObject("RoadsideWorld");
+            int buildingSeed = 9321;
+            var rng = new System.Random(buildingSeed);
+
+            for (int i = 0; i < segmentCount; i++)
+            {
+                float d = (i + 0.5f) * segmentLength;
+                Vector3 point = path.GetPoint(d);
+                Vector3 tangent = path.GetTangent(d);
+                Vector3 right = path.GetRight(d);
+                Quaternion rotation = Quaternion.LookRotation(tangent, Vector3.up);
+
+                if (i % 2 == 0)
+                {
+                    CreateBarrier(worldRoot.transform, point + right * 6.15f + Vector3.up * 0.55f, rotation, segmentLength);
+                    CreateBarrier(worldRoot.transform, point - right * 6.15f + Vector3.up * 0.55f, rotation, segmentLength);
+                }
+
+                if (i % 2 == 0)
+                {
+                    CreateBuilding(worldRoot.transform, point + right * (13f + rng.NextDouble() * 7f), rotation, 10f + (float)rng.NextDouble() * 18f, 5f + (float)rng.NextDouble() * 8f);
+                    CreateBuilding(worldRoot.transform, point - right * (13f + rng.NextDouble() * 7f), rotation, 11f + (float)rng.NextDouble() * 20f, 5f + (float)rng.NextDouble() * 8f);
+                }
+
+                if (i % 3 == 0)
+                {
+                    CreateStreetLight(worldRoot.transform, point + right * 7.8f, rotation);
+                    CreateStreetLight(worldRoot.transform, point - right * 7.8f, rotation * Quaternion.Euler(0f, 180f, 0f));
+                }
+
+                if (i % 4 == 1)
+                {
+                    CreateTree(worldRoot.transform, point + right * 10.5f, 4.2f);
+                    CreateTree(worldRoot.transform, point - right * 10.5f, 4.8f);
+                }
+            }
+        }
+
+        private static void CreateBarrier(Transform parent, Vector3 position, Quaternion rotation, float length)
+        {
+            var barrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            barrier.name = "GuardRail";
+            barrier.transform.SetParent(parent);
+            barrier.transform.SetPositionAndRotation(position, rotation);
+            barrier.transform.localScale = new Vector3(0.28f, 0.95f, length * 0.98f);
+            ApplyMaterial(barrier.GetComponent<Renderer>(), new Color(0.32f, 0.36f, 0.41f), 0.7f, 0.28f);
+        }
+
+        private static void CreateBuilding(Transform parent, Vector3 position, Quaternion roadRotation, float height, float width)
+        {
+            var building = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            building.name = "CityBuilding";
+            building.transform.SetParent(parent);
+            building.transform.SetPositionAndRotation(position + Vector3.up * (height * 0.5f), roadRotation);
+            building.transform.localScale = new Vector3(width, height, width * 0.72f);
+            float tone = Mathf.Clamp01(0.18f + (height % 17f) * 0.018f);
+            ApplyMaterial(building.GetComponent<Renderer>(), new Color(tone, tone * 0.95f, tone * 1.08f), 0.05f, 0.55f);
+
+            var windows = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            windows.name = "WindowBand";
+            windows.transform.SetParent(building.transform);
+            windows.transform.localPosition = new Vector3(0f, 0.08f, -0.501f);
+            windows.transform.localScale = new Vector3(0.82f, 0.56f, 0.018f);
+            ApplyMaterial(windows.GetComponent<Renderer>(), new Color(0.04f, 0.08f, 0.12f), 0.15f, 0.18f);
+        }
+
+        private static void CreateStreetLight(Transform parent, Vector3 position, Quaternion rotation)
+        {
+            var pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pole.name = "StreetLight";
+            pole.transform.SetParent(parent);
+            pole.transform.SetPositionAndRotation(position + Vector3.up * 2.7f, rotation);
+            pole.transform.localScale = new Vector3(0.12f, 2.7f, 0.12f);
+            ApplyMaterial(pole.GetComponent<Renderer>(), new Color(0.08f, 0.09f, 0.11f), 0.85f, 0.22f);
+
+            var lamp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            lamp.name = "Lamp";
+            lamp.transform.SetParent(pole.transform);
+            lamp.transform.localPosition = new Vector3(0f, 1f, 0f);
+            lamp.transform.localScale = Vector3.one * 0.32f;
+            ApplyMaterial(lamp.GetComponent<Renderer>(), new Color(1f, 0.55f, 0.18f), 0.05f, 0.2f, true);
+        }
+
+        private static void CreateTree(Transform parent, Vector3 position, float scale)
+        {
+            var trunk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            trunk.name = "TreeTrunk";
+            trunk.transform.SetParent(parent);
+            trunk.transform.SetPositionAndRotation(position + Vector3.up * (scale * 0.32f), Quaternion.identity);
+            trunk.transform.localScale = new Vector3(0.18f, scale * 0.32f, 0.18f);
+            ApplyMaterial(trunk.GetComponent<Renderer>(), new Color(0.16f, 0.09f, 0.05f), 0f, 0.9f);
+
+            var canopy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            canopy.name = "TreeCanopy";
+            canopy.transform.SetParent(parent);
+            canopy.transform.position = position + Vector3.up * (scale * 0.82f);
+            canopy.transform.localScale = Vector3.one * scale;
+            ApplyMaterial(canopy.GetComponent<Renderer>(), new Color(0.04f, 0.22f, 0.11f), 0.05f, 0.75f);
+        }
+
+        private static void CreateTrafficVehicle(NitroStreetRacing.RaceSplinePath path, Transform parent, int index, float distance, float lane)
+        {
+            distance = Mathf.Clamp(distance, 30f, Mathf.Max(40f, path.TotalLength - 40f));
+            Vector3 point = path.GetPoint(distance);
+            Vector3 tangent = path.GetTangent(distance);
+            Vector3 right = path.GetRight(distance);
+
+            var car = new GameObject($"Traffic_{index:00}");
+            car.transform.SetParent(parent);
+            car.transform.position = point + right * lane + Vector3.up * 0.55f;
+            car.transform.rotation = Quaternion.LookRotation(tangent, Vector3.up);
+            var body = car.AddComponent<Rigidbody>();
+            body.mass = 1280f;
+            body.linearDamping = 0.2f;
+            body.angularDamping = 4.5f;
+            car.AddComponent<NitroStreetRacing.TrafficVehicleAI>().SetPath(path, distance, lane);
+
+            var chassis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            chassis.name = "TrafficBody";
+            chassis.transform.SetParent(car.transform);
+            chassis.transform.localPosition = new Vector3(0f, 0.28f, 0f);
+            chassis.transform.localScale = new Vector3(1.78f, 0.52f, 4.05f);
+            Color[] paints = {
+                new Color(0.88f, 0.12f, 0.08f),
+                new Color(0.05f, 0.28f, 0.78f),
+                new Color(0.95f, 0.67f, 0.06f),
+                new Color(0.76f, 0.78f, 0.82f),
+                new Color(0.12f, 0.65f, 0.39f),
+                new Color(0.50f, 0.18f, 0.73f)
+            };
+            ApplyMaterial(chassis.GetComponent<Renderer>(), paints[index % paints.Length], 0.72f, 0.2f);
+
+            var roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            roof.name = "TrafficCabin";
+            roof.transform.SetParent(car.transform);
+            roof.transform.localPosition = new Vector3(0f, 0.64f, -0.2f);
+            roof.transform.localScale = new Vector3(1.45f, 0.32f, 1.85f);
+            ApplyMaterial(roof.GetComponent<Renderer>(), new Color(0.06f, 0.08f, 0.11f), 0.5f, 0.18f);
+        }
+
+        private static void CreateJumpRamp(NitroStreetRacing.RaceSplinePath path, Transform parent, float distance, float width)
+        {
+            distance = Mathf.Clamp(distance, 40f, Mathf.Max(60f, path.TotalLength - 60f));
+            Vector3 point = path.GetPoint(distance) + Vector3.up * 0.18f;
+            Vector3 tangent = path.GetTangent(distance);
+            var ramp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ramp.name = "StuntRamp";
+            ramp.transform.SetParent(parent);
+            ramp.transform.position = point + Vector3.up * 0.18f;
+            ramp.transform.rotation = Quaternion.LookRotation(tangent, Vector3.up) * Quaternion.Euler(-9f, 0f, 0f);
+            ramp.transform.localScale = new Vector3(width, 0.42f, 11f);
+            ApplyMaterial(ramp.GetComponent<Renderer>(), new Color(0.07f, 0.08f, 0.1f), 0.22f, 0.32f);
+        }
+
+        private static void BuildFinishGate(NitroStreetRacing.RaceSplinePath path, Transform finish)
+        {
+            Vector3 right = path.GetRight(path.TotalLength);
+            Quaternion rot = finish.rotation;
+            CreateGatePart(finish.parent, finish.position + right * 5.2f + Vector3.up * 2.2f, rot, new Vector3(0.35f, 4.4f, 0.55f));
+            CreateGatePart(finish.parent, finish.position - right * 5.2f + Vector3.up * 2.2f, rot, new Vector3(0.35f, 4.4f, 0.55f));
+            CreateGatePart(finish.parent, finish.position + Vector3.up * 4.25f, rot, new Vector3(10.75f, 0.5f, 0.55f));
+        }
+
+        private static void CreateGatePart(Transform parent, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            var part = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            part.name = "FinishGate";
+            part.transform.SetParent(parent);
+            part.transform.SetPositionAndRotation(position, rotation);
+            part.transform.localScale = scale;
+            ApplyMaterial(part.GetComponent<Renderer>(), new Color(0.06f, 0.09f, 0.12f), 0.75f, 0.16f);
+        }
+
+        private static void ApplyMaterial(Renderer renderer, Color baseColor, float metallic, float smoothness, bool emission = false)
+        {
+            if (!renderer) return;
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (!shader) shader = Shader.Find("Standard");
+            if (!shader) return;
+
+            var material = new Material(shader);
+            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", baseColor);
+            if (material.HasProperty("_Color")) material.color = baseColor;
+            if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", metallic);
+            if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", smoothness);
+            if (emission)
+            {
+                material.EnableKeyword("_EMISSION");
+                if (material.HasProperty("_EmissionColor")) material.SetColor("_EmissionColor", baseColor * 4f);
+            }
+            renderer.sharedMaterial = material;
+        }
 
         private static void CreateControlButton(Transform parent, string label, Vector2 position, NitroStreetRacing.MobileControlButton.ActionType action)
         {
