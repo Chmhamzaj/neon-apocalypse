@@ -216,6 +216,29 @@ namespace NitroStreetRush.Editor
             SetPrivate(scoreHud, "scoreText", scoreText);
             SetPrivate(scoreHud, "comboText", comboText);
 
+            var resultsPanel = new GameObject("ResultsPanel");
+            resultsPanel.transform.SetParent(canvasGo.transform);
+            var resultsRect = resultsPanel.AddComponent<RectTransform>();
+            resultsRect.anchorMin = Vector2.zero;
+            resultsRect.anchorMax = Vector2.one;
+            resultsRect.offsetMin = Vector2.zero;
+            resultsRect.offsetMax = Vector2.zero;
+            var resultsImage = resultsPanel.AddComponent<Image>();
+            resultsImage.color = new Color(0f, 0f, 0f, 0.88f);
+            var resultsTitle = CreateText(resultsPanel.transform, "RESULTS", new Vector2(0f, 220f), 66);
+            var resultsTime = CreateText(resultsPanel.transform, "00:00.000", new Vector2(0f, 95f), 48);
+            var resultsReward = CreateText(resultsPanel.transform, "REWARD  +500", new Vector2(0f, 15f), 32);
+            var resultsBest = CreateText(resultsPanel.transform, "BEST  --:--.---", new Vector2(0f, -60f), 28);
+            var resultsRestart = CreateUIButton(resultsPanel.transform, "RACE AGAIN", new Vector2(0f, -190f), new Vector2(360f, 90f));
+            resultsRestart.onClick.AddListener(restartController.RestartRace);
+            var resultsHud = canvasGo.AddComponent<NitroStreetRacing.RaceResultsHUD>();
+            SetPrivate(resultsHud, "saveGame", save);
+            SetPrivate(resultsHud, "resultsPanel", resultsPanel);
+            SetPrivate(resultsHud, "timeText", resultsTime.GetComponent<Text>());
+            SetPrivate(resultsHud, "rewardText", resultsReward.GetComponent<Text>());
+            SetPrivate(resultsHud, "bestText", resultsBest.GetComponent<Text>());
+            resultsPanel.SetActive(false);
+
             progress.SetPath(racePath);
             progress.SetPlayer(car.transform);
             progress.SetFinish(finish);
