@@ -1,7 +1,7 @@
-name: Build Street Sovereign 3D APK
+name: Build Nitro Street Rush 3D APK
 on:
   push:
-    branches: ["main", "street-sovereign-react3d"]
+    branches: ["main", "street-sovereign-react3d", "hd-racing-v2"]
   workflow_dispatch:
 jobs:
   android:
@@ -44,13 +44,13 @@ jobs:
       - name: Export signed APK
         run: |
           mkdir -p godot-game/dist
-          keytool -genkeypair -v -keystore /tmp/street-sovereign-debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Street Sovereign,O=Hamza,C=PK"
-          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH=/tmp/street-sovereign-debug.keystore
+          keytool -genkeypair -v -keystore /tmp/nitro-street-rush-debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Nitro Street Rush,O=Hamza,C=PK"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH=/tmp/nitro-street-rush-debug.keystore
           export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
           godot --headless --path godot-game --editor --quit
-          godot --headless --path godot-game --export-debug "Android" dist/StreetSovereign-3D-Hamza-unsigned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/StreetSovereign-3D-Hamza.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
+          godot --headless --path godot-game --export-debug "Android" dist/NitroStreetRush-3D-unsigned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/NitroStreetRush-3D.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
       - name: Runtime smoke test
         run: |
           set -o pipefail
@@ -75,7 +75,7 @@ jobs:
           script: |
             adb wait-for-device
             adb install -r godot-game/dist/StreetSovereign-3D-Hamza.apk
-            adb shell monkey -p com.hamza.streetsovereign3d 1
+            adb shell monkey -p com.hamza.nitrostreetrush 1
             sleep 20
             adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" || true
             adb logcat -d > godot-game/dist/android-logcat.txt
@@ -88,15 +88,15 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: StreetSovereign-3D-Android-Launch-Test
+          name: NitroStreetRush-3D-Android-Launch-Test
           path: godot-game/dist/android-logcat.txt
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: StreetSovereign-3D-Tested-APK
-          path: godot-game/dist/StreetSovereign-3D-Hamza.apk
+          name: NitroStreetRush-3D-Tested-APK
+          path: godot-game/dist/NitroStreetRush-3D.apk
       - name: Upload smoke log
         uses: actions/upload-artifact@v4
         with:
-          name: StreetSovereign-3D-Smoke-Test
+          name: NitroStreetRush-3D-Smoke-Test
           path: godot-game/dist/runtime-smoke.log
