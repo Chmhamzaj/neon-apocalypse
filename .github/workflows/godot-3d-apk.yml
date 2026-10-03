@@ -63,6 +63,33 @@ jobs:
         run: |
           $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/StreetSovereign-3D-Hamza.apk
           test -s godot-game/dist/StreetSovereign-3D-Hamza.apk
+
+      - name: Android emulator launch test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            adb wait-for-device
+            adb install -r godot-game/dist/StreetSovereign-3D-Hamza.apk
+            adb shell monkey -p com.hamza.streetsovereign3d 1
+            sleep 20
+            adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" || true
+            adb logcat -d > godot-game/dist/android-logcat.txt
+            if grep -Eiq "FATAL EXCEPTION|ANR in|Process: com\.hamza\.streetsovereign3d|java\.lang\.(NullPointerException|IllegalStateException)" godot-game/dist/android-logcat.txt; then
+              grep -Ein "FATAL EXCEPTION|ANR in|Process: com\.hamza\.streetsovereign3d|java\.lang\.(NullPointerException|IllegalStateException)" godot-game/dist/android-logcat.txt || true
+              exit 1
+            fi
+
+      - name: Upload Android launch log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: StreetSovereign-3D-Android-Launch-Test
+          path: godot-game/dist/android-logcat.txt
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
