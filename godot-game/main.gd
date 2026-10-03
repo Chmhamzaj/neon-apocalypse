@@ -441,19 +441,20 @@ func _spawn_population_async():
         n.floor_snap_length=0.15
         var npc_shape:=CollisionShape3D.new()
         var npc_capsule:=CapsuleShape3D.new()
-        npc_capsule.radius=0.25
-        npc_capsule.height=1.75
+        # Compact human-sized capsule: slightly shorter/narrower than the hero.
+        npc_capsule.radius=0.22
+        npc_capsule.height=1.62
         npc_shape.shape=npc_capsule
-        npc_shape.position.y=0.875
+        npc_shape.position.y=0.81
         n.add_child(npc_shape)
-        n.position=_nearest_safe_sidewalk_point(PLAYER_START + Vector3(rng.randf_range(-34,34),0,rng.randf_range(-34,34)))
+        n.position=_find_npc_spawn_point()
         if external_human_scene:
             _create_external_human(n,i)
         else:
             _create_npc_visual(n,i)
         add_child(n)
         n.set_meta("phase",rng.randf_range(0,TAU))
-        n.set_meta("speed",rng.randf_range(0.62,0.92))
+        n.set_meta("speed",rng.randf_range(0.46,0.64))
         n.set_meta("target",_random_sidewalk_point(n.position))
         npcs.append(n)
         if i%3==0:
@@ -500,8 +501,12 @@ func _create_external_human(root:Node3D,index:int):
         return
     var model:=external_human_scene.instantiate()
     root.add_child(model)
-    _normalize_model_height(model,1.68)
+    # Keep civilians clearly human-sized and a little smaller than the hero,
+    # with gentle variation so the crowd does not look cloned.
+    var target_height:float=1.58+float(index%5)*0.02
+    _normalize_model_height(model,target_height)
     _tint_model(model,index+1)
+    root.set_meta("visual_height",target_height)
     var ap:=_find_animation_player(model)
     root.set_meta("model",model)
     root.set_meta("anim_player",ap)
@@ -1505,23 +1510,43 @@ func _animate_npcs(delta):
         var moving:bool=to_target.length()>0.8
         var dir:Vector3=to_target.normalized() if moving else Vector3.ZERO
 
-        # Gentle local avoidance keeps pedestrians from occupying the same
-        # physical space while preserving natural sidewalk movement.
+        # Two-layer crowd avoidance:
+        # 1) steer away before movement;
+        # 2) resolve any remaining overlap after movement.
         var separation:=Vector3.ZERO
+        var crowd_blocked:=false
         for other in npcs:
             if other==n:
                 continue
             var offset:Vector3=n.global_position-other.global_position
             offset.y=0.0
             var distance:float=offset.length()
-            if distance>0.01 and distance<1.05:
-                separation += offset.normalized()*((1.05-distance)/1.05)
+            if distance>0.01 and distance<0.95:
+                separation += offset.normalized()*((0.95-distance)/0.95)
+            if moving and distance>0.01 and distance<0.72:
+                var toward_other:=(-offset).normalized()
+                if dir.dot(toward_other)>0.15:
+                    crowd_blocked=true
         if separation.length()>0.01:
-            dir=(dir+separation.normalized()*0.72).normalized()
-
-        body.velocity=dir*speed if moving else Vector3.ZERO
+            dir=(dir+separation.normalized()*1.35).normalized()
+        if crowd_blocked and separation.length()<0.1:
+            body.velocity=Vector3.ZERO
+        else:
+            body.velocity=dir*speed if moving else Vector3.ZERO
         body.velocity.y=0.0
         body.move_and_slide()
+
+        # Hard minimum spacing stops two CharacterBodies from visually crossing
+        # each other between physics frames, even on slower/mobile physics.
+        for other in npcs:
+            if other==n:
+                continue
+            var post_offset:Vector3=body.global_position-other.global_position
+            post_offset.y=0.0
+            var post_distance:float=post_offset.length()
+            var min_spacing:float=0.60
+            if post_distance>0.01 and post_distance<min_spacing:
+                body.global_position += post_offset.normalized()*((min_spacing-post_distance)*0.55)
 
         # CharacterBody3D collision now blocks buildings, cars, the player,
         # and other pedestrians. On contact, choose another connected point.
@@ -1544,11 +1569,27 @@ func _animate_npcs(delta):
             if chosen!="" and ap.current_animation!=chosen:
                 if ap.current_animation!=chosen:
                     ap.play(chosen)
-            # Match animation cadence to the actual walking speed instead of
-            # letting imported clips run unnaturally fast.
-            ap.speed_scale=clamp(speed/0.82,0.72,1.05) if moving else 1.0
+            # The imported walk clip is deliberately slowed to read as a
+            # relaxed pedestrian walk, not a jog/run.
+            ap.speed_scale=clamp(speed/0.92,0.52,0.76) if moving else 1.0
 
         n.position.y=0.0
+
+func _find_npc_spawn_point()->Vector3:
+    # Prevent two civilians from spawning on top of each other or inside the
+    # same tiny patch of sidewalk.
+    var preferred:=PLAYER_START + Vector3(rng.randf_range(-34.0,34.0),0.0,rng.randf_range(-34.0,34.0))
+    for attempt in range(24):
+        var candidate:=_nearest_safe_sidewalk_point(preferred + Vector3(rng.randf_range(-10.0,10.0),0.0,rng.randf_range(-10.0,10.0)))
+        var clear:=true
+        for other in npcs:
+            if is_instance_valid(other) and candidate.distance_to(other.global_position)<1.05:
+                clear=false
+                break
+        if clear:
+            return candidate
+        preferred+=Vector3(rng.randf_range(-14.0,14.0),0.0,rng.randf_range(-14.0,14.0))
+    return _nearest_safe_sidewalk_point(preferred)
 
 func _nearest_npc(source:Node3D)->Node3D:
     var best:Node3D=null
