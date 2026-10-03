@@ -33,6 +33,8 @@ jobs:
           mkdir -p godot-game/assets/external/kenney-library
           cp -R /tmp/tge-assets/packs godot-game/assets/external/kenney-library/
           cp /tmp/tge-assets/catalog.json /tmp/tge-assets/LICENSE godot-game/assets/external/kenney-library/
+          find godot-game/assets/external/kenney-library/packs -type d -name thumbs -prune -exec rm -rf {} +
+          echo "Kenney GLB count: $(find godot-game/assets/external/kenney-library/packs -type f -name '*.glb' | wc -l)"
           curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb" -o godot-game/assets/external/CarConcept.glb
 
           mkdir -p godot-game/assets/external/polyhaven
