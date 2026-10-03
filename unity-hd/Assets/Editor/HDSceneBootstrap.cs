@@ -104,6 +104,7 @@ namespace NitroStreetRush.Editor
 
             CreateJumpRamp(racePath, roadRoot.transform, 760f, 12f);
             CreateJumpRamp(racePath, roadRoot.transform, 1480f, 9f);
+            CreateCheckpointGates(racePath, roadRoot.transform, 4);
 
             var finish = new GameObject("FinishLine").transform;
             finish.position = racePath.GetPoint(racePath.TotalLength);
@@ -167,6 +168,8 @@ namespace NitroStreetRush.Editor
             var comboTextGo = CreateText(canvasGo.transform, "Combo", new Vector2(0f, -80f), 24);
             var objectiveTextGo = CreateText(canvasGo.transform, "Objective", new Vector2(0f, 400f), 26);
             var objectiveStatusGo = CreateText(canvasGo.transform, "ObjectiveStatus", new Vector2(0f, 345f), 24);
+            var routeDirectionGo = CreateText(canvasGo.transform, "RouteDirection", new Vector2(690f, 345f), 28);
+            var routeDistanceGo = CreateText(canvasGo.transform, "RouteDistance", new Vector2(690f, 305f), 22);
             var bannerGo = new GameObject("RaceEventBanner");
             bannerGo.transform.SetParent(canvasGo.transform);
             var bannerRect = bannerGo.AddComponent<RectTransform>();
@@ -198,6 +201,13 @@ namespace NitroStreetRush.Editor
             SetPrivate(objectiveHud, "objectives", systems.GetComponent<NitroStreetRacing.RaceObjectiveSystem>());
             SetPrivate(objectiveHud, "objectiveText", objectiveText);
             SetPrivate(objectiveHud, "statusText", objectiveStatus);
+
+            var routeHud = canvasGo.AddComponent<NitroStreetRacing.RaceRouteGuidanceHUD>();
+            SetPrivate(routeHud, "path", racePath);
+            SetPrivate(routeHud, "progress", progress);
+            SetPrivate(routeHud, "player", car.transform);
+            SetPrivate(routeHud, "directionText", routeDirectionGo.GetComponent<Text>());
+            SetPrivate(routeHud, "distanceText", routeDistanceGo.GetComponent<Text>());
 
             var controls = canvasGo.AddComponent<NitroStreetRacing.MobileControlOverlay>();
             controls.Configure(canvas);
@@ -411,6 +421,23 @@ namespace NitroStreetRush.Editor
             roof.transform.localPosition = new Vector3(0f, 0.64f, -0.2f);
             roof.transform.localScale = new Vector3(1.45f, 0.32f, 1.85f);
             ApplyMaterial(roof.GetComponent<Renderer>(), new Color(0.06f, 0.08f, 0.11f), 0.5f, 0.18f);
+        }
+
+        private static void CreateCheckpointGates(NitroStreetRacing.RaceSplinePath path, Transform parent, int count)
+        {
+            var checkpointRoot = new GameObject("CheckpointGates");
+            checkpointRoot.transform.SetParent(parent);
+            float spacing = path.TotalLength / (count + 1f);
+            for (int i = 1; i <= count; i++)
+            {
+                float d = spacing * i;
+                Vector3 point = path.GetPoint(d);
+                Quaternion rot = Quaternion.LookRotation(path.GetTangent(d), Vector3.up);
+                Vector3 right = path.GetRight(d);
+                CreateGatePart(checkpointRoot.transform, point + right * 5.25f + Vector3.up * 2.25f, rot, new Vector3(0.3f, 4.5f, 0.45f));
+                CreateGatePart(checkpointRoot.transform, point - right * 5.25f + Vector3.up * 2.25f, rot, new Vector3(0.3f, 4.5f, 0.45f));
+                CreateGatePart(checkpointRoot.transform, point + Vector3.up * 4.45f, rot, new Vector3(10.8f, 0.35f, 0.45f));
+            }
         }
 
         private static void CreateJumpRamp(NitroStreetRacing.RaceSplinePath path, Transform parent, float distance, float width)
