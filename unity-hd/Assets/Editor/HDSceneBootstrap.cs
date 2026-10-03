@@ -125,6 +125,62 @@ namespace NitroStreetRush.Editor
             chassis.transform.SetParent(car.transform);
             chassis.transform.localPosition = new Vector3(0f, 0.35f, 0f);
             chassis.transform.localScale = new Vector3(1.9f, 0.55f, 4.3f);
+            ApplyMaterial(chassis.GetComponent<Renderer>(), new Color(0.08f, 0.28f, 0.82f), 0.82f, 0.18f);
+
+            var cabin = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cabin.name = "CabinGlass";
+            cabin.transform.SetParent(car.transform);
+            cabin.transform.localPosition = new Vector3(0f, 0.82f, -0.15f);
+            cabin.transform.localScale = new Vector3(1.42f, 0.42f, 1.8f);
+            ApplyMaterial(cabin.GetComponent<Renderer>(), new Color(0.03f, 0.06f, 0.10f), 0.25f, 0.12f);
+
+            var frontSplitter = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            frontSplitter.name = "FrontSplitter";
+            frontSplitter.transform.SetParent(car.transform);
+            frontSplitter.transform.localPosition = new Vector3(0f, 0.06f, 2.24f);
+            frontSplitter.transform.localScale = new Vector3(2.05f, 0.10f, 0.45f);
+            ApplyMaterial(frontSplitter.GetComponent<Renderer>(), new Color(0.015f, 0.018f, 0.025f), 0.9f, 0.12f);
+
+            var rearWing = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            rearWing.name = "RearWing";
+            rearWing.transform.SetParent(car.transform);
+            rearWing.transform.localPosition = new Vector3(0f, 0.95f, -1.72f);
+            rearWing.transform.localScale = new Vector3(1.95f, 0.11f, 0.48f);
+            ApplyMaterial(rearWing.GetComponent<Renderer>(), new Color(0.02f, 0.025f, 0.035f), 0.88f, 0.12f);
+
+            var rearWingBaseL = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            rearWingBaseL.name = "WingSupportL";
+            rearWingBaseL.transform.SetParent(car.transform);
+            rearWingBaseL.transform.localPosition = new Vector3(-0.65f, 0.65f, -1.62f);
+            rearWingBaseL.transform.localScale = new Vector3(0.12f, 0.55f, 0.12f);
+            ApplyMaterial(rearWingBaseL.GetComponent<Renderer>(), new Color(0.02f, 0.025f, 0.035f), 0.88f, 0.12f);
+
+            var rearWingBaseR = Object.Instantiate(rearWingBaseL, car.transform);
+            rearWingBaseR.name = "WingSupportR";
+            rearWingBaseR.transform.localPosition = new Vector3(0.65f, 0.65f, -1.62f);
+
+            var headlightL = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            headlightL.name = "HeadlightL";
+            headlightL.transform.SetParent(car.transform);
+            headlightL.transform.localPosition = new Vector3(-0.62f, 0.42f, 2.12f);
+            headlightL.transform.localScale = new Vector3(0.30f, 0.13f, 0.08f);
+            ApplyMaterial(headlightL.GetComponent<Renderer>(), new Color(0.72f, 0.88f, 1f), 0.05f, 0.15f, true);
+
+            var headlightR = Object.Instantiate(headlightL, car.transform);
+            headlightR.name = "HeadlightR";
+            headlightR.transform.localPosition = new Vector3(0.62f, 0.42f, 2.12f);
+
+            var taillightL = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            taillightL.name = "TailLightL";
+            taillightL.transform.SetParent(car.transform);
+            taillightL.transform.localPosition = new Vector3(-0.68f, 0.43f, -2.12f);
+            taillightL.transform.localScale = new Vector3(0.28f, 0.12f, 0.08f);
+            ApplyMaterial(taillightL.GetComponent<Renderer>(), new Color(1f, 0.03f, 0.02f), 0.05f, 0.15f, true);
+
+            var taillightR = Object.Instantiate(taillightL, car.transform);
+            taillightR.name = "TailLightR";
+            taillightR.transform.localPosition = new Vector3(0.68f, 0.43f, -2.12f);
+
             for (int i = 0; i < 4; i++)
             {
                 var wheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -135,6 +191,7 @@ namespace NitroStreetRush.Editor
                 float x = i % 2 == 0 ? -0.95f : 0.95f;
                 float z = i < 2 ? 1.35f : -1.35f;
                 wheel.transform.localPosition = new Vector3(x, 0f, z);
+                ApplyMaterial(wheel.GetComponent<Renderer>(), new Color(0.015f, 0.018f, 0.022f), 0.85f, 0.22f);
             }
 
             var cameraGo = new GameObject("RaceCamera");
