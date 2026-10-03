@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace NitroStreetRush.Racing
 {
@@ -6,12 +9,25 @@ namespace NitroStreetRush.Racing
     {
         [SerializeField] private GameObject pausePanel;
         private bool paused;
+
         public bool IsPaused => paused;
 
-        public void TogglePause()
+        private void Update()
         {
-            SetPaused(!paused);
+#if ENABLE_INPUT_SYSTEM
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+                TogglePause();
+#endif
         }
+
+        public void BindPanel(GameObject panel)
+        {
+            pausePanel = panel;
+            if (pausePanel) pausePanel.SetActive(paused);
+        }
+
+        public void TogglePause() => SetPaused(!paused);
 
         public void SetPaused(bool value)
         {
@@ -20,6 +36,9 @@ namespace NitroStreetRush.Racing
             if (pausePanel) pausePanel.SetActive(paused);
         }
 
-        private void OnDestroy() => Time.timeScale = 1f;
+        private void OnDestroy()
+        {
+            Time.timeScale = 1f;
+        }
     }
 }
