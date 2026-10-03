@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace NitroStreetRush.Racing
 {
@@ -9,7 +12,13 @@ namespace NitroStreetRush.Racing
         public float Value { get; private set; }
         private void Update()
         {
-            float target = Mathf.Clamp(Input.acceleration.x * sensitivity, -1f, 1f);
+            float axis = 0f;
+#if ENABLE_INPUT_SYSTEM
+            if (Accelerometer.current != null) axis = Accelerometer.current.acceleration.ReadValue().x;
+#else
+            axis = Input.acceleration.x;
+#endif
+            float target = Mathf.Clamp(axis * sensitivity, -1f, 1f);
             Value = Mathf.Lerp(Value, target, smoothing * Time.deltaTime);
         }
     }
