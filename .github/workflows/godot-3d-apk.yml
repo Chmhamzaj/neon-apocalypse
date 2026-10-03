@@ -29,10 +29,11 @@ jobs:
           # characters and other 3D content without runtime network downloads.
           rm -rf /tmp/tge-assets
           git clone --depth 1 --filter=blob:none --sparse https://github.com/Hidencod/tge-assets.git /tmp/tge-assets
-          git -C /tmp/tge-assets sparse-checkout set packs catalog.json LICENSE
+          git -C /tmp/tge-assets sparse-checkout set packs
           mkdir -p godot-game/assets/external/kenney-library
           cp -R /tmp/tge-assets/packs godot-game/assets/external/kenney-library/
-          cp /tmp/tge-assets/catalog.json /tmp/tge-assets/LICENSE godot-game/assets/external/kenney-library/
+          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/catalog.json" -o godot-game/assets/external/kenney-library/catalog.json
+          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/LICENSE" -o godot-game/assets/external/kenney-library/LICENSE
           find godot-game/assets/external/kenney-library/packs -type d -name thumbs -prune -exec rm -rf {} +
           echo "Kenney GLB count: $(find godot-game/assets/external/kenney-library/packs -type f -name '*.glb' | wc -l)"
           curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb" -o godot-game/assets/external/CarConcept.glb
