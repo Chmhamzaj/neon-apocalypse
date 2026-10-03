@@ -29,7 +29,9 @@ namespace NitroStreetRush.Editor
             systems.AddComponent<NitroStreetRacing.RaceComboSystem>();
             systems.AddComponent<NitroStreetRacing.GameplayFeedback>();
             systems.AddComponent<NitroStreetRacing.RaceResultsController>();
-            systems.AddComponent<NitroStreetRacing.RacePauseController>();
+            systems.AddComponent<NitroStreetRacing.RaceObjectiveSystem>();
+            var pauseController = systems.AddComponent<NitroStreetRacing.RacePauseController>();
+            var restartController = systems.AddComponent<NitroStreetRacing.RaceRestartController>();
             systems.AddComponent<NitroStreetRacing.MobileSteering>();
 
             var roadRoot = new GameObject("Road");
@@ -89,7 +91,10 @@ namespace NitroStreetRush.Editor
             var canvasGo = new GameObject("HUD");
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasGo.AddComponent<CanvasScaler>();
+            var scaler = canvasGo.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
             var hud = canvasGo.AddComponent<NitroStreetRacing.RacePresentationHUD>();
             var stateTextGo = CreateText(canvasGo.transform, "RaceState", new Vector2(0f, 170f), 48);
@@ -97,11 +102,27 @@ namespace NitroStreetRush.Editor
             var progressTextGo = CreateText(canvasGo.transform, "Progress", new Vector2(0f, 30f), 30);
             var scoreTextGo = CreateText(canvasGo.transform, "Score", new Vector2(0f, -35f), 28);
             var comboTextGo = CreateText(canvasGo.transform, "Combo", new Vector2(0f, -80f), 24);
+            var objectiveTextGo = CreateText(canvasGo.transform, "Objective", new Vector2(0f, 400f), 26);
+            var objectiveStatusGo = CreateText(canvasGo.transform, "ObjectiveStatus", new Vector2(0f, 345f), 24);
+            var bannerGo = new GameObject("RaceEventBanner");
+            bannerGo.transform.SetParent(canvasGo.transform);
+            var bannerRect = bannerGo.AddComponent<RectTransform>();
+            bannerRect.anchorMin = bannerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            bannerRect.anchoredPosition = new Vector2(0f, 245f);
+            bannerRect.sizeDelta = new Vector2(1100f, 130f);
+            var bannerGroup = bannerGo.AddComponent<CanvasGroup>();
+            var bannerText = CreateText(bannerGo.transform, "Event", Vector2.zero, 58);
+            bannerText.GetComponent<RectTransform>().sizeDelta = bannerRect.sizeDelta;
+            var eventBanner = bannerGo.AddComponent<NitroStreetRacing.RaceEventBanner>();
+            SetPrivate(eventBanner, "bannerText", bannerText);
+            SetPrivate(eventBanner, "group", bannerGroup);
             var stateText = stateTextGo.GetComponent<Text>();
             var speedText = speedTextGo.GetComponent<Text>();
             var progressText = progressTextGo.GetComponent<Text>();
             var scoreText = scoreTextGo.GetComponent<Text>();
             var comboText = comboTextGo.GetComponent<Text>();
+            var objectiveText = objectiveTextGo.GetComponent<Text>();
+            var objectiveStatus = objectiveStatusGo.GetComponent<Text>();
 
             SetPrivate(hud, "flow", systems.GetComponent<NitroStreetRacing.RaceFlowController>());
             SetPrivate(hud, "car", car.GetComponent<NitroStreetRacing.CarController>());
@@ -110,12 +131,36 @@ namespace NitroStreetRush.Editor
             SetPrivate(hud, "speedText", speedText);
             SetPrivate(hud, "progressText", progressText);
 
+            var objectiveHud = canvasGo.AddComponent<NitroStreetRacing.RaceObjectiveHUD>();
+            SetPrivate(objectiveHud, "objectives", systems.GetComponent<NitroStreetRacing.RaceObjectiveSystem>());
+            SetPrivate(objectiveHud, "objectiveText", objectiveText);
+            SetPrivate(objectiveHud, "statusText", objectiveStatus);
+
             var controls = canvasGo.AddComponent<NitroStreetRacing.MobileControlOverlay>();
             controls.Configure(canvas);
             CreateControlButton(canvasGo.transform, "LEFT", new Vector2(-420f, -260f), NitroStreetRacing.MobileControlButton.ActionType.Left);
             CreateControlButton(canvasGo.transform, "RIGHT", new Vector2(-250f, -260f), NitroStreetRacing.MobileControlButton.ActionType.Right);
             CreateControlButton(canvasGo.transform, "BRAKE", new Vector2(300f, -240f), NitroStreetRacing.MobileControlButton.ActionType.Brake);
             CreateControlButton(canvasGo.transform, "NITRO", new Vector2(470f, -150f), NitroStreetRacing.MobileControlButton.ActionType.Nitro);
+
+            var pauseButton = CreateUIButton(canvasGo.transform, "PAUSE", new Vector2(810f, 465f), new Vector2(180f, 80f));
+            pauseButton.onClick.AddListener(pauseController.TogglePause);
+
+            var pausePanel = new GameObject("PausePanel");
+            pausePanel.transform.SetParent(canvasGo.transform);
+            var panelRect = pausePanel.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+            var panelImage = pausePanel.AddComponent<Image>();
+            panelImage.color = new Color(0f, 0f, 0f, 0.82f);
+            var pausedText = CreateText(pausePanel.transform, "PAUSED", new Vector2(0f, 170f), 68);
+            var resumeButton = CreateUIButton(pausePanel.transform, "RESUME", new Vector2(0f, 10f), new Vector2(320f, 90f));
+            var restartButton = CreateUIButton(pausePanel.transform, "RESTART", new Vector2(0f, -110f), new Vector2(320f, 90f));
+            resumeButton.onClick.AddListener(() => pauseController.SetPaused(false));
+            restartButton.onClick.AddListener(restartController.RestartRace);
+            pauseController.BindPanel(pausePanel);
 
             var scoreHud = canvasGo.AddComponent<NitroStreetRacing.RaceScoreHUD>();
             SetPrivate(scoreHud, "combo", systems.GetComponent<NitroStreetRacing.RaceComboSystem>());
@@ -155,6 +200,22 @@ namespace NitroStreetRush.Editor
             text.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
             go.AddComponent<NitroStreetRacing.MobileControlButton>().Configure(action);
         }
+        private static Button CreateUIButton(Transform parent, string label, Vector2 position, Vector2 size)
+        {
+            var go = new GameObject(label + "Button");
+            go.transform.SetParent(parent);
+            var rect = go.AddComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            var image = go.AddComponent<Image>();
+            image.color = new Color(0.05f, 0.08f, 0.12f, 0.92f);
+            var button = go.AddComponent<Button>();
+            var text = CreateText(go.transform, label, Vector2.zero, 26);
+            text.GetComponent<RectTransform>().sizeDelta = size;
+            return button;
+        }
+
         private static GameObject CreateText(Transform parent, string name, Vector2 position, int size)
         {
             var go = new GameObject(name);
