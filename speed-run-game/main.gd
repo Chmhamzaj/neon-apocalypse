@@ -175,7 +175,7 @@ func _setup_traffic() -> void:
     ]
     for i in range(9):
         var car := _make_car(colors[i % colors.size()], false)
-        var lane := [-6.0, 0.0, 6.0][i % 3]
+        var lane: float = [-6.0, 0.0, 6.0][i % 3]
         car.position = Vector3(lane, 0.0, WORLD_START_Z + float(i) * 24.0 + rng.randf_range(-5.0, 5.0))
         car.rotation.y = PI
         car.set_meta("speed_mul", rng.randf_range(0.78, 1.12))
@@ -480,11 +480,11 @@ func _unhandled_input(event: InputEvent) -> void:
             steer_target = 0.0
 
     if event is InputEventScreenDrag and swipe_active:
-        var dx := event.position.x - touch_start.x
+        var dx: float = event.position.x - touch_start.x
         steer_target = clamp(dx / 180.0, -1.0, 1.0)
 
     if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-        var dxm := event.position.x - touch_start.x
+        var dxm: float = event.position.x - touch_start.x
         steer_target = clamp(dxm / 180.0, -1.0, 1.0)
 
 func _nitro_visual(delta: float) -> void:
