@@ -17,6 +17,7 @@ namespace NitroStreetRush.Racing
             if (!car) car = FindFirstObjectByType<CarController>();
             if (!saveGame) saveGame = FindFirstObjectByType<SaveGame>();
             Level = saveGame ? Mathf.Clamp(Mathf.RoundToInt((saveGame.Data.nitroUpgrade - 1f) / 0.15f), 0, maxLevel) : 0;
+            if (car) car.ApplyNitroMultiplier(saveGame ? saveGame.Data.nitroUpgrade : 1f);
         }
 
         public bool PurchaseUpgrade()
