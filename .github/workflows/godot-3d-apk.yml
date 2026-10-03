@@ -28,9 +28,7 @@ jobs:
           git clone --depth 1 --filter=blob:none --sparse https://github.com/Hidencod/tge-assets.git /tmp/tge-assets
           git -C /tmp/tge-assets sparse-checkout set packs
           mkdir -p godot-game/assets/external/kenney-library
-          cp -R /tmp/tge-assets/packs packs.tmp
-          cp -R packs.tmp godot-game/assets/external/kenney-library/
-          rm -rf packs.tmp
+          cp -R /tmp/tge-assets/packs godot-game/assets/external/kenney-library/
           curl -fL --retry 3 https://raw.githubusercontent.com/Hidencod/tge-assets/main/catalog.json -o godot-game/assets/external/kenney-library/catalog.json
           curl -fL --retry 3 https://raw.githubusercontent.com/Hidencod/tge-assets/main/LICENSE -o godot-game/assets/external/kenney-library/LICENSE
           find godot-game/assets/external/kenney-library/packs -type d -name thumbs -prune -exec rm -rf {} +
@@ -52,7 +50,7 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
           godot --headless --path godot-game --editor --quit
           godot --headless --path godot-game --export-debug "Android" godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
-          \$ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/StreetSovereign-3D-Hamza.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/StreetSovereign-3D-Hamza.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
       - name: Runtime smoke test
         run: |
           set -o pipefail
@@ -63,7 +61,7 @@ jobs:
           fi
       - name: APK installability check
         run: |
-          \$ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/StreetSovereign-3D-Hamza.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/StreetSovereign-3D-Hamza.apk
           test -s godot-game/dist/StreetSovereign-3D-Hamza.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
