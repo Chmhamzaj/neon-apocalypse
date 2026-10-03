@@ -22,6 +22,9 @@ jobs:
         run: |
           set -e
           mkdir -p godot-game/assets/external
+          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human_posed.glb" -o godot-game/assets/external/human_posed.glb
+          # Keep the rigged source available as a fallback, but the game loads
+          # human_posed.glb so no imported bone/root animation can detach limbs.
           curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human.glb" -o godot-game/assets/external/human.glb
           # Kenney's CC0 3D library is used through a public GLB mirror that exposes
           # the individual models as engine-independent files. Include the full 3D
@@ -55,7 +58,7 @@ jobs:
           curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_nor_gl_2k.jpg
 
           ls -lh godot-game/assets/external
-          file godot-game/assets/external/human.glb godot-game/assets/external/CarConcept.glb godot-game/assets/external/kenney-cars/sedan.glb
+          file godot-game/assets/external/human_posed.glb godot-game/assets/external/human.glb godot-game/assets/external/CarConcept.glb godot-game/assets/external/kenney-cars/sedan.glb
       - name: Configure Android SDK
         uses: android-actions/setup-android@v3
         with:
