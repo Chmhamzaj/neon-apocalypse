@@ -11,6 +11,8 @@ namespace NitroStreetRush.Editor
         [MenuItem("Nitro Street Rush/Build Android APK") ]
         public static void Build()
         {
+            HDSceneBootstrap.EnsureScene();
+            AssetDatabase.Refresh();
             const string output = "Builds/NitroStreetRush-HD.apk";
             Directory.CreateDirectory("Builds");
             EditorUserBuildSettings.buildAppBundle = false;
