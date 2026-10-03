@@ -53,16 +53,10 @@ namespace NitroStreetRush.Racing
                 driveForce += nitroAcceleration;
                 nitro = Mathf.Max(0f, nitro - nitroDrainPerSecond * Time.fixedDeltaTime);
             }
-            else
-            {
-                nitro = Mathf.Min(nitroCapacity, nitro + nitroRechargePerSecond * Time.fixedDeltaTime);
-            }
+            else nitro = Mathf.Min(nitroCapacity, nitro + nitroRechargePerSecond * Time.fixedDeltaTime);
 
-            if (forwardSpeed < maxSpeed)
-                body.AddForce(transform.forward * driveForce, ForceMode.Acceleration);
-
-            if (brakeInput)
-                body.AddForce(-velocity.normalized * brakeForce, ForceMode.Acceleration);
+            if (forwardSpeed < maxSpeed) body.AddForce(transform.forward * driveForce, ForceMode.Acceleration);
+            if (brakeInput && velocity.sqrMagnitude > 0.01f) body.AddForce(-velocity.normalized * brakeForce, ForceMode.Acceleration);
 
             float grip = Mathf.Abs(steerInput) > 0.65f ? driftGrip : lateralGrip;
             Vector3 lateralVelocity = transform.right * Vector3.Dot(velocity, transform.right);
@@ -71,27 +65,21 @@ namespace NitroStreetRush.Racing
             float steerScale = Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 18f);
             float yaw = steerInput * steerRate * steerScale * Time.fixedDeltaTime;
             body.MoveRotation(body.rotation * Quaternion.Euler(0f, yaw * Mathf.Rad2Deg, 0f));
-
             body.AddForce(-transform.up * downforce * velocity.sqrMagnitude, ForceMode.Force);
         }
 
         private void ReadInput()
         {
-            float keyboardSteer = Input.GetAxisRaw("Horizontal");
-            steerInput = Mathf.Clamp(keyboardSteer, -1f, 1f);
-
-            if (Input.touchCount > 0)
-            {
-                Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Moved)
-                {
-                    steerInput = Mathf.Clamp(touch.deltaPosition.x / 70f, -1f, 1f);
-                }
-            }
-
-            throttleInput = 1f;
+            steerInput = Mathf.Clamp(Input.GetAxisRaw("Horizontal"), -1f, 1f);
             brakeInput = Input.GetKey(KeyCode.Space);
             nitroInput = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.JoystickButton0);
+
+            if (TouchInput.Instance)
+            {
+                steerInput = TouchInput.Instance.Steer;
+                brakeInput |= TouchInput.Instance.BrakeHeld;
+                nitroInput |= TouchInput.Instance.NitroHeld;
+            }
         }
     }
 }
