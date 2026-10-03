@@ -10,6 +10,12 @@ const HUMAN_HEIGHT:float = 1.72
 const HUMAN_COLLIDER_RADIUS:float = 0.28
 const HUMAN_COLLIDER_HEIGHT:float = 1.82
 
+# Civilian proportions are intentionally smaller than the hero so the city
+# population reads as background pedestrians rather than giant foreground avatars.
+const NPC_HEIGHT:float = 1.60
+const NPC_COLLIDER_RADIUS:float = 0.24
+const NPC_COLLIDER_HEIGHT:float = 1.68
+
 var player: CharacterBody3D
 var player_visual: Node3D
 var camera: Camera3D
@@ -449,10 +455,10 @@ func _spawn_population_async():
         var npc_shape:=CollisionShape3D.new()
         var npc_capsule:=CapsuleShape3D.new()
         # Civilians use the EXACT same physical body dimensions as the hero.
-        npc_capsule.radius=HUMAN_COLLIDER_RADIUS
-        npc_capsule.height=HUMAN_COLLIDER_HEIGHT
+        npc_capsule.radius=NPC_COLLIDER_RADIUS
+        npc_capsule.height=NPC_COLLIDER_HEIGHT
         npc_shape.shape=npc_capsule
-        npc_shape.position.y=HUMAN_COLLIDER_HEIGHT*0.5
+        npc_shape.position.y=NPC_COLLIDER_HEIGHT*0.5
         n.add_child(npc_shape)
         n.position=_find_npc_spawn_point()
         if external_human_scene:
@@ -509,10 +515,11 @@ func _create_external_human(root:Node3D,index:int):
     var model:=external_human_scene.instantiate()
     root.add_child(model)
     # Every civilian uses the exact same rigged human mesh and height as the hero.
-    var target_height:float=HUMAN_HEIGHT
+    var target_height:float=NPC_HEIGHT
     _normalize_model_height(model,target_height)
     _tint_model(model,index+1)
     root.set_meta("visual_height",target_height)
+    root.set_meta("is_civilian",true)
     root.set_meta("base_model_scale",model.scale)
     root.set_meta("model",model)
     var ap:=_find_animation_player(model)
@@ -1076,6 +1083,7 @@ func _spawn_population():
         add_child(c)
 
 func _create_npc_visual(root:Node3D,index:int):
+    root.scale = Vector3.ONE * 0.93
     var skins=[Color("#9b604a"),Color("#d08a67"),Color("#704738"),Color("#c99a76"),Color("#7f523f"),Color("#d9a27c")]
     var outfits=[Color("#7d3348"),Color("#355f94"),Color("#3d765c"),Color("#754f98"),Color("#8f622f"),Color("#327985")]
     var hairs=[Color("#1a1210"),Color("#4a2116"),Color("#a0441f"),Color("#252a32"),Color("#6b351d"),Color("#3a273e")]
@@ -1106,6 +1114,7 @@ func _create_npc_visual(root:Node3D,index:int):
     var jaw:=sphere_part(root,Vector3(0,-0.02,1.59),0.15,skin,"Jaw")
     jaw.scale=Vector3(1.12,0.60,0.55)
     root.set_meta("head_node",head)
+    root.set_meta("is_civilian",true)
     root.set_meta("jaw_node",jaw)
     root.set_meta("mouth_node",mouth)
     root.set_meta("eye_l",root.get_node_or_null("Eye"))
