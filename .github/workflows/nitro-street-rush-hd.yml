@@ -1,0 +1,51 @@
+name: Nitro Street Rush HD Branch Smoke Build
+
+on:
+  push:
+    branches: ["hd-racing-v2"]
+    paths:
+      - "speed-run-game/**"
+      - ".github/workflows/nitro-street-rush-hd.yml"
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.5
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
+          unzip -q Godot_v4.5-stable_linux.x86_64.zip
+          sudo mv Godot_v4.5-stable_linux.x86_64 /usr/local/bin/godot
+          wget -q https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.5.stable
+          unzip -q Godot_v4.5-stable_export_templates.tpz -d /tmp/godot-templates
+          cp -R /tmp/godot-templates/templates/* ~/.local/share/godot/export_templates/4.5.stable/
+      - name: Configure Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;35.0.0"
+      - name: Validate Godot project
+        run: |
+          godot --headless --path speed-run-game --editor --quit 2>&1 | tee godot-validation.log
+          if grep -Eiq "SCRIPT ERROR|Parse Error|ERROR:" godot-validation.log; then
+            grep -Ein "SCRIPT ERROR|Parse Error|ERROR:" godot-validation.log || true
+            exit 1
+          fi
+      - name: Export Android APK
+        run: |
+          mkdir -p speed-run-game/dist
+          keytool -genkeypair -v -keystore /tmp/nitro-debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Nitro Street Rush,O=Hamza,C=PK"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH=/tmp/nitro-debug.keystore
+          export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
+          godot --headless --path speed-run-game --export-debug "Android" speed-run-game/dist/NitroStreetRush-HD.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/nitro-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out speed-run-game/dist/NitroStreetRush-HD-signed.apk speed-run-game/dist/NitroStreetRush-HD.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose speed-run-game/dist/NitroStreetRush-HD-signed.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NitroStreetRush-HD-Smoke-APK
+          path: speed-run-game/dist/NitroStreetRush-HD-signed.apk
