@@ -28,3 +28,12 @@
 
 ## Production visual integration
 The scene hierarchy should keep gameplay components separate from visual meshes so imported HD assets can be replaced without changing race logic.
+
+## Driving feel layer
+- Live race timer
+- Airborne/jump detection
+- Drift detection
+- Near-miss detection hook
+- Stability assist and collision recovery
+- Engine/nitro/brake/drift audio event hooks
+- Camera impact and nitro feedback
