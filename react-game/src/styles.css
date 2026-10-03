@@ -1,0 +1,155 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f4f7fb;
+  background: #05070d;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { background: radial-gradient(circle at 50% 10%, #18243d 0%, #05070d 55%); }
+button { font: inherit; }
+.app { position: relative; width: 100%; height: 100%; touch-action: none; user-select: none; }
+.viewport { position: absolute; inset: 0; }
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.brand { letter-spacing: .16em; font-size: 11px; text-transform: uppercase; color: #91a5bb; }
+.title { font-size: 22px; font-weight: 750; margin-top: 4px; letter-spacing: -.03em; }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.pill {
+  min-width: 92px;
+  padding: 9px 11px;
+  border: 1px solid rgba(181, 214, 255, .14);
+  border-radius: 12px;
+  background: rgba(6, 12, 21, .62);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.24);
+}
+.pill-label { color: #6e8197; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+.pill-value { margin-top: 2px; font-weight: 700; font-size: 12px; }
+
+.bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.objective {
+  max-width: min(430px, 72vw);
+  padding: 12px 14px;
+  border: 1px solid rgba(181, 214, 255, .14);
+  border-radius: 14px;
+  background: rgba(6, 12, 21, .64);
+  backdrop-filter: blur(14px);
+}
+.kicker { color: #6e8197; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+.objective strong { display: block; margin-top: 3px; font-size: 14px; }
+
+.controls {
+  pointer-events: auto;
+  display: flex;
+  gap: 8px;
+}
+.control {
+  border: 1px solid rgba(181, 214, 255, .17);
+  border-radius: 12px;
+  background: rgba(8, 15, 26, .74);
+  color: #d9e5f1;
+  padding: 10px 12px;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+}
+.control:hover { background: rgba(16, 26, 42, .82); }
+.control:active { transform: translateY(1px); }
+
+.crosshair {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  opacity: .54;
+}
+.crosshair::before, .crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(255,255,255,.85);
+}
+.crosshair::before { width: 2px; height: 18px; left: 8px; top: 0; }
+.crosshair::after { width: 18px; height: 2px; left: 0; top: 8px; }
+
+.joystick {
+  position: absolute;
+  left: 22px;
+  bottom: 26px;
+  width: 126px;
+  height: 126px;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 224, 255, .18);
+  background: rgba(9, 17, 29, .40);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+  display: none;
+}
+.joystick .knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+  margin-top: -28px;
+  border-radius: 50%;
+  background: rgba(202, 229, 255, .16);
+  border: 1px solid rgba(228, 241, 255, .36);
+}
+.hint {
+  position: absolute;
+  right: 18px;
+  bottom: 26px;
+  color: rgba(222, 237, 252, .46);
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(4,7,14,.92), rgba(4,7,14,.74));
+  backdrop-filter: blur(12px);
+  z-index: 20;
+}
+.loading-card {
+  width: min(420px, 88vw);
+  padding: 22px;
+  border: 1px solid rgba(181, 214, 255, .16);
+  border-radius: 18px;
+  background: rgba(7, 13, 24, .86);
+  box-shadow: 0 24px 80px rgba(0,0,0,.4);
+}
+.loading-bar { height: 4px; background: #172233; border-radius: 99px; overflow: hidden; margin-top: 18px; }
+.loading-bar > div { width: 68%; height: 100%; background: linear-gradient(90deg,#82b9ff,#d6e9ff); animation: load 1.7s ease-in-out infinite; }
+@keyframes load { 0%,100% { transform: translateX(-70%); } 50% { transform: translateX(110%); } }
+
+@media (pointer: coarse) {
+  .joystick { display: block; }
+  .hint { display: none; }
+  .controls .control { padding: 11px 12px; }
+}
+@media (max-width: 700px) {
+  .hud { padding: 12px; }
+  .title { font-size: 18px; }
+  .stats { max-width: 56vw; }
+  .pill { min-width: 76px; padding: 7px 8px; }
+  .objective { max-width: 64vw; }
+}
