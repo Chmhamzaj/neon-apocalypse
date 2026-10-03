@@ -65,6 +65,7 @@ var kenney_furniture_paths:Array[String]=[]
 var kenney_food_paths:Array[String]=[]
 var kenney_graveyard_paths:Array[String]=[]
 var kenney_space_paths:Array[String]=[]
+var kenney_total_paths:Array[String]=[]
 var drive_button: Button
 var active_car: Node3D
 var building_obstacles: Array[Rect2] = []
@@ -197,41 +198,45 @@ func _prepare_kenney_asset_catalog():
     kenney_food_paths.clear()
     kenney_graveyard_paths.clear()
     kenney_space_paths.clear()
+    kenney_total_paths=_scan_glb_paths(base)
 
-    var commercial:=_scan_glb_paths(base+"/city-kit-commercial")
-    var suburban:=_scan_glb_paths(base+"/city-kit-suburban")
-    for path in commercial+suburban:
+    var commercial:Array[String]=_scan_glb_paths(base+"/city-kit-commercial")
+    var suburban:Array[String]=_scan_glb_paths(base+"/city-kit-suburban")
+    var building_sources:Array[String]=[]
+    building_sources.append_array(commercial)
+    building_sources.append_array(suburban)
+    for path:String in building_sources:
         var n:String=path.get_file().to_lower()
         if n.contains("building"):
             kenney_building_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/car-kit"):
+    for path:String in _scan_glb_paths(base+"/car-kit"):
         var n:String=path.get_file().to_lower()
         if not n.contains("debris") and not n.contains("wheel") and not n.contains("cone") and not n.contains("barrier"):
             kenney_car_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/nature-kit"):
+    for path:String in _scan_glb_paths(base+"/nature-kit"):
         var n:String=path.get_file().to_lower()
         if n.contains("tree") or n.contains("bush") or n.contains("plant") or n.contains("flower") or n.contains("grass"):
             kenney_tree_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/city-kit-roads"):
+    for path:String in _scan_glb_paths(base+"/city-kit-roads"):
         var n:String=path.get_file().to_lower()
         if not n.contains("road") and not n.contains("sidewalk") and not n.contains("tile") and not n.contains("lane"):
             kenney_street_prop_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/furniture-kit"):
+    for path:String in _scan_glb_paths(base+"/furniture-kit"):
         var n:String=path.get_file().to_lower()
         if n.contains("chair") or n.contains("table") or n.contains("bench") or n.contains("lamp") or n.contains("trash") or n.contains("plant") or n.contains("shelf") or n.contains("cabinet"):
             kenney_furniture_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/food-kit"):
+    for path:String in _scan_glb_paths(base+"/food-kit"):
         kenney_food_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/graveyard-kit"):
+    for path:String in _scan_glb_paths(base+"/graveyard-kit"):
         kenney_graveyard_paths.append(path)
 
-    for path in _scan_glb_paths(base+"/space-kit"):
+    for path:String in _scan_glb_paths(base+"/space-kit"):
         kenney_space_paths.append(path)
 
 func _instantiate_glb(path:String)->Node3D:
@@ -912,7 +917,7 @@ func _spawn_player():
     cs.shape = capsule
     cs.position.y = 0.91
     player.collision_layer = 1
-    player.collision_mask = 5
+    player.collision_mask = 7
     player.add_child(cs)
 
     player_visual = Node3D.new()
@@ -1608,7 +1613,7 @@ func _update_hud():
     if is_instance_valid(objective):
         objective.text="Reach the gold marker"
     if is_instance_valid(fps_label):
-        var library_count:int=kenney_building_paths.size()+kenney_car_paths.size()+kenney_tree_paths.size()+kenney_street_prop_paths.size()+kenney_furniture_paths.size()+kenney_food_paths.size()+kenney_graveyard_paths.size()+kenney_space_paths.size()
+        var library_count:int=kenney_total_paths.size()
         fps_label.text="FPS %d  |  GFX %s  |  3D LIB %d"%[Engine.get_frames_per_second(),["LOW","MED","HIGH"][graphics],library_count]
     if is_instance_valid(joystick_knob):
         var knob_center:=Vector2(58,58)
