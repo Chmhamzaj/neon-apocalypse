@@ -80,6 +80,9 @@ namespace NitroStreetRush.Racing
                 brakeInput |= TouchInput.Instance.BrakeHeld;
                 nitroInput |= TouchInput.Instance.NitroHeld;
             }
+
+            var tilt = FindFirstObjectByType<MobileSteering>();
+            if (Mathf.Abs(steerInput) < 0.05f && tilt) steerInput = tilt.Value;
         }
     }
 }
