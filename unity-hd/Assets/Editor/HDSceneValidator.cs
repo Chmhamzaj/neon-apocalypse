@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
+using UnityEditor.Build;
 
 namespace NitroStreetRush.Editor
 {
