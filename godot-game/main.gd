@@ -392,6 +392,16 @@ func _replace_player_with_external_asset():
             player_model_animation.play(player_idle_anim)
 
 
+func _tighten_civilian_footwear(model:Node3D):
+    if model == null:
+        return
+    # Some imported pedestrian meshes have exaggerated shoes/feet. Tighten only
+    # civilian footwear meshes; the hero model is never passed through this path.
+    for node in model.find_children("*","MeshInstance3D",true,false):
+        var name_lower:String=node.name.to_lower()
+        if name_lower.contains("foot") or name_lower.contains("shoe") or name_lower.contains("boot") or name_lower.contains("sneaker"):
+            node.scale=Vector3(node.scale.x*0.82,node.scale.y,node.scale.z*0.78)
+
 func _find_animation_player(root:Node)->AnimationPlayer:
     var players:=root.find_children("*","AnimationPlayer",true,false)
     if players.size()>0:
@@ -514,9 +524,10 @@ func _create_external_human(root:Node3D,index:int):
         return
     var model:=external_human_scene.instantiate()
     root.add_child(model)
-    # Every civilian uses the exact same rigged human mesh and height as the hero.
+    # Civilians use the same rigged human base, but a smaller background scale than the hero.
     var target_height:float=NPC_HEIGHT
     _normalize_model_height(model,target_height)
+    _tighten_civilian_footwear(model)
     _tint_model(model,index+1)
     root.set_meta("visual_height",target_height)
     root.set_meta("is_civilian",true)
