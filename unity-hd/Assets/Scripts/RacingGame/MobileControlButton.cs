@@ -12,6 +12,8 @@ namespace NitroStreetRush.Racing
         public static bool NitroHeld { get; private set; }
         public static bool BrakeHeld { get; private set; }
 
+        public void Configure(ActionType type) => action = type;
+
         public void OnPointerDown(PointerEventData _) => Set(true);
         public void OnPointerUp(PointerEventData _) => Set(false);
         public void OnPointerExit(PointerEventData _) => Set(false);
