@@ -50,26 +50,26 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
           godot --headless --path godot-game --editor --quit
           godot --headless --path godot-game --export-debug "Android" dist/StreetSovereign-3D-Hamza-unsigned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out dist/StreetSovereign-3D-Hamza.apk dist/StreetSovereign-3D-Hamza-unsigned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/StreetSovereign-3D-Hamza.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
       - name: Runtime smoke test
         run: |
           set -o pipefail
-          timeout 20s godot --headless --path godot-game --quit-after 8 2>&1 | tee dist/runtime-smoke.log
-          if grep -Eiq "SCRIPT ERROR|Parse Error|Invalid call|Invalid get index|Node not found|Null instance|ERROR:" dist/runtime-smoke.log; then
-            grep -Ein "SCRIPT ERROR|Parse Error|Invalid call|Invalid get index|Node not found|Null instance|ERROR:" dist/runtime-smoke.log || true
+          timeout 20s godot --headless --path godot-game --quit-after 8 2>&1 | tee godot-game/dist/runtime-smoke.log
+          if grep -Eiq "SCRIPT ERROR|Parse Error|Invalid call|Invalid get index|Node not found|Null instance|ERROR:" godot-game/dist/runtime-smoke.log; then
+            grep -Ein "SCRIPT ERROR|Parse Error|Invalid call|Invalid get index|Node not found|Null instance|ERROR:" godot-game/dist/runtime-smoke.log || true
             exit 1
           fi
       - name: APK installability check
         run: |
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose dist/StreetSovereign-3D-Hamza.apk
-          test -s dist/StreetSovereign-3D-Hamza.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/StreetSovereign-3D-Hamza.apk
+          test -s godot-game/dist/StreetSovereign-3D-Hamza.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: StreetSovereign-3D-Tested-APK
-          path: dist/StreetSovereign-3D-Hamza.apk
+          path: godot-game/dist/StreetSovereign-3D-Hamza.apk
       - name: Upload smoke log
         uses: actions/upload-artifact@v4
         with:
           name: StreetSovereign-3D-Smoke-Test
-          path: dist/runtime-smoke.log
+          path: godot-game/dist/runtime-smoke.log
