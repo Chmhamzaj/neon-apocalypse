@@ -1,7 +1,7 @@
 name: Build Street Sovereign 3D APK
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "street-sovereign-react3d"]
   workflow_dispatch:
 jobs:
   android:
@@ -18,78 +18,60 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.5.stable
           unzip -q Godot_v4.5-stable_export_templates.tpz -d /tmp/godot-templates
           cp -r /tmp/godot-templates/templates/* ~/.local/share/godot/export_templates/4.5.stable/
-      - name: Download real-world asset pack
+      - name: Download game assets
         run: |
           set -e
           mkdir -p godot-game/assets/external
-          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human_posed.glb" -o godot-game/assets/external/human_posed.glb
-          # Keep the rigged source available as a fallback, but the game loads
-          # human_posed.glb so no imported bone/root animation can detach limbs.
-          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human.glb" -o godot-game/assets/external/human.glb
-          # Kenney's CC0 3D library is used through a public GLB mirror that exposes
-          # the individual models as engine-independent files. Include the full 3D
-          # collection so the game can use buildings, roads, cars, vegetation, props,
-          # characters and other 3D content without runtime network downloads.
+          curl -fL --retry 3 https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human_posed.glb -o godot-game/assets/external/human_posed.glb
+          curl -fL --retry 3 https://raw.githubusercontent.com/UMRAM-Bilkent/supine-human-model/main/assets/human.glb -o godot-game/assets/external/human.glb
           rm -rf /tmp/tge-assets
           git clone --depth 1 --filter=blob:none --sparse https://github.com/Hidencod/tge-assets.git /tmp/tge-assets
           git -C /tmp/tge-assets sparse-checkout set packs
           mkdir -p godot-game/assets/external/kenney-library
-          cp -R /tmp/tge-assets/packs godot-game/assets/external/kenney-library/
-          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/catalog.json" -o godot-game/assets/external/kenney-library/catalog.json
-          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/LICENSE" -o godot-game/assets/external/kenney-library/LICENSE
+          cp -R /tmp/tge-assets/packs packs.tmp
+          cp -R packs.tmp godot-game/assets/external/kenney-library/
+          rm -rf packs.tmp
+          curl -fL --retry 3 https://raw.githubusercontent.com/Hidencod/tge-assets/main/catalog.json -o godot-game/assets/external/kenney-library/catalog.json
+          curl -fL --retry 3 https://raw.githubusercontent.com/Hidencod/tge-assets/main/LICENSE -o godot-game/assets/external/kenney-library/LICENSE
           find godot-game/assets/external/kenney-library/packs -type d -name thumbs -prune -exec rm -rf {} +
-          echo "Kenney GLB count: $(find godot-game/assets/external/kenney-library/packs -type f -name '*.glb' | wc -l)"
-          curl -fL --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb" -o godot-game/assets/external/CarConcept.glb
-
+          curl -fL --retry 3 https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb -o godot-game/assets/external/CarConcept.glb
           mkdir -p godot-game/assets/external/polyhaven
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_diff_2k.jpg" -o godot-game/assets/external/polyhaven/asphalt_07_diff_2k.jpg
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/asphalt_07_nor_gl_2k.jpg
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_rough_2k.jpg" -o godot-game/assets/external/polyhaven/asphalt_07_rough_2k.jpg
-
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete/concrete_diff_2k.jpg" -o godot-game/assets/external/polyhaven/concrete_diff_2k.jpg
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete/concrete_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/concrete_nor_gl_2k.jpg
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete/concrete_rough_2k.jpg" -o godot-game/assets/external/polyhaven/concrete_rough_2k.jpg
-
-          mkdir -p godot-game/assets/external/polyhaven/street_lamp_01/textures
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/street_lamp_01/street_lamp_01_2k.gltf" -o godot-game/assets/external/polyhaven/street_lamp_01/street_lamp_01_2k.gltf
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/street_lamp_01/street_lamp_01.bin" -o godot-game/assets/external/polyhaven/street_lamp_01/street_lamp_01.bin
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_diff_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_diff_2k.jpg
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_arm_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_arm_2k.jpg
-          curl -fL --retry 3 --retry-delay 2 "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/street_lamp_01/street_lamp_01_nor_gl_2k.jpg" -o godot-game/assets/external/polyhaven/street_lamp_01/textures/street_lamp_01_nor_gl_2k.jpg
-
-          ls -lh godot-game/assets/external
-          file godot-game/assets/external/human_posed.glb godot-game/assets/external/human.glb godot-game/assets/external/CarConcept.glb godot-game/assets/external/kenney-cars/sedan.glb
+          curl -fL --retry 3 https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_diff_2k.jpg -o godot-game/assets/external/polyhaven/asphalt_07_diff_2k.jpg
+          curl -fL --retry 3 https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_nor_gl_2k.jpg -o godot-game/assets/external/polyhaven/asphalt_07_nor_gl_2k.jpg
+          curl -fL --retry 3 https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_07/asphalt_07_rough_2k.jpg -o godot-game/assets/external/polyhaven/asphalt_07_rough_2k.jpg
       - name: Configure Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: "platform-tools platforms;android-35 build-tools;35.0.0"
-      - name: Export APK
+      - name: Export signed APK
         run: |
           mkdir -p godot-game/dist
-          keytool -genkeypair -v -keystore /tmp/street-sovereign-debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
+          keytool -genkeypair -v -keystore /tmp/street-sovereign-debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Street Sovereign,O=Hamza,C=PK"
           export GODOT_ANDROID_KEYSTORE_DEBUG_PATH=/tmp/street-sovereign-debug.keystore
           export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
           godot --headless --path godot-game --editor --quit
-          godot --headless --path godot-game --export-debug "Android" dist/StreetSovereign-3D-Hamza-unsigned.apk
-          ${ANDROID_HOME}/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/StreetSovereign-3D-Hamza.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
-      - name: Godot runtime smoke test
+          godot --headless --path godot-game --export-debug "Android" godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
+          \$ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/street-sovereign-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/StreetSovereign-3D-Hamza.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
+      - name: Runtime smoke test
         run: |
           set -o pipefail
           timeout 20s godot --headless --path godot-game --quit-after 8 2>&1 | tee godot-game/dist/runtime-smoke.log
           if grep -Eiq "SCRIPT ERROR|Parse Error|Invalid call|Invalid get index|Node not found|Null instance|ERROR:" godot-game/dist/runtime-smoke.log; then
-            echo "GODOT RUNTIME ERROR DETECTED"
             grep -Ein "SCRIPT ERROR|Parse Error|Invalid call|Invalid get index|Node not found|Null instance|ERROR:" godot-game/dist/runtime-smoke.log || true
             exit 1
           fi
-      - name: Upload runtime smoke log
-        if: always()
+      - name: APK installability check
+        run: |
+          \$ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/StreetSovereign-3D-Hamza.apk
+          test -s godot-game/dist/StreetSovereign-3D-Hamza.apk
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: StreetSovereign-runtime-smoke
-          path: godot-game/dist/runtime-smoke.log
-      - name: Upload 3D APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: StreetSovereign-3D-Hamza-APK
+          name: StreetSovereign-3D-Tested-APK
           path: godot-game/dist/StreetSovereign-3D-Hamza.apk
+      - name: Upload smoke log
+        uses: actions/upload-artifact@v4
+        with:
+          name: StreetSovereign-3D-Smoke-Test
+          path: godot-game/dist/runtime-smoke.log
