@@ -30,6 +30,7 @@ namespace NitroStreetRush.Racing
         public float SpeedKph => body.linearVelocity.magnitude * 3.6f;
         public float Nitro => nitro;
         public bool IsBoosting => nitroInput && nitro > 0.5f && throttleInput > 0f;
+        public bool IsBraking => brakeInput;
 
         private void Awake()
         {
