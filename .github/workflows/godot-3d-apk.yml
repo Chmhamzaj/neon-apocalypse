@@ -50,7 +50,7 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
           godot --headless --path godot-game --editor --quit
           godot --headless --path godot-game --export-debug "Android" dist/NitroStreetRush-3D-unsigned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/nitro-street-rush-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/NitroStreetRush-3D.apk godot-game/dist/StreetSovereign-3D-Hamza-unsigned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks /tmp/nitro-street-rush-debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out godot-game/dist/NitroStreetRush-3D.apk godot-game/dist/NitroStreetRush-3D-unsigned.apk
       - name: Runtime smoke test
         run: |
           set -o pipefail
@@ -61,8 +61,8 @@ jobs:
           fi
       - name: APK installability check
         run: |
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/StreetSovereign-3D-Hamza.apk
-          test -s godot-game/dist/StreetSovereign-3D-Hamza.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose godot-game/dist/NitroStreetRush-3D.apk
+          test -s godot-game/dist/NitroStreetRush-3D.apk
 
       - name: Android emulator launch test
         uses: reactivecircus/android-emulator-runner@v2
@@ -74,13 +74,13 @@ jobs:
           disable-animations: true
           script: |
             adb wait-for-device
-            adb install -r godot-game/dist/StreetSovereign-3D-Hamza.apk
+            adb install -r godot-game/dist/NitroStreetRush-3D.apk
             adb shell monkey -p com.hamza.nitrostreetrush 1
             sleep 20
             adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" || true
             adb logcat -d > godot-game/dist/android-logcat.txt
-            if grep -Eiq "FATAL EXCEPTION|ANR in|Process: com\.hamza\.streetsovereign3d|java\.lang\.(NullPointerException|IllegalStateException)" godot-game/dist/android-logcat.txt; then
-              grep -Ein "FATAL EXCEPTION|ANR in|Process: com\.hamza\.streetsovereign3d|java\.lang\.(NullPointerException|IllegalStateException)" godot-game/dist/android-logcat.txt || true
+            if grep -Eiq "FATAL EXCEPTION|ANR in|Process: com\\.hamza\\.nitrostreetrush|java\.lang\.(NullPointerException|IllegalStateException)" godot-game/dist/android-logcat.txt; then
+              grep -Ein "FATAL EXCEPTION|ANR in|Process: com\\.hamza\\.nitrostreetrush|java\.lang\.(NullPointerException|IllegalStateException)" godot-game/dist/android-logcat.txt || true
               exit 1
             fi
 
