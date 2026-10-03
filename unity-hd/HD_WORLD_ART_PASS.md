@@ -7,3 +7,10 @@
 - Lighting: day/night cycle with street-light activation.
 - Performance: LOD groups and chunk streaming are mandatory for Android.
 - Art assets remain original and must not reproduce proprietary commercial-game assets.
+
+## Latest art validation
+- 3D Jutsu committed revision: 7
+- Added catalog LED streetlight and traffic light assets
+- Refined PBR roles for paint, chrome, glass, asphalt, buildings, windows, headlights and tail lights
+- Added portable point-light city fill bank
+- Latest render validation artifact: nsr_hd_art_pass_rev7.png
