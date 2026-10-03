@@ -29,7 +29,7 @@ namespace NitroStreetRush.Racing
             progress.SetFinish(finish);
             progress.SetRaceDistance(raceDistance);
             markers?.Configure(car.transform, finish, raceDistance);
-            raceEvents?.StartRace();
+            // RaceFlowController owns the actual start event after countdown.
         }
     }
 }
