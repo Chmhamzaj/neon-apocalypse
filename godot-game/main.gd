@@ -300,8 +300,19 @@ func _build_city_async():
 func _spawn_population_async():
     _build_sidewalk_waypoints()
     for i in range(20):
-        var n:=Node3D.new()
+        var n:=CharacterBody3D.new()
         n.name="Civilian_%02d"%i
+        n.collision_layer=2
+        n.collision_mask=1
+        n.safe_margin=0.04
+        n.floor_snap_length=0.15
+        var npc_shape:=CollisionShape3D.new()
+        var npc_capsule:=CapsuleShape3D.new()
+        npc_capsule.radius=0.25
+        npc_capsule.height=1.75
+        npc_shape.shape=npc_capsule
+        npc_shape.position.y=0.875
+        n.add_child(npc_shape)
         n.position=_nearest_safe_sidewalk_point(PLAYER_START + Vector3(rng.randf_range(-34,34),0,rng.randf_range(-34,34)))
         if external_human_scene:
             _create_external_human(n,i)
@@ -316,8 +327,16 @@ func _spawn_population_async():
             await get_tree().process_frame
 
     for i in range(13):
-        var c:=Node3D.new()
+        var c:=AnimatableBody3D.new()
         c.name="Traffic_%02d"%i
+        c.collision_layer=4
+        c.collision_mask=1
+        var car_shape:=CollisionShape3D.new()
+        var car_box:=BoxShape3D.new()
+        car_box.size=Vector3(2.05,1.35,4.45)
+        car_shape.shape=car_box
+        car_shape.position.y=0.68
+        c.add_child(car_shape)
         c.position=Vector3([ -82.0,-40.0,42.0,82.0 ][i%4],0.0,rng.randf_range(-88,88))
         if i==0:
             c.position=PLAYER_START+Vector3(4.0,0.0,3.5)
@@ -345,7 +364,7 @@ func _create_external_human(root:Node3D,index:int):
         return
     var model:=external_human_scene.instantiate()
     root.add_child(model)
-    _normalize_model_height(model,1.68 if index%3 else 1.76)
+    _normalize_model_height(model,1.75)
     _tint_model(model,index+1)
     var ap:=_find_animation_player(model)
     root.set_meta("model",model)
@@ -649,16 +668,20 @@ func _spawn_player():
     add_child(player)
     var cs := CollisionShape3D.new()
     var capsule := CapsuleShape3D.new()
-    capsule.radius = 0.42
-    capsule.height = 1.65
+    capsule.radius = 0.28
+    capsule.height = 1.82
     cs.shape = capsule
-    cs.position.y = 0.95
+    cs.position.y = 0.91
+    player.collision_layer = 1
+    player.collision_mask = 1
     player.add_child(cs)
 
     player_visual = Node3D.new()
     player_visual.name = "HeroVisual"
     player.add_child(player_visual)
     _create_humanoid(player_visual)
+    # Fallback procedural hero is authored around 2.6m; normalize it to a real adult height.
+    player_visual.scale = Vector3(0.68,0.68,0.68)
 
     camera_pivot = Node3D.new()
     camera_pivot.position = Vector3(0,1.25,0)
@@ -1097,10 +1120,7 @@ func _input(event):
 func _process(delta):
     elapsed+=delta
     fire_cooldown=max(0.0,fire_cooldown-delta)
-    _move_player(delta)
     _animate_player(delta)
-    _animate_npcs(delta)
-    _animate_cars(delta)
     _update_day_night()
     _update_hud()
     if is_instance_valid(mission_marker):
@@ -1111,6 +1131,11 @@ func _process(delta):
             wanted=max(0,wanted-1)
             mission=(mission+1)%missions.size()
             _new_mission()
+
+func _physics_process(delta):
+    _move_player(delta)
+    _animate_npcs(delta)
+    _animate_cars(delta)
 
 func _move_player(delta):
     var input_vec:=move_input
@@ -1128,9 +1153,11 @@ func _move_player(delta):
         if input_vec.length()>0.05:
             active_car.rotation.y=lerp_angle(active_car.rotation.y,active_car.rotation.y-steer*delta*2.6,delta*5.0)
             var cf:=active_car.transform.basis.z.normalized()
-            active_car.position+=(-cf)*(-input_vec.y)*car_speed*delta
-            active_car.position.x=clamp(active_car.position.x,-93.0,93.0)
-            active_car.position.z=clamp(active_car.position.z,-93.0,93.0)
+            var motion:=(-cf)*(-input_vec.y)*car_speed*delta
+            var collision:=active_car.move_and_collide(motion)
+            if collision==null:
+                active_car.position.x=clamp(active_car.position.x,-93.0,93.0)
+                active_car.position.z=clamp(active_car.position.z,-93.0,93.0)
         player.global_position=active_car.global_position+Vector3(0,0.05,0)
         player.velocity=Vector3.ZERO
     else:
@@ -1213,6 +1240,8 @@ func _animate_player(delta):
 
 func _animate_npcs(delta):
     for n in npcs:
+        var body:=n as CharacterBody3D
+        if body==null: continue
         var target:Vector3=n.get_meta("target",n.global_position)
         var to_target:=target-n.global_position
         to_target.y=0.0
@@ -1220,33 +1249,39 @@ func _animate_npcs(delta):
         var life:float=float(n.get_meta("life_clock",0.0))+delta
         n.set_meta("life_clock",life)
 
-        if external_human_scene and n.has_meta("anim_player"):
-            var moving:=to_target.length()>1.6
-            var ap:AnimationPlayer=n.get_meta("anim_player") as AnimationPlayer
+        if to_target.length()<1.0:
+            n.position=_nearest_safe_sidewalk_point(n.position)
+            n.set_meta("target",_next_sidewalk_point(n.position))
+            target=Vector3(n.get_meta("target"))
+            to_target=target-n.position
+
+        var moving:=to_target.length()>0.8
+        var dir:=to_target.normalized() if moving else Vector3.ZERO
+        body.velocity=dir*speed
+        body.velocity.y=0.0
+        body.move_and_slide()
+
+        # A physical collision with a building/car is a hard stop; choose a new
+        # connected sidewalk node so pedestrians turn rather than ghost through it.
+        if body.is_on_wall():
+            body.velocity=Vector3.ZERO
+            body.set_meta("target",_next_sidewalk_point(body.position))
+            var next_target:Vector3=body.get_meta("target")
+            var next_dir:=next_target-body.position
+            next_dir.y=0.0
+            if next_dir.length()>0.1:
+                body.rotation.y=lerp_angle(body.rotation.y,atan2(next_dir.x,next_dir.z),delta*10.0)
+        elif moving:
+            body.rotation.y=lerp_angle(body.rotation.y,atan2(dir.x,dir.z),delta*7.0)
+
+        var ap:AnimationPlayer=n.get_meta("anim_player",null) as AnimationPlayer
+        if ap:
             var idle_name:String=String(n.get_meta("idle_anim",""))
             var walk_name:String=String(n.get_meta("walk_anim",""))
             var chosen:=walk_name if moving else idle_name
-            if ap and chosen!="" and ap.current_animation!=chosen:
+            if chosen!="" and ap.current_animation!=chosen:
                 ap.play(chosen)
-            if moving:
-                var dir:=to_target.normalized()
-                n.position+=dir*speed*delta
-                n.rotation.y=lerp_angle(n.rotation.y,atan2(dir.x,dir.z),delta*6.0)
-            else:
-                n.rotation.y=sin(life*0.6+float(n.get_meta("phase")))*0.15
-            if to_target.length()<1.0:
-                n.position=_nearest_safe_sidewalk_point(n.position)
-                n.set_meta("target",_next_sidewalk_point(n.position))
-        else:
-            if to_target.length()<1.0:
-                n.position=_nearest_safe_sidewalk_point(n.position)
-                n.set_meta("target",_next_sidewalk_point(n.position))
-                target=Vector3(n.get_meta("target"))
-                to_target=target-n.position
-            var dir_fallback:Vector3=to_target.normalized() if to_target.length()>0.1 else Vector3.ZERO
-            n.position+=dir_fallback*speed*delta
-            n.rotation.y=lerp_angle(n.rotation.y,atan2(dir_fallback.x,dir_fallback.z),delta*5.0)
-            n.position.y=0.0
+        n.position.y=0.0
 
 func _nearest_npc(source:Node3D)->Node3D:
     var best:Node3D=null
@@ -1320,6 +1355,8 @@ func _update_hud():
 func _toggle_drive():
     if driving:
         driving=false
+        player.collision_layer=1
+        player.collision_mask=1
         if is_instance_valid(active_car):
             player.global_position=active_car.global_position+Vector3(2.2,0.0,0.0)
         player_visual.visible=true
@@ -1329,6 +1366,8 @@ func _toggle_drive():
     var nearest:=_nearest_car()
     if nearest and player.global_position.distance_to(nearest.global_position)<6.5:
         driving=true
+        player.collision_layer=0
+        player.collision_mask=0
         active_car=nearest
         player.global_position=nearest.global_position+Vector3(0,0.05,0)
         player_visual.visible=false
