@@ -15,6 +15,30 @@ const NPC_SPEED = [0.42, 0.60];
 const ROAD_X = [-48, 0, 48];
 const ROAD_Z = [-48, 0, 48];
 
+const BUILDING_URLS = [
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-commercial/building-a.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-commercial/building-d.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-commercial/building-g.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-commercial/building-i.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-commercial/building-skyscraper-a.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-commercial/building-skyscraper-c.glb"
+];
+const TREE_URLS = [
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/nature-kit/tree-oak.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/nature-kit/tree-palm.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/nature-kit/tree-pinegrounda.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/nature-kit/tree-detailed.glb"
+];
+const CAR_URLS = [
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/sedan.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/sedan-sports.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/suv.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/suv-luxury.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/taxi.glb",
+  "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/hatchback-sports.glb"
+];
+const NANO_BANANA_ENVIRONMENT = "https://cdn.openart.ai/watermarked_images/3G0rStF8KogcmQKPpocn/thumbnail_db258e6a_1791023556335.webp";
+
 const BUILDINGS = [
   [-64,-64,12,22,12],[-42,-63,14,30,15],[-20,-63,12,18,11],
   [20,-63,15,26,14],[44,-63,12,34,13],[65,-63,13,20,12],
@@ -117,6 +141,65 @@ function Human({ position, rotationY=0, moving=false, tint="#dce7f5", isPlayer=f
 
 useGLTF.preload(HUMAN_URL);
 
+function NormalizedGLB({ url, target=[10,10,10], position=[0,0,0], rotationY=0, castShadow=true }) {
+  const { scene } = useGLTF(url);
+  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
+
+  useEffect(() => {
+    clone.traverse(o => {
+      if (o.isMesh) {
+        o.castShadow = castShadow;
+        o.receiveShadow = true;
+      }
+    });
+    clone.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = box.getSize(new THREE.Vector3());
+    const sx = target[0] / Math.max(size.x, .001);
+    const sy = target[1] / Math.max(size.y, .001);
+    const sz = target[2] / Math.max(size.z, .001);
+    const scale = Math.min(sx, sy, sz);
+    clone.scale.setScalar(scale);
+    clone.updateMatrixWorld(true);
+    const scaled = new THREE.Box3().setFromObject(clone);
+    clone.position.x -= (scaled.min.x + scaled.max.x) * .5;
+    clone.position.z -= (scaled.min.z + scaled.max.z) * .5;
+    clone.position.y -= scaled.min.y;
+  }, [clone, target, castShadow]);
+
+  return <primitive object={clone} position={position} rotation={[0,rotationY,0]} />;
+}
+BUILDING_URLS.forEach(u => useGLTF.preload(u));
+TREE_URLS.forEach(u => useGLTF.preload(u));
+
+function AssetCity() {
+  const placements = useMemo(() => [
+    {url:BUILDING_URLS[0],p:[-64,0,-64],t:[15,24,15]},
+    {url:BUILDING_URLS[1],p:[-42,0,-63],t:[14,31,14]},
+    {url:BUILDING_URLS[2],p:[-20,0,-63],t:[13,20,13]},
+    {url:BUILDING_URLS[3],p:[20,0,-63],t:[15,28,15]},
+    {url:BUILDING_URLS[4],p:[46,0,-62],t:[18,42,18]},
+    {url:BUILDING_URLS[5],p:[68,0,-62],t:[18,50,18]},
+    {url:BUILDING_URLS[2],p:[-64,0,22],t:[13,23,13]},
+    {url:BUILDING_URLS[3],p:[-22,0,22],t:[16,31,16]},
+    {url:BUILDING_URLS[0],p:[22,0,22],t:[15,25,15]},
+    {url:BUILDING_URLS[4],p:[61,0,23],t:[17,39,17]},
+    {url:BUILDING_URLS[1],p:[-64,0,64],t:[15,29,15]},
+    {url:BUILDING_URLS[5],p:[-40,0,65],t:[18,44,18]},
+    {url:BUILDING_URLS[0],p:[20,0,64],t:[15,26,15]},
+    {url:BUILDING_URLS[4],p:[52,0,66],t:[19,48,19]}
+  ], []);
+  const trees = useMemo(() => Array.from({length:30},(_,i) => ({
+    url:TREE_URLS[i % TREE_URLS.length],
+    p:[-70 + ((i*31)%140),0,-70 + ((i*47)%140)],
+    s:.8 + (i%4)*.08
+  })).filter(t => Math.min(...rects.map(b => Math.hypot(t.p[0]-b.x,t.p[2]-b.z))) > 8), []);
+  return <>
+    {placements.map((b,i)=><NormalizedGLB key={"b"+i} url={b.url} target={b.t} position={b.p} rotationY={(i%4)*Math.PI/2}/>)}
+    {trees.map((t,i)=><NormalizedGLB key={"t"+i} url={t.url} target={[3.6*t.s,6.2*t.s,3.6*t.s]} position={t.p} rotationY={(i%9)*.7}/>)}
+  </>;
+}
+
 function CityBuilding({ box, index }) {
   const [x,z,w,h,d]=box;
   return (
@@ -163,23 +246,31 @@ function Tree({position,scale=1}) {
   );
 }
 
-function Car({position, color="#a3b8cb", rotationY=0, moving=false}) {
-  const { scene } = useGLTF(SEDAN_URL);
+function Car({position, color="#a3b8cb", rotationY=0, moving=false, modelUrl=CAR_URLS[0]}) {
+  const { scene } = useGLTF(modelUrl);
   const clone=useMemo(()=>SkeletonUtils.clone(scene),[scene]);
   const ref=useRef();
   useEffect(()=>{
-    clone.scale.setScalar(.84);
-    clone.rotation.set(0,Math.PI,0);
     clone.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+    clone.updateMatrixWorld(true);
+    const box=new THREE.Box3().setFromObject(clone);
+    const size=box.getSize(new THREE.Vector3());
+    const scale=4.6/Math.max(size.z,.001);
+    clone.scale.setScalar(scale);
+    clone.updateMatrixWorld(true);
+    const b2=new THREE.Box3().setFromObject(clone);
+    clone.position.x-=(b2.min.x+b2.max.x)/2;
+    clone.position.y-=b2.min.y;
+    clone.position.z-=b2.min.z;
   },[clone]);
   useFrame((_,dt)=>{
     if(!moving || !ref.current) return;
-    ref.current.position.z += 5.0*dt;
+    ref.current.position.z += 4.6*dt;
     if(ref.current.position.z>72) ref.current.position.z=-72;
   });
   return <group ref={ref} position={position} rotation={[0,rotationY,0]}><primitive object={clone}/></group>;
 }
-useGLTF.preload(SEDAN_URL);
+CAR_URLS.forEach(u => useGLTF.preload(u));
 
 function Crowd({ playerPos, setPlayerPos }) {
   const rngRef=useRef(Math.random()*100);
@@ -304,10 +395,12 @@ function FollowCamera({ playerPos, look }) {
 
 function World({ playerPos, setPlayerPos, look, setLook }) {
   const cars=useMemo(()=>[
-    {x:-48,z:-24,c:"#8795a9",r:0,m:true},
-    {x:0,z:28,c:"#d2a34a",r:Math.PI,m:true},
-    {x:48,z:12,c:"#7f9c8f",r:Math.PI,m:false},
-    {x:-48,z:48,c:"#7e8798",r:0,m:false}
+    {x:-48,z:-24,c:"#8795a9",r:0,m:true,u:CAR_URLS[0]},
+    {x:0,z:28,c:"#d2a34a",r:Math.PI,m:true,u:CAR_URLS[1]},
+    {x:48,z:12,c:"#7f9c8f",r:Math.PI,m:false,u:CAR_URLS[2]},
+    {x:-48,z:48,c:"#7e8798",r:0,m:false,u:CAR_URLS[3]},
+    {x:48,z:-42,c:"#a76d62",r:Math.PI,m:true,u:CAR_URLS[4]},
+    {x:-48,z:65,c:"#7a7f89",r:0,m:false,u:CAR_URLS[5]}
   ],[]);
   const trees=useMemo(()=>Array.from({length:34},(_,i)=>({
     x:-70+(i*19)%140,z:-70+((i*43)%140),s:.7+((i*17)%5)*.09
@@ -319,9 +412,9 @@ function World({ playerPos, setPlayerPos, look, setLook }) {
       <ambientLight intensity={1.15}/>
       <directionalLight castShadow position={[-18,32,12]} intensity={2.1} shadow-mapSize={[2048,2048]} shadow-camera-top={80} shadow-camera-bottom={-80} shadow-camera-left={-80} shadow-camera-right={80}/>
       <Street/>
-      {rects.map((b,i)=><CityBuilding box={b} index={i} key={i}/>)}
-      {trees.map((t,i)=><Tree key={i} position={[t.x,0,t.z]} scale={t.s}/>)}
-      {cars.map((c,i)=><Car key={i} position={[c.x,.08,c.z]} color={c.c} rotationY={c.r} moving={c.m}/>)}
+      <AssetCity/>
+      {rects.slice(0,8).map((b,i)=><CityBuilding box={b} index={i} key={i}/>)}
+      {cars.map((c,i)=><Car key={i} position={[c.x,.08,c.z]} color={c.c} rotationY={c.r} moving={c.m} modelUrl={c.u}/>)}
       <Crowd playerPos={playerPos} setPlayerPos={setPlayerPos}/>
       <Player pos={playerPos} setPos={setPlayerPos} look={look} setLook={setLook}/>
       <FollowCamera playerPos={playerPos} look={look}/>
@@ -379,7 +472,7 @@ export default function App() {
       <div className="joystick"><div className="knob"/></div>
       <div className="hint">WASD move · drag mouse to look</div>
 
-      {!ready && <div className="loading"><div className="loading-card"><div className="brand">Street Sovereign</div><div className="title">Loading the district</div><div className="loading-bar"><div/></div></div></div>}
+      {!ready && <div className="loading" style={{backgroundImage:`linear-gradient(180deg,rgba(4,7,14,.82),rgba(4,7,14,.94)),url(${NANO_BANANA_ENVIRONMENT})`}}><div className="loading-card"><div className="brand">Street Sovereign // React 3D</div><div className="title">Entering San Valora</div><div style={{color:"#8ea1b8",fontSize:12,marginTop:6}}>Real 3D city assets · realistic human scale · live crowd</div><div className="loading-bar"><div/></div></div></div>}
     </div>
   );
 }
